@@ -20,7 +20,7 @@ remain available to the same Agent after an approved Plan → Agent transition.
 
 ## 1. Goals
 
-Give PI-Desktop extensibility similar to established desktop plugin ecosystems (e.g. VS Code extensions):
+Give DuaerAiDesk extensibility similar to established desktop plugin ecosystems (e.g. VS Code extensions):
 
 - Users can install / enable / disable / uninstall plugins
 - Developers can build custom plugins
@@ -29,7 +29,7 @@ Give PI-Desktop extensibility similar to established desktop plugin ecosystems (
 
 In one sentence:
 
-> **PI-Desktop is the host; plugins are capability packs.**
+> **DuaerAiDesk is the host; plugins are capability packs.**
 
 ## 2. Design goals
 
@@ -99,7 +99,7 @@ my-plugin/
 ### Install location
 
 ```text
-~/.pi-desktop/plugins/
+~/.duaer-ai-desk/plugins/
  ├── installed/
  │ └── <plugin-id>/
  ├── disabled/
@@ -170,7 +170,7 @@ Developer mode can load a local path directly, without copying it into `installe
  "delete": { "own": true }
  },
  "engines": {
- "piDesktop": ">=0.1.0"
+ "duaerAiDesk": ">=0.1.0"
  },
  "entrypoints": {
  "onLoad": "main.js#onLoad",
@@ -192,7 +192,7 @@ Developer mode can load a local path directly, without copying it into `installe
 Uses **three-layer isolation**:
 
 ```text
-Host Main (PI-Desktop)
+Host Main (DuaerAiDesk)
  ├─ PluginManager
  ├─ PluginPermissionGateway
  ├─ Plugin Sandbox / Worker
@@ -234,7 +234,7 @@ are reachable there) and CPU/memory limits.
   "zh-CN": string }` object for the native window identity and launcher
   metadata, but the host does not render that title inside the panel.
 - The capsule follows the loaded plugin page's computed background and text
-  colors. The active PI-Desktop theme (`light` / `dark`, including a plugin
+  colors. The active DuaerAiDesk theme (`light` / `dark`, including a plugin
   theme's base palette) is the fallback while the page is transparent.
 - Expose the drag-band height as `--pi-plugin-titlebar-height: 46px`;
   normal-flow content is offset automatically, while fixed/sticky plugin UI
@@ -545,7 +545,7 @@ Rules the control encodes:
 
 Provide:
 
-1. Plugin template: `npm create pi-desktop-plugin`
+1. Plugin template: `npm create duaer-ai-desk-plugin`
 2. manifest schema validator
 3. Developer hot reload (watch directory)
 4. Example plugins:
@@ -560,7 +560,7 @@ Local development flow:
 cd plugins/hello
 pnpm dev
 
-# in PI-Desktop
+# in DuaerAiDesk
 Plugins → Load Development Plugin → choose directory
 ```
 

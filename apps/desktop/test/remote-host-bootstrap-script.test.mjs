@@ -13,16 +13,16 @@ const here = dirname(fileURLToPath(import.meta.url));
 register(pathToFileURL(join(here, "helpers/ts-import-hooks.mjs")));
 
 const { buildBootstrapScript, parseBootstrapOutput, shellQuote } = await import(
-  "../electron/main/remote/pi-host-bootstrap-script.ts"
+  "../electron/main/remote/duaer-ai-desk-host-bootstrap-script.ts"
 );
 
 const VERSION = "0.15.1-beta.5";
-const BUNDLE_DIR = `pi-host-${VERSION}-linux-x64`;
+const BUNDLE_DIR = `duaer-ai-desk-host-${VERSION}-linux-x64`;
 const ARTIFACT_NAME = `${BUNDLE_DIR}.tar.gz`;
-const ARTIFACT_URL = `https://github.com/vastsa/PI-Desktop/releases/download/v${VERSION}/${ARTIFACT_NAME}`;
+const ARTIFACT_URL = `https://github.com/Duaer/DuaerAiDesk/releases/download/v${VERSION}/${ARTIFACT_NAME}`;
 const DIGEST = "0123456789abcdef".repeat(4);
 /** The sandbox the script's `HOME`/`PATH` point at, outside the real user's. */
-const WORK_SUBDIR = ".pi-desktop/pi-host/.bootstrap";
+const WORK_SUBDIR = ".duaer-ai-desk/duaer-ai-desk-host/.bootstrap";
 
 /** Inputs every scenario starts from; callers override the digest or version. */
 function scriptInput(overrides = {}) {
@@ -184,7 +184,7 @@ test("buildBootstrapScript interpolates every input as a quoted literal", () => 
 });
 
 test("the generated script is valid POSIX shell, even with hostile inputs", async () => {
-  const { dir, cleanup } = await tempDir("pi-host-script-syntax-");
+  const { dir, cleanup } = await tempDir("duaer-ai-desk-host-script-syntax-");
   try {
     const plain = join(dir, "plain.sh");
     await writeFile(plain, buildBootstrapScript(scriptInput()));
@@ -211,7 +211,7 @@ test("the generated script is valid POSIX shell, even with hostile inputs", asyn
 });
 
 test("a hostile version stays one literal value when the assignments run", async () => {
-  const { dir, cleanup } = await tempDir("pi-host-script-quote-");
+  const { dir, cleanup } = await tempDir("duaer-ai-desk-host-script-quote-");
   try {
     const hostileVersion = "1.0.0'; touch \"$HOME/pwned\"; echo '";
     const script = buildBootstrapScript(scriptInput({ version: hostileVersion }));
@@ -233,7 +233,7 @@ test("a hostile version stays one literal value when the assignments run", async
 });
 
 test("the generated script installs, starts, and prints the ready/pairing lines", async () => {
-  const { dir, cleanup } = await tempDir("pi-host-script-run-");
+  const { dir, cleanup } = await tempDir("duaer-ai-desk-host-script-run-");
   try {
     const sandbox = await prepareSandbox(dir);
     const scriptPath = join(dir, "bootstrap.sh");
@@ -252,7 +252,7 @@ test("the generated script installs, starts, and prints the ready/pairing lines"
     assert.deepEqual(parsed.steps, ["download", "verify", "install", "start", "await-ready", "ok"]);
 
     // The host was started under the sandbox HOME and left running there.
-    const pid = (await readFile(join(sandbox.home, WORK_SUBDIR, "pi-host.pid"), "utf8")).trim();
+    const pid = (await readFile(join(sandbox.home, WORK_SUBDIR, "duaer-ai-desk-host.pid"), "utf8")).trim();
     assert.match(pid, /^\d+$/);
   } finally {
     await cleanup();
@@ -260,7 +260,7 @@ test("the generated script installs, starts, and prints the ready/pairing lines"
 });
 
 test("a checksum mismatch fails the script before anything is installed", async () => {
-  const { dir, cleanup } = await tempDir("pi-host-script-digest-");
+  const { dir, cleanup } = await tempDir("duaer-ai-desk-host-script-digest-");
   try {
     const sandbox = await prepareSandbox(dir);
     const scriptPath = join(dir, "bootstrap.sh");

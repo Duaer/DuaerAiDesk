@@ -9,7 +9,7 @@ import {
   resolveFontScale,
   resolveKeybinding,
   type ShortcutPlatform,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { installRendererApi } from "../../capture/renderer-api";
@@ -26,7 +26,7 @@ import {
   MAIN_PANE_MIN_WIDTH,
   workPanelWidthForSidebarReopen,
 } from "../../lib/work-panel-resize";
-import { browserPluginTab } from "../../lib/work-panel-tabs";
+import { browserPluginTab, toolWorkPanelTab } from "../../lib/work-panel-tabs";
 import { useAppStore } from "../../stores/app-store";
 import { useSidebarTransition } from "./useSidebarTransition";
 import { useStartupWatchdog } from "./useStartupWatchdog";
@@ -44,7 +44,7 @@ const PLUGIN_THEME_STYLE_ID = "pi-plugin-theme";
 
 export function useAppShellRuntime() {
   const { t } = useTranslation();
-  const platform = window.piDesktop?.platform ?? "darwin";
+  const platform = window.duaerAiDesk?.platform ?? "darwin";
   const bootstrap = useAppStore((s) => s.bootstrap);
   const ready = useAppStore((s) => s.ready);
   const page = useAppStore((s) => s.page);
@@ -57,6 +57,9 @@ export function useAppShellRuntime() {
   const subagentPanel = useAppStore((s) => s.subagentPanel);
   const closeSubagentPanel = useAppStore((s) => s.closeSubagentPanel);
   const workPanelOpen = useAppStore((s) => s.workPanelOpen);
+  const workPanelTabs = useAppStore((s) => s.workPanelTabs);
+  const openWorkPanelTab = useAppStore((s) => s.openWorkPanelTab);
+  const openWorkPanel = useAppStore((s) => s.openWorkPanel);
   const workPanelWidth = useAppStore((s) => s.workPanelWidth);
   const subagentPanelOpen = Boolean(
     page === "chat" &&
@@ -70,7 +73,10 @@ export function useAppShellRuntime() {
   const workPanelVisible = workPanelOpen || subagentPanelOpen;
 
   const [searchOpen, setSearchOpen] = useState(false);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
+  const [sidebarRevealed, setSidebarRevealed] = useState(false);
+  const sidebarRevealTimer = useRef(0);
+  useEffect(() => () => window.clearTimeout(sidebarRevealTimer.current), []);
   const [sidebarWidth, setSidebarWidth] = useState(() => loadSidebarWidth());
   const { sidebarEntering, sidebarExiting, handleSidebarAnimationEnd } = useSidebarTransition(
     sidebarCollapsed,
@@ -96,6 +102,16 @@ export function useAppShellRuntime() {
   shellWidthRef.current = shellWidth;
   workPanelWidthRef.current = workPanelWidth;
   workPanelOpenRef.current = workPanelVisible;
+
+  useEffect(() => {
+    if (page !== "chat" || !activeSessionId) return;
+    const hasContent = workPanelTabs.some((tab) => tab.kind !== "new");
+    if (!hasContent) {
+      openWorkPanelTab(toolWorkPanelTab("requirements"));
+      return;
+    }
+    if (!workPanelOpen) openWorkPanel();
+  }, [activeSessionId, openWorkPanel, openWorkPanelTab, page, workPanelOpen, workPanelTabs]);
 
   // The shell is a fixed client area: the three-column budget needs its real
   // measured width, not the native window bounds, because the reservation seam
@@ -162,8 +178,18 @@ export function useAppShellRuntime() {
   // Stable identity: the keydown and native-menu handlers register once and
   // must never capture a stale `sidebarCollapsed`. Every invocation is a user
   // action, so it clears an automatic-collapse record before toggling.
+  const revealSidebar = useCallback(() => {
+    window.clearTimeout(sidebarRevealTimer.current);
+    if (!sidebarCollapsedRef.current) return;
+    setSidebarRevealed(true);
+  }, []);
+  const concealSidebar = useCallback(() => {
+    window.clearTimeout(sidebarRevealTimer.current);
+    sidebarRevealTimer.current = window.setTimeout(() => setSidebarRevealed(false), 180);
+  }, []);
   const toggleSidebar = useCallback(() => {
     autoCollapsedSidebarRef.current = false;
+    setSidebarRevealed(false);
     if (sidebarCollapsedRef.current) reopenSidebar();
     else setSidebarCollapsed(true);
   }, [reopenSidebar]);
@@ -917,6 +943,9 @@ export function useAppShellRuntime() {
     searchOpen,
     setSearchOpen,
     sidebarCollapsed,
+    sidebarRevealed,
+    revealSidebar,
+    concealSidebar,
     setSidebarCollapsed,
     sidebarEntering,
     sidebarExiting,

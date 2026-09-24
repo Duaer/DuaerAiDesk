@@ -167,7 +167,7 @@ const MAX_STDIN_LINE_BYTES: u64 = 64 * 1024 * 1024;
 
 fn spawn_stdin_reader(tx: mpsc::UnboundedSender<StdinEvent>) -> io::Result<thread::JoinHandle<()>> {
     thread::Builder::new()
-        .name("pi-host-stdin".into())
+        .name("duaer-ai-desk-host-stdin".into())
         .spawn(move || {
             let stdin = io::stdin();
             let mut reader = StdBufReader::new(stdin.lock());
@@ -267,7 +267,7 @@ fn spawn_stdout_writer(
     done_tx: oneshot::Sender<Option<String>>,
 ) -> io::Result<thread::JoinHandle<()>> {
     thread::Builder::new()
-        .name("pi-host-stdout".into())
+        .name("duaer-ai-desk-host-stdout".into())
         .spawn(move || {
             let stdout = io::stdout();
             let mut writer = stdout.lock();
@@ -302,7 +302,7 @@ pub async fn serve(state: Arc<Mutex<AppState>>) -> Result<()> {
         .map_err(|error| anyhow!("host stdout writer unavailable: {error}"))?;
     // Electron's RegisterHotKey cannot claim Windows' Alt+Space system-menu
     // chord. Keep the native fallback beside the host transport so it remains
-    // active even when PI-Desktop is unfocused.
+    // active even when DuaerAiDesk is unfocused.
     crate::keyboard::start(tx.clone());
     let (input_tx, mut input_rx) = mpsc::unbounded_channel::<StdinEvent>();
     let _stdin_reader = match spawn_stdin_reader(input_tx) {
@@ -797,6 +797,21 @@ fn validate_settings_value(value: &Value) -> Result<(), JsonRpcError> {
                 return Err(rpc_err(
                     1002,
                     "invalid image generation binding",
+                    "INVALID_PARAMS",
+                ));
+            }
+        }
+    }
+    if let Some(binding) = object.get("judgmentModel").filter(|v| !v.is_null()) {
+        for (key, max) in [("providerId", 128), ("modelId", 256)] {
+            if !binding
+                .get(key)
+                .and_then(Value::as_str)
+                .is_some_and(|s| !s.trim().is_empty() && s.len() <= max)
+            {
+                return Err(rpc_err(
+                    1002,
+                    "invalid judgment model binding",
                     "INVALID_PARAMS",
                 ));
             }
@@ -1598,7 +1613,7 @@ async fn handle_request(
             Ok(json!({ "enabled": enabled }))
         }
         "app.getVersion" => Ok(json!({
-            "name": "pi-desktop-host-core",
+            "name": "duaer-ai-desk-host-core",
             "version": HOST_VERSION,
             "protocolVersion": PROTOCOL_VERSION
         })),
@@ -4557,6 +4572,30 @@ async fn handle_request(
                 .set_builtin_enabled(&id, enabled)
                 .map_err(subagent_err)?;
             Ok(json!({ "id": id, "enabled": enabled }))
+        }
+        "agents.builtinModels" => {
+            let st = state.lock().await;
+            Ok(json!({ "models": st.user_subagents.builtin_models() }))
+        }
+        "agents.setBuiltinModel" => {
+            let id = require_id(&params)?;
+            let model = params.get("model").and_then(Value::as_str);
+            let fallbacks = params
+                .get("fallbackModels")
+                .and_then(Value::as_array)
+                .map(|items| {
+                    items
+                        .iter()
+                        .filter_map(|value| value.as_str().map(str::to_string))
+                        .collect::<Vec<_>>()
+                })
+                .unwrap_or_default();
+            let mut st = state.lock().await;
+            let id = st
+                .user_subagents
+                .set_builtin_model(&id, model, &fallbacks)
+                .map_err(subagent_err)?;
+            Ok(json!({ "id": id }))
         }
 
         "market.refresh" => {
@@ -8783,6 +8822,8 @@ mod image_generation_settings_tests {
             json!({}),
             json!({"imageGeneration": null}),
             json!({"imageGeneration": {"providerId": "p", "modelId": "image"}}),
+            json!({"judgmentModel": null}),
+            json!({"judgmentModel": {"providerId": "p", "modelId": "jev-latest"}}),
             json!({"imageGenerationModels": null}),
             json!({"imageGenerationModels": []}),
             json!({"imageGenerationModels": [
@@ -8798,6 +8839,7 @@ mod image_generation_settings_tests {
             json!({"providerId": "p", "modelId": " "}),
         ] {
             assert!(validate_settings_value(&json!({"imageGeneration": value})).is_err());
+            assert!(validate_settings_value(&json!({"judgmentModel": value})).is_err());
         }
         for value in [
             json!(false),

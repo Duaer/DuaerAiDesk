@@ -16,7 +16,7 @@ import {
   proxyEnvAssignments,
   type NetworkProxySettings,
   type ParsedProxyUrl,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import {
   Agent,
   EnvHttpProxyAgent,

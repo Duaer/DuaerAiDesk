@@ -34,7 +34,7 @@ import {
   type Entry,
   type MessageEntry,
   type PrepareNextTurnContext,
-} from "@earendil-works/pi-agent-core";
+} from "@duaer-ai-desk/upstream-agent-core";
 import {
   isContextOverflow,
   Type,
@@ -47,7 +47,7 @@ import {
   type ToolResultMessage,
   type Usage,
   type UserMessage,
-} from "@earendil-works/pi-ai";
+} from "@duaer-ai-desk/upstream-ai";
 import {
   DEFAULT_COMMAND_TIMEOUT_MS,
   OAUTH_AUTH_KIND,
@@ -55,7 +55,7 @@ import {
   type TrustedExtensionDiagnostic,
   type TrustedExtensionSpec,
   type TrustedExtensionUiResponse,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import {
   TrustedExtensionRunner,
   type RegisteredTrustedExtensionAgent,
@@ -92,7 +92,7 @@ import type {
   ThinkingLevel,
   ToolTokenUsage,
   UiMessage,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import {
   addUsage,
   checkpointGeneration,
@@ -112,7 +112,7 @@ import {
   subagentToolsLabel,
   type ProposalKind,
   type SubagentPermission,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import { createStreamCoalescer, type StreamCoalescer } from "./stream-coalescer.js";
 import type { RuntimeHost } from "./host-client.js";
 import { classifyAgentError } from "./agent-errors.js";
@@ -770,7 +770,7 @@ const PROGRESS_TURN_NUDGE = [
 /**
  * Some OpenAI-style models emit their internal parallel-call wrapper as
  * assistant text (`to=multi_tool_use.parallel code:{"tool_uses":[…]}`) instead
- * of real tool calls. PI-Desktop has no such tool, so the whole batch lands as
+ * of real tool calls. DuaerAiDesk has no such tool, so the whole batch lands as
  * prose and silently does nothing — the turn looks finished while no work ran.
  * Rare (2 occurrences across 255 recorded sessions) but indistinguishable from
  * a stuck agent when it happens.
@@ -807,7 +807,7 @@ function resolveCompactionStrategy(
   option?: CompactionStrategy,
 ): CompactionStrategy {
   if (option) return option;
-  return process.env.PI_DESKTOP_COMPACTION_STRATEGY === "fresh_window"
+  return process.env.DUAER_AI_DESK_COMPACTION_STRATEGY === "fresh_window"
     ? "fresh_window"
     : "summary";
 }
@@ -921,7 +921,7 @@ export type AgentRuntimeOptions = {
   compactionSettings?: ContextCompactionSettings;
   /**
    * Which compaction family to use. Tests set it explicitly; production reads
-   * `PI_DESKTOP_COMPACTION_STRATEGY` and otherwise summarizes.
+   * `DUAER_AI_DESK_COMPACTION_STRATEGY` and otherwise summarizes.
    */
   compactionStrategy?: CompactionStrategy;
   /** Plugin agent tools to expose to the model this session. */
@@ -1862,13 +1862,13 @@ Delegation rules:
       // what exhausted context and forced repeated re-searching.
       "Searching and reading: prefer the Read, Grep, and Glob tools over shell `cat`, `sed`, `head`, `grep`, or `find`. Read accepts only an existing regular text file, never a directory. If a file name is uncertain or a directory must be listed, use Glob instead of guessing a file name or calling Read on the directory; in Agent mode, activate it with ToolSearch for the current prompt when it is unavailable. Scope every search with the native parameters: Grep takes a file-or-directory `path` plus `include`, `outputMode`, and `headLimit`; Glob takes a directory `path` and `limit`; Read takes `offset` and `limit`, always reports `totalLines`, and paginates any supported text file however large; for files beyond the default window, use Grep to locate the target lines first, then Read the relevant range. Use `outputMode: \"filesWithMatches\"` or `\"count\"` when file contents are not needed, and use `include` to avoid scanning generated or vendor trees. These tools bound their own output; a shell pipeline does not, and one unscoped search over a whole workspace costs context you will need later. Workspace-relative paths are portable across macOS, Linux, and Windows; an explicit path outside the workspace and session scratch roots asks for permission unless the effective mode is Auto, so do not retry a denied path blindly. Grep uses the system's `rg` when it is installed and an in-process searcher otherwise — call Grep, do not shell out to `rg`. When a search genuinely needs Bash, use the active shell's syntax and a bounded command, and never assume POSIX utilities, `/`-based paths, or PowerShell commands on every platform. Do not re-run a search whose answer you already have.",
       // Observed leak: OpenAI-style models sometimes emit the internal
-      // `multi_tool_use.parallel` wrapper as assistant text. PI-Desktop has no
+      // `multi_tool_use.parallel` wrapper as assistant text. DuaerAiDesk has no
       // such tool, so the whole batch is silently lost as prose.
       "Call tools through the native tool-call interface only. Never write a tool call as text, and never emit a `multi_tool_use.parallel` / `{\"tool_uses\": [...]}` wrapper — there is no such tool here, and a call written as prose does not run. To run several tools at once, emit several real tool calls in one assistant message.",
       "Editing workflow: use the built-in Edit or Write tool directly on the deliverable file whenever it is inside the advertised workspace. Use Edit for one small unique line-anchored change (path + tag + ops) and Write for a coherent whole-file rewrite. Do not invoke shell apply_patch, git apply, or patch commands; do not create or hand-edit unified-diff files in scratch or repeatedly repair their hunk headers. Treat an edit or shell patch failure as recoverable state: classify the error, perform the required fresh Read or use a complete reveal, regenerate the change, and retry with a corrected payload. A path may have three counted failures per prompt; stop after the third and report the exact mismatch instead of looping. Never issue concurrent Write/Edit calls for the same path. When a dedicated worktree is outside the advertised workspace, make one guarded, deterministic edit inside that worktree with Bash, then verify it with git diff or an equivalent check.",
       // Work panel browser preview (D100): workspace HTML files render
       // in the embedded browser with live reload on file changes.
-      `For user-visible HTML pages, call the BrowserPreview tool once after creating the page or making the first meaningful visual edit, using its workspace-relative path (e.g. \`index.html\` or \`demo/index.html\`) to show it in PI-Desktop's built-in browser panel. Reuse that preview while iterating: it live-reloads as you edit, so no repeat call or manual refresh is needed. Skip generated, test-only, and non-visual HTML files. If BrowserPreview is not in the current tool list, load it first with ${TOOL_SEARCH_NAME}.`,
+      `For user-visible HTML pages, call the BrowserPreview tool once after creating the page or making the first meaningful visual edit, using its workspace-relative path (e.g. \`index.html\` or \`demo/index.html\`) to show it in DuaerAiDesk's built-in browser panel. Reuse that preview while iterating: it live-reloads as you edit, so no repeat call or manual refresh is needed. Skip generated, test-only, and non-visual HTML files. If BrowserPreview is not in the current tool list, load it first with ${TOOL_SEARCH_NAME}.`,
       // Shell dialect and scratch variable are selected by host-core.
       commandShellGuidance(this.commandShell, this.scratchDir),
       // Session scratch directory (D114): temp files must not dirty
@@ -1966,7 +1966,7 @@ Delegation rules:
         const stallAbort = new AbortController();
         const attemptOptions: SimpleStreamOptions = {
           ...hookedOptions,
-          // Cap the output budget at the pi-desktop layer so the estimate
+          // Cap the output budget at the duaer-ai-desk layer so the estimate
           // holds for both adapter branches: `streamSimple` re-derives
           // max_tokens, but the low-level `stream` path used by
           // `thinkingLevel: "omit"` would otherwise send it untouched, and
@@ -2890,7 +2890,7 @@ Delegation rules:
       if (scheduledToolDescriptions[toolName]) return scheduledToolDescriptions[toolName];
       switch (toolName) {
         case "BrowserPreview":
-          return "Open a workspace HTML file in PI-Desktop's built-in browser panel. `path` is workspace-relative (e.g. \"demo/index.html\"). The preview live-reloads on later edits to the file or its sibling assets, so call once per page.";
+          return "Open a workspace HTML file in DuaerAiDesk's built-in browser panel. `path` is workspace-relative (e.g. \"demo/index.html\"). The preview live-reloads on later edits to the file or its sibling assets, so call once per page.";
         case "Read":
           return (
             "Read a bounded window from an existing regular text file, never a directory. " +
@@ -2927,13 +2927,13 @@ Delegation rules:
         case ASK_TOOL_NAME:
           return "Ask the user one or more questions. Each question has selectable options and the desktop card always provides a custom user-input option; unanswered questions are returned as empty answers.";
         case "PluginScaffold":
-          return "Create a PI-Desktop plugin from a template and load it for development. `directory` is workspace-relative and must be empty or new; `template` is one of panel-basic, agent-tool-basic, skill-pack, full-demo. Use this instead of hand-writing plugin files.";
+          return "Create a DuaerAiDesk plugin from a template and load it for development. `directory` is workspace-relative and must be empty or new; `template` is one of panel-basic, agent-tool-basic, skill-pack, full-demo. Use this instead of hand-writing plugin files.";
         case "PluginCheck":
-          return "Validate a PI-Desktop plugin directory against every rule the installer enforces (manifest, entry file, panel, skills, permissions, package limits). `directory` is workspace-relative. Run this before packaging.";
+          return "Validate a DuaerAiDesk plugin directory against every rule the installer enforces (manifest, entry file, panel, skills, permissions, package limits). `directory` is workspace-relative. Run this before packaging.";
         case "PluginPack":
-          return "Package a PI-Desktop plugin directory into an installable dist/<id>-<version>.piplug. `directory` is workspace-relative. Runs the same validation as PluginCheck first and refuses to package a plugin with errors. Never build a .piplug with shell tools — the installer only accepts uncompressed archives.";
+          return "Package a DuaerAiDesk plugin directory into an installable dist/<id>-<version>.piplug. `directory` is workspace-relative. Runs the same validation as PluginCheck first and refuses to package a plugin with errors. Never build a .piplug with shell tools — the installer only accepts uncompressed archives.";
         default:
-          return `${toolName} tool via PI-Desktop host-core`;
+          return `${toolName} tool via DuaerAiDesk host-core`;
       }
     };
     // One entry per tool: the shapes diverge enough that a chain of ternaries
@@ -3636,11 +3636,11 @@ Delegation rules:
       case "BrowserPreview":
         return "Preview an HTML file in the built-in browser panel.";
       case "PluginCheck":
-        return "Validate a PI-Desktop plugin directory.";
+        return "Validate a DuaerAiDesk plugin directory.";
       case "PluginScaffold":
-        return "Create a PI-Desktop plugin from a template.";
+        return "Create a DuaerAiDesk plugin from a template.";
       case "PluginPack":
-        return "Validate and package a PI-Desktop plugin.";
+        return "Validate and package a DuaerAiDesk plugin.";
       default:
         return this.compactToolDescription(tool.description);
     }
@@ -4211,7 +4211,7 @@ Delegation rules:
             if (!provider) {
               return this.subagentToolError(
                 toolCallId,
-                `The ${definition.name} subagent pins ${definition.model?.providerId}/${definition.model?.modelId}, which is not configured in PI-Desktop. Do this work yourself or delegate to another subagent.`,
+                `The ${definition.name} subagent pins ${definition.model?.providerId}/${definition.model?.modelId}, which is not configured in DuaerAiDesk. Do this work yourself or delegate to another subagent.`,
               );
             }
           } else if (this.isSessionModelOverride(modelOverride)) {
@@ -4243,7 +4243,7 @@ Delegation rules:
           if (!provider) {
             return this.subagentToolError(
               toolCallId,
-              `The ${definition.name} subagent pins ${definition.model?.providerId}/${definition.model?.modelId}, which is not configured in PI-Desktop. Do this work yourself or delegate to another subagent.`,
+              `The ${definition.name} subagent pins ${definition.model?.providerId}/${definition.model?.modelId}, which is not configured in DuaerAiDesk. Do this work yourself or delegate to another subagent.`,
             );
           }
         }

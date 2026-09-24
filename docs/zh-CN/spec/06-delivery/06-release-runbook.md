@@ -11,9 +11,9 @@
 
 | 通道 | 命令 | 签名 | 用途 |
 |---|---|---|---|
-| 开发 | `pnpm dev` | 无 | 日常开发 |
-| 本地打包 | `pnpm --filter @pi-desktop/desktop pack` | 未配置证书时未签名 | 打包冒烟测试（`--dir` 输出） |
-| 本地 DMG | `pnpm --filter @pi-desktop/desktop dist` | 未配置证书时未签名 | 本地安装测试 |
+| 开发 | `pnpm dev` | macOS 为带 hardened runtime 的临时签名；Windows/Linux 无 | 日常开发 |
+| 本地打包 | `pnpm --filter @duaer-ai-desk/desktop pack` | 未配置证书时未签名 | 打包冒烟测试（`--dir` 输出） |
+| 本地 DMG | `pnpm --filter @duaer-ai-desk/desktop dist` | 未配置证书时未签名 | 本地安装测试 |
 | 发布 | `scripts/release-macos.sh` | Developer ID + 强制公证 | 可分发产物 |
 
 静态 electron-builder 配置不嵌入证书身份，因此没有证书的贡献者仍可在本地打包。
@@ -21,17 +21,18 @@
 失败时，发布会在上传前失败。
 
 在 macOS 上，`pnpm dev` 创建并重用带有指纹的品牌 Electron 主机
-捆绑在 `.cache/electron-dev/` 下。它的包名称、可执行文件、标识符、
-和 ICNS 资源是仅用于开发的 PI-Desktop 值，因此 AppKit 显示
-应用程序菜单中的 PI-Desktop 并使用本机中的规范图标
+捆绑在 `.cache/electron-dev/` 下。该副本使用 hardened runtime 和
+`apps/desktop/build/entitlements.mac.plist` 做临时签名。它的包名称、可执行文件、标识符、
+和 ICNS 资源是仅用于开发的 DuaerAiDesk 值，因此 AppKit 显示
+应用程序菜单中的 DuaerAiDesk 并使用本机中的规范图标
 关于面板。运行时还将 `build/icon_1024.png` 应用于 Dock。库存
 `node_modules` 下的文件永远不会被修改。 Windows/Linux 不断发展
 正常的 electro-vite 可执行文件。尽管如此，Windows Main 还是注册了
-之前 NSIS 包使用的相同 `net.aiuo.pi-desktop` AppUserModelID
+之前 NSIS 包使用的相同 `net.aiuo.duaer-ai-desk` AppUserModelID
 Electron 准备就绪，防止库存主机身份拥有本机
 通知或任务栏组。 Windows 封装另外引脚
-`PI-Desktop` 可执行文件和“开始”菜单快捷方式名称。启动器设置
-`PI_DESKTOP_DEV=1` 因此运行时打包检查会禁用更新传送
+`DuaerAiDesk` 可执行文件和“开始”菜单快捷方式名称。启动器设置
+`DUAER_AI_DESK_DEV=1` 因此运行时打包检查会禁用更新传送
 并保留开发人员工作区默认值，尽管有品牌可执行文件名称。
 Electron 43+ 上的首次 `pnpm dev` 会按需下载 Electron 二进制文件
 （该包不再在 `pnpm install` 期间安装它）。
@@ -60,9 +61,9 @@ Windows 可执行文件和原生窗口图标中使用 `build/icon.ico`。渲染�
   Chromium 主进程与 `ELECTRON_RUN_AS_NODE` 的 agent sidecar；否则主进程的
   Test Provider 能过，但 sidecar 走局域网请求会以 `EHOSTUNREACH` 失败
   （issue #573）。
-- `Resources/bin/pi-desktop-host-core` — Rust 主机二进制文件（发布版本）。
+- `Resources/bin/duaer-ai-desk-host-core` — Rust 主机二进制文件（发布版本）。
 - Windows NSIS 构建包含静态链接 MSVC CRT 的 x64
-  `pi-desktop-host-core.exe`，因此全新的 Windows x64 或 Windows 11 ARM64
+  `duaer-ai-desk-host-core.exe`，因此全新的 Windows x64 或 Windows 11 ARM64
   （x64 模拟）安装无需在本地服务启动前单独安装 Visual C++ Redistributable。
 - `Resources/agent-runtime/` — 捆绑的 sidecar，执行
   `ELECTRON_RUN_AS_NODE=1`（未发货单独的 Node）。
@@ -121,7 +122,7 @@ Windows 可执行文件和原生窗口图标中使用 `build/icon.ico`。渲染�
    才省略目录。
 4. 同步 `packages/shared/src/changelog.test.ts` 中的最新优先版本清单
    （把新的稳定版本加到首位），然后运行
-   `pnpm --filter @pi-desktop/shared test`，确认目录对齐（版本集合与亮点
+   `pnpm --filter @duaer-ai-desk/shared test`，确认目录对齐（版本集合与亮点
    条数）仍然通过。
 5. 版本线发生变化（`0.10.x` → `0.11.x`）时更新 `README.md` 与
    `README.zh-CN.md`；当本次发布交付了用户可见行为，使亮点、下载、快速上手、
@@ -181,7 +182,7 @@ GitHub Release 工作流程启动所有本机平台运行程序，无需
 在每个平台上，发布准备步骤都会启动锁定的 Rust 主机
 与 pnpm 安装和本机依赖项重建并行构建。它
 然后仅构建由选择的工作区依赖项
-`@pi-desktop/desktop^...`，如果该依赖项选择意外则失败
+`@duaer-ai-desk/desktop^...`，如果该依赖项选择意外则失败
 空的。平台 `dist:*` 命令仍然负责捆绑代理
 运行时，验证主机构建，构建一次桌面应用程序，以及
 调用电子构建器。这避免了多余的桌面构建，而无需
@@ -192,14 +193,14 @@ GitHub Release 工作流程启动所有本机平台运行程序，无需
 macOS 矩阵使用 arm64 的 `macos-15` 和 Intel x64 的
 `macos-15-intel`。每个作业验证 `uname -m`，向 electron-builder 传入匹配
 的 `--arm64` 或 `--x64`，并在同一本机运行器上构建
-`pi-desktop-host-core`。每个架构的 `latest-mac.yml` 会在上传前重命名，
+`duaer-ai-desk-host-core`。每个架构的 `latest-mac.yml` 会在上传前重命名，
 发布作业下载两个工件后再合并为一个更新源。
 
 共享的 electron-builder 配置在 macOS 平台级别为 ZIP 应用带架构后缀的命名模板，
 并在 DMG 目标级别覆盖该模板。两个公开架构都会明确可见：arm64 通道发布
-`PI-Desktop-<version>-arm64.dmg` 和 `PI-Desktop-<version>-arm64-mac.zip`，
-Intel x64 通道发布 `PI-Desktop-<version>-x64.dmg` 和
-`PI-Desktop-<version>-x64-mac.zip`。这同时适用于未签名、已签名和本地 macOS
+`DuaerAiDesk-<version>-arm64.dmg` 和 `DuaerAiDesk-<version>-arm64-mac.zip`，
+Intel x64 通道发布 `DuaerAiDesk-<version>-x64.dmg` 和
+`DuaerAiDesk-<version>-x64-mac.zip`。这同时适用于未签名、已签名和本地 macOS
 通道，并确保每个按架构生成的更新源都会引用带架构后缀的工件名及其匹配校验和。
 上传前，每个 macOS 运行器必须恰好生成一个带架构后缀的 DMG 和 ZIP（包括
 blockmap），任何无后缀或架构错误的 macOS 工件都会使发布失败。
@@ -207,21 +208,21 @@ blockmap），任何无后缀或架构错误的 macOS 工件都会使发布失�
 DMG 使用带有品牌视觉的 720×440 背景，只展示拖入 Applications 的双图标安装手势。
 窗口里只有应用和 Applications 链接；打开说明和可执行 command 助手都不放入 DMG。
 
-macOS ZIP 在安装包根目录包含 `PI-Desktop-macOS-opening-help.txt` 和可执行的
-`PI-Desktop-macOS-open.command`。将 `PI-Desktop.app` 移动到 `/Applications` 或
+macOS ZIP 在安装包根目录包含 `DuaerAiDesk-macOS-opening-help.txt` 和可执行的
+`DuaerAiDesk-macOS-open.command`。将 `DuaerAiDesk.app` 移动到 `/Applications` 或
 `~/Applications` 后，ZIP 用户可以双击该助手。它只搜索这两个固定位置，在存在时递归
-删除唯一的 `com.apple.quarantine` 属性，然后打开 PI-Desktop。在执行前它会校验
-`CFBundleIdentifier=net.aiuo.pi-desktop`。它不会使用 `sudo`，也不接受任意应用路径。
+删除唯一的 `com.apple.quarantine` 属性，然后打开 DuaerAiDesk。在执行前它会校验
+`CFBundleIdentifier=net.aiuo.duaer-ai-desk`。它不会使用 `sudo`，也不接受任意应用路径。
 标准系统位置的终端备用命令为：
 
 ```sh
-xattr -r -d com.apple.quarantine /Applications/PI-Desktop.app
+xattr -r -d com.apple.quarantine /Applications/DuaerAiDesk.app
 ```
 
 该助手仅适用于可信来源的未签名工件在 macOS 上提示应用已损坏的场景；已签名并公证
 的版本无需执行它。
 
-标签构建和 `sign_macos: true`（手动运行的默认值）仅从 GitHub Actions 密钥接收 `CSC_LINK`、`CSC_KEY_PASSWORD`、`APPLE_ID`、`APPLE_APP_SPECIFIC_PASSWORD` 和 `APPLE_TEAM_ID`，通过 `CSC_NAME=XingYu Liu (DUV63RKYTW)`（裸通用名——electron-builder 拒绝 `Developer ID Application:` 前缀）固定证书，强制代码签名与 `notarytool` 公证 `PI-Desktop.app`。随后 DMG 会由 `scripts/notarize-and-staple-macos-release-dmg.sh` 单独提交到同一个服务，只有返回 `Accepted` 才允许装订票据。之后验证身份、代码签名完整性（含 `pi-desktop-host-core`）、Gatekeeper `Notarized Developer ID` 以及两份已装订票据，再进行任何工件上传。
+标签构建和 `sign_macos: true`（手动运行的默认值）仅从 GitHub Actions 密钥接收 `CSC_LINK`、`CSC_KEY_PASSWORD`、`APPLE_ID`、`APPLE_APP_SPECIFIC_PASSWORD` 和 `APPLE_TEAM_ID`，通过 `CSC_NAME=XingYu Liu (DUV63RKYTW)`（裸通用名——electron-builder 拒绝 `Developer ID Application:` 前缀）固定证书，强制代码签名与 `notarytool` 公证 `DuaerAiDesk.app`。随后 DMG 会由 `scripts/notarize-and-staple-macos-release-dmg.sh` 单独提交到同一个服务，只有返回 `Accepted` 才允许装订票据。之后验证身份、代码签名完整性（含 `duaer-ai-desk-host-core`）、Gatekeeper `Notarized Developer ID` 以及两份已装订票据，再进行任何工件上传。
 
 DMG、ZIP、NSIS、AppImage、deb、rpm、块图和更新程序提要输出已
 压缩或压缩不敏感。因此，工作流程会上传它们的
@@ -231,13 +232,13 @@ DMG、ZIP、NSIS、AppImage、deb、rpm、块图和更新程序提要输出已
 ### 4.4 CNB 镜像触发
 
 `softprops/action-gh-release` 发布或更新 GitHub Release 之后，
-`.github/workflows/mirror-to-cnb.yml` 会启动 `aixk/Pi-Desktop` 上的 CNB
+`.github/workflows/mirror-to-cnb.yml` 会启动 `aixk/DuaerAiDesk` 上的 CNB
 流水线。GitHub Release 仍是权威产物源；CNB 只是同一标签的副本，供从
-https://cnb.cool/aixk/Pi-Desktop 拉取的用户使用。
+https://cnb.cool/aixk/DuaerAiDesk 拉取的用户使用。
 
 该作业：
 
-- 仅在 `vastsa/PI-Desktop` 上运行
+- 仅在 `Duaer/DuaerAiDesk` 上运行
 - 在 `release` 的 `published` / `edited` 时触发，也可通过
   `workflow_dispatch` 传入明确标签（例如 `v0.14.6`）
 - 发送事件 `api_trigger_mirror`，并把 `MIRROR_TAGS` 设为该标签
@@ -249,7 +250,7 @@ https://cnb.cool/aixk/Pi-Desktop 拉取的用户使用。
 
 ### 4.5 GitHub Actions 中的 macOS 签名密钥
 
-在 GitHub → 仓库 `vastsa/PI-Desktop` → Settings → Secrets and variables →
+在 GitHub → 仓库 `Duaer/DuaerAiDesk` → Settings → Secrets and variables →
 Actions 中创建下列密钥。不要把 p12、密码、Apple ID 或应用专用密码提交进仓库。
 不要在 CI 中 `echo` 这些值。
 
@@ -273,13 +274,13 @@ Linux 使用 `base64 -w0 developer-id-application.p12`。绝不能进入 git 的
 ### 4.6 macOS 签名可观测性与超时
 
 `electron-builder` 在开始签名前只打印一行 —— `signing
-file=release/mac-arm64/PI-Desktop.app platform=darwin type=distribution
+file=release/mac-arm64/DuaerAiDesk.app platform=darwin type=distribution
 identityName=...` —— 之后直到该阶段结束都没有任何输出。这段时间里隐藏了三种机制，
 现在 macOS 通道把它们全部暴露出来：
 
 | 阶段位置 | 发生什么 | 现在如何可见 |
 |---|---|---|
-| 遍历 | `@electron/osx-sign` 遍历 `PI-Desktop.app/Contents`，收集所有 Mach-O 文件以及嵌套的 `.app` 与 `.framework` 包 | `DEBUG=electron-osx-sign*` 打印 `Walking... <dir>`；`scripts/macos-bundle-inventory.mjs` 在打包结束后打印同一个包的数量 |
+| 遍历 | `@electron/osx-sign` 遍历 `DuaerAiDesk.app/Contents`，收集所有 Mach-O 文件以及嵌套的 `.app` 与 `.framework` 包 | `DEBUG=electron-osx-sign*` 打印 `Walking... <dir>`；`scripts/macos-bundle-inventory.mjs` 在打包结束后打印同一个包的数量 |
 | 逐文件签名 | `codesign --force --sign <identity> --timestamp --entitlements ... <file>` 串行执行，最深的文件优先，应用包最后签 | `DEBUG=electron-osx-sign*` 打印 `Signing... <file>` 与 `Executing... <file> codesign ...`；codesign shim 记录每次调用的耗时。若钥匙串拒绝把私钥交给被包裹的 `codesign`，可设置 `PI_SIGNING_NO_CODESIGN_SHIM=1` 在不使用 shim 的情况下运行该阶段 |
 | 静默重试 | 一轮签名失败后最多再重试三次，退避 5s/10s/15s，且没有任何日志行 | 看门狗汇总中的 `codesign-calls` 与 `failures` 行会暴露重复的整轮签名 |
 | 应用公证 | `@electron/notarize` 打包 zip、上传并等待 Apple 队列（`mac.notarize=true`） | `DEBUG=electron-notarize*` 打印 `zipping application to`、`attempting to upload file to Apple`、`notarization success`，随后 electron-builder 打印 `notarization successful` |
@@ -334,15 +335,15 @@ override 作用于它。它的 `signApplication()` 对每个文件 `await` 一�
 
 | 工件 | 提交方 | 票据 |
 |---|---|---|
-| `PI-Desktop.app`（ZIP 内） | electron-builder `-c.mac.notarize=true` | 由 electron-builder 装订 |
-| `PI-Desktop-<version>-<arch>.dmg` | `scripts/notarize-and-staple-macos-release-dmg.sh`（`notarytool submit --wait`） | 同一脚本在 `status: Accepted` 后装订 |
+| `DuaerAiDesk.app`（ZIP 内） | electron-builder `-c.mac.notarize=true` | 由 electron-builder 装订 |
+| `DuaerAiDesk-<version>-<arch>.dmg` | `scripts/notarize-and-staple-macos-release-dmg.sh`（`notarytool submit --wait`） | 同一脚本在 `status: Accepted` 后装订 |
 
 从未提交过的 DMG 没有票据，因此装订会失败并报 `Could not find base64 encoded ticket ... Error 65`。只有在 Apple 返回 `Accepted` 之后才允许重试装订。
 
 每次已签名发布后运行：
 
 ```bash
-for APP in apps/desktop/release/mac-*/PI-Desktop.app; do
+for APP in apps/desktop/release/mac-*/DuaerAiDesk.app; do
   codesign -dv --verbose=4 "$APP"
   codesign --verify --deep --strict --verbose=2 "$APP"
   spctl --assess --type execute --verbose=4 "$APP"
@@ -456,20 +457,20 @@ Inter、Noto Sans SC、LXGW WenKai），因此 `out/renderer` 中只剩 KaTeX �
 
 上表是三控件的 `v0.10.8` 记录，早于本次移除，其 `woff2` 行已不再反映现状。
 
-在干净的轮廓上手动烟雾 (`PI_DESKTOP_DATA_DIR=$(mktemp -d)`)：
+在干净的轮廓上手动烟雾 (`DUAER_AI_DESK_DATA_DIR=$(mktemp -d)`)：
 
-1. `pnpm dev` 与 `PI-Desktop` 一起在 macOS 应用程序菜单中启动，
+1. `pnpm dev` 与 `DuaerAiDesk` 一起在 macOS 应用程序菜单中启动，
    Dock 和本机“关于”面板中的规范图标；没有 Electron 品牌
    可见。
 2. 应用程序从 DMG 安装启动，出现窗口，然后出现应用程序菜单，
    关于面板和 Dock 品牌与开发路线相匹配。
-3. 空首页和 expanded/collapsed 侧边栏显示规范的 PI-Desktop
+3. 空首页和 expanded/collapsed 侧边栏显示规范的 DuaerAiDesk
    标志；输入框提示行没有领先的品牌图标；新任务和
 project/Temporary 使用消息加会话图标创建控件。
 4. 出现新手引导清单；配置提供商；一轮流式聊天。
 5. 一种授权工具调用（写入）允许 + 拒绝路径。
 6. Quit/relaunch → 恢复会话历史记录，恢复窗口边界。
-7. `~/.pi-desktop/logs/` 包含 `app/`、`host/` 和 `agent/` 下分类的 NDJSON；
+7. `~/.duaer-ai-desk/logs/` 包含 `app/`、`host/` 和 `agent/` 下分类的 NDJSON；
    关键的生命周期、工具、provider、plugin 和错误记录可用，不再创建独立的计时文件。
 8. 禁用网络访问后，shell 仍然启动； English/Chinese
    切换、语法高亮、shell 高亮、KaTeX、Mermaid fallback/rendering、
@@ -483,39 +484,39 @@ project/Temporary 使用消息加会话图标创建控件。
 电子更新程序清单。在该目标操作系统上运行目标命令：
 
 ```text
-macOS Apple Silicon: pnpm --filter @pi-desktop/desktop run dist:mac -- --arm64
-macOS Intel:         pnpm --filter @pi-desktop/desktop run dist:mac -- --x64
-Windows: pnpm --filter @pi-desktop/desktop dist:win
-Linux:   pnpm --filter @pi-desktop/desktop dist:linux
+macOS Apple Silicon: pnpm --filter @duaer-ai-desk/desktop run dist:mac -- --arm64
+macOS Intel:         pnpm --filter @duaer-ai-desk/desktop run dist:mac -- --x64
+Windows: pnpm --filter @duaer-ai-desk/desktop dist:win
+Linux:   pnpm --filter @duaer-ai-desk/desktop dist:linux
 ```
 
 Windows 的 `dist:win` 命令会运行 `scripts/build-desktop-release.mjs`，分别调用
 一次 electron-builder 构建 NSIS 和 ZIP，确保每个包写入正确的更新器发行类型标记。
 
-macOS 软件包包括按本机架构构建的 `bin/pi-desktop-host-core`；Windows
-软件包包括 `bin/pi-desktop-host-core.exe`；Linux 包括
-`bin/pi-desktop-host-core`。签名、回滚和安装程序升级资质仍保持发布
+macOS 软件包包括按本机架构构建的 `bin/duaer-ai-desk-host-core`；Windows
+软件包包括 `bin/duaer-ai-desk-host-core.exe`；Linux 包括
+`bin/duaer-ai-desk-host-core`。签名、回滚和安装程序升级资质仍保持发布
 硬化工作；发布本身已在 D126/D285/D603 下启用。
 
 Native-runner 输出矩阵：
 
-- macOS arm64：`PI-Desktop-<version>-arm64.dmg` 和
-  `PI-Desktop-<version>-arm64-mac.zip`
-- macOS Intel x64：`PI-Desktop-<version>-x64.dmg` 和
-  `PI-Desktop-<version>-x64-mac.zip`
-- Windows x64：NSIS 安装程序 `PI-Desktop-Setup-<version>.exe` 和便携版
-  ZIP `PI-Desktop-Portable-<version>.zip`
+- macOS arm64：`DuaerAiDesk-<version>-arm64.dmg` 和
+  `DuaerAiDesk-<version>-arm64-mac.zip`
+- macOS Intel x64：`DuaerAiDesk-<version>-x64.dmg` 和
+  `DuaerAiDesk-<version>-x64-mac.zip`
+- Windows x64：NSIS 安装程序 `DuaerAiDesk-Setup-<version>.exe` 和便携版
+  ZIP `DuaerAiDesk-Portable-<version>.zip`
 - Linux x64：AppImage、deb 和 rpm
-- Linux x64 系统 Electron 产物：`PI-Desktop-<version>-linux-x64.asar`
+- Linux x64 系统 Electron 产物：`DuaerAiDesk-<version>-linux-x64.asar`
 
 便携版 Windows ZIP 目标不会写入 `latest.yml`。Windows 发布脚本会分别构建 NSIS
 和 ZIP，并给 ZIP 的应用元数据写入 `piDistribution = "zip"`；已打包的 ZIP 运行使用
 通知加链接交付。旧便携版 exe 仍在存在 `PORTABLE_EXECUTABLE_FILE` 时保持手动更新。
 NSIS 仍走应用内下载并在退出时安装。数据仍在现有应用数据目录。用户解压 ZIP 后
-直接运行 `PI-Desktop.exe`，不会启动自解压包装器，也不会请求管理员权限。
+直接运行 `DuaerAiDesk.exe`，不会启动自解压包装器，也不会请求管理员权限。
 
 RPM 目标会向 FPM 传入 `_build_id_links none`。捆绑的 Electron 二进制文件位于
-`/opt/PI-Desktop` 下；省略全局 `/usr/lib/.build-id` 链接，可以避免与其他捆绑相同
+`/opt/DuaerAiDesk` 下；省略全局 `/usr/lib/.build-id` 链接，可以避免与其他捆绑相同
 Electron 二进制文件的应用发生冲突。
 
 该 ASAR 产物包含的是 Electron 应用归档，而不是完整的 Linux 发行包。
@@ -523,7 +524,7 @@ Electron 二进制文件的应用发生冲突。
 与目标软件包内的本机主机及其他资源放在一起，然后用以下命令启动：
 
 ```bash
-electron PI-Desktop-<version>-linux-x64.asar
+electron DuaerAiDesk-<version>-linux-x64.asar
 ```
 
 每个本机运行器上的外壳冒烟测试：
@@ -532,7 +533,7 @@ electron PI-Desktop-<version>-linux-x64.asar
 2. 验证 F10 和 Shift+F10 对焦点内容仍然可用。
 3. 从焦点编辑器执行应用程序和编辑快捷方式。
 4. 最小化、最大化、恢复和关闭自定义控件。
-5. 使用 `PI_DESKTOP_START_MAXIMIZED=1` 重新启动；确认初始
+5. 使用 `DUAER_AI_DESK_START_MAXIMIZED=1` 重新启动；确认初始
    maximize/restore 字形与查询的本机状态匹配。
 6. 验证未知的 menu/window IPC 操作在窗口打开和关闭时失败。
 

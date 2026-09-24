@@ -90,7 +90,7 @@ mod windows {
         }
 
         let result = thread::Builder::new()
-            .name("pi-host-global-shortcut".into())
+            .name("duaer-ai-desk-host-global-shortcut".into())
             .spawn(|| unsafe {
                 let module = GetModuleHandleW(std::ptr::null());
                 let hook = SetWindowsHookExW(WH_KEYBOARD_LL, Some(keyboard_hook), module, 0);

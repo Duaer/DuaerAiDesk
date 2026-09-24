@@ -1,4 +1,4 @@
-import { IPC } from "@pi-desktop/shared";
+import { IPC } from "@duaer-ai-desk/shared";
 import { testNetworkProxy } from "../network-proxy";
 import type { AgentSidecar } from "../agent-sidecar";
 import type { HostProcess } from "../host-process";
@@ -72,7 +72,7 @@ export function registerSettingsIpc({
           networkProxy: currentNetworkProxy(),
         });
       } catch {
-        // Sidecar will pick up PI_DESKTOP_PROXY_JSON on the next spawn.
+        // Sidecar will pick up DUAER_AI_DESK_PROXY_JSON on the next spawn.
       }
     }
     applyApplicationMenuSettings(

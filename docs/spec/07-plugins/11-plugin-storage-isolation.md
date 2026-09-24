@@ -7,7 +7,7 @@ Isolate plugin data from the host's core data to avoid cross-contamination and u
 ## 2. Directory layout
 
 ```text
-~/.pi-desktop/
+~/.duaer-ai-desk/
  ├── pi.sqlite # host DB (03-runtime/04); plugins never open it
  ├── plugins/
  │ ├── installed/<plugin-id>/
@@ -21,7 +21,7 @@ Isolate plugin data from the host's core data to avoid cross-contamination and u
 
 Bundled marketplace fallback packages use the owning plugin manager's data
 root (`plugins/market/packages`), just like its catalog and download cache.
-Catalog construction never re-reads the process-wide `PI_DESKTOP_DATA_DIR`;
+Catalog construction never re-reads the process-wide `DUAER_AI_DESK_DATA_DIR`;
 independent host instances must not share package paths through that mutable
 default. Package size and checksum validation remain mandatory.
 
@@ -53,7 +53,7 @@ type PluginRegistry = {
 `pi.plugin.getDataPath()` points to:
 
 ```text
-~/.pi-desktop/plugins/data/<plugin-id>/
+~/.duaer-ai-desk/plugins/data/<plugin-id>/
 ```
 
 Uses:

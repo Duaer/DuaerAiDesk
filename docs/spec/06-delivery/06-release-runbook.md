@@ -9,9 +9,9 @@
 
 | Lane | Command | Signing | Use |
 |---|---|---|---|
-| Dev | `pnpm dev` | none | daily development |
-| Local package | `pnpm --filter @pi-desktop/desktop pack` | unsigned without a configured certificate | packaging smoke (`--dir` output) |
-| Local DMG | `pnpm --filter @pi-desktop/desktop dist` | unsigned without a configured certificate | local install test |
+| Dev | `pnpm dev` | macOS ad-hoc with hardened runtime; none on Windows/Linux | daily development |
+| Local package | `pnpm --filter @duaer-ai-desk/desktop pack` | unsigned without a configured certificate | packaging smoke (`--dir` output) |
+| Local DMG | `pnpm --filter @duaer-ai-desk/desktop dist` | unsigned without a configured certificate | local install test |
 | Release | `scripts/release-macos.sh` | Developer ID + mandatory notarization | distributable artifact |
 
 The static electron-builder config does not embed a certificate identity, so
@@ -21,17 +21,18 @@ requires an injected Developer ID identity (local) or `CSC_LINK` certificate
 not pass.
 
 On macOS, `pnpm dev` creates and reuses a fingerprinted branded Electron host
-bundle under `.cache/electron-dev/`. Its bundle name, executable, identifier,
-and ICNS resource are development-only PI-Desktop values, so AppKit shows
-PI-Desktop in the application menu and uses the canonical icon in the native
+bundle under `.cache/electron-dev/`. The copy is ad-hoc-signed with hardened
+runtime and `apps/desktop/build/entitlements.mac.plist`. Its bundle name, executable, identifier,
+and ICNS resource are development-only DuaerAiDesk values, so AppKit shows
+DuaerAiDesk in the application menu and uses the canonical icon in the native
 About panel. The runtime also applies `build/icon_1024.png` to the Dock. Stock
 files under `node_modules` are never modified. Windows/Linux development keeps
 the normal electron-vite executable. Windows Main nevertheless registers the
-same `net.aiuo.pi-desktop` AppUserModelID used by the NSIS package before
+same `net.aiuo.duaer-ai-desk` AppUserModelID used by the NSIS package before
 Electron readiness, preventing the stock host identity from owning native
 notifications or taskbar groups. The Windows package additionally pins the
-`PI-Desktop` executable and Start menu shortcut names. The launcher sets
-`PI_DESKTOP_DEV=1` so runtime packaging checks keep update delivery disabled
+`DuaerAiDesk` executable and Start menu shortcut names. The launcher sets
+`DUAER_AI_DESK_DEV=1` so runtime packaging checks keep update delivery disabled
 and preserve developer workspace defaults despite the branded executable name.
 The first `pnpm dev` on Electron 43+ downloads the Electron binary on demand
 (the package no longer installs it during `pnpm install`).
@@ -70,8 +71,8 @@ when macOS `iconutil` is available, without overwriting the canonical source.
   agent sidecar — without it, LAN provider requests from the sidecar fail with
   `EHOSTUNREACH` even though the main process's Test Provider fetch succeeds
   (issue #573).
-- `Resources/bin/pi-desktop-host-core` — Rust host binary (release build).
-- Windows NSIS builds include an x64 `pi-desktop-host-core.exe` statically
+- `Resources/bin/duaer-ai-desk-host-core` — Rust host binary (release build).
+- Windows NSIS builds include an x64 `duaer-ai-desk-host-core.exe` statically
   linked to the MSVC CRT, so a clean Windows x64 or Windows 11 ARM64
   (x64-emulated) installation does not need a separate Visual C++
   Redistributable before the local service can start.
@@ -142,7 +143,7 @@ Blocking steps:
    this cut.
 4. Sync the newest-first version list in
    `packages/shared/src/changelog.test.ts` (add the new stable version at the
-   top), then run `pnpm --filter @pi-desktop/shared test` and confirm catalog
+   top), then run `pnpm --filter @duaer-ai-desk/shared test` and confirm catalog
    alignment (version sets + highlight counts) still passes.
 5. Update `README.md` and `README.zh-CN.md` when the release line changes
    (`0.10.x` → `0.11.x`) and whenever the release ships user-visible behavior
@@ -207,7 +208,7 @@ inputs are prepared.
 On every platform, the release preparation step starts the locked Rust host
 build in parallel with pnpm installation and native dependency rebuilding. It
 then builds only the workspace dependencies selected by
-`@pi-desktop/desktop^...`, failing if that dependency selection is unexpectedly
+`@duaer-ai-desk/desktop^...`, failing if that dependency selection is unexpectedly
 empty. The platform `dist:*` command remains responsible for bundling the agent
 runtime, verifying the host build, building the Desktop application once, and
 invoking electron-builder. This avoids a redundant Desktop build without
@@ -223,17 +224,17 @@ stays unsigned without a configured certificate (D078).
 
 The macOS matrix uses `macos-15` for arm64 and `macos-15-intel` for Intel x64.
 Each job verifies `uname -m`, passes the matching `--arm64` or `--x64` flag to
-electron-builder, and builds `pi-desktop-host-core` on that same native
+electron-builder, and builds `duaer-ai-desk-host-core` on that same native
 runner. Tag builds and `sign_macos: true` (the dispatch default) receive
 `CSC_LINK`, `CSC_KEY_PASSWORD`, `APPLE_ID`, `APPLE_APP_SPECIFIC_PASSWORD`, and
 `APPLE_TEAM_ID` only from GitHub Actions secrets, pin the certificate through
 `CSC_NAME=XingYu Liu (DUV63RKYTW)` (bare common name — electron-builder rejects
 the `Developer ID Application:` prefix), force code signing and
-`notarytool` notarization of `PI-Desktop.app`. The DMG is then submitted to the
+`notarytool` notarization of `DuaerAiDesk.app`. The DMG is then submitted to the
 same service on its own (`scripts/notarize-and-staple-macos-release-dmg.sh`),
 and only an `Accepted` status allows the ticket to be stapled. Verification
 then checks the identity, code-signing integrity (including
-`pi-desktop-host-core`), Gatekeeper `Notarized Developer ID`, and both stapled
+`duaer-ai-desk-host-core`), Gatekeeper `Notarized Developer ID`, and both stapled
 tickets before any artifact upload. The per-architecture `latest-mac.yml` files
 are renamed before upload; the publish job merges them into one feed after
 downloading both artifacts.
@@ -241,9 +242,9 @@ downloading both artifacts.
 The shared electron-builder configuration applies the architecture-labelled
 pattern at the macOS platform level for ZIPs and overrides it at the DMG target
 level. Both public architectures are therefore explicit: the arm64 lane
-publishes `PI-Desktop-<version>-arm64.dmg` and
-`PI-Desktop-<version>-arm64-mac.zip`, while the Intel x64 lane publishes
-`PI-Desktop-<version>-x64.dmg` and `PI-Desktop-<version>-x64-mac.zip`. This
+publishes `DuaerAiDesk-<version>-arm64.dmg` and
+`DuaerAiDesk-<version>-arm64-mac.zip`, while the Intel x64 lane publishes
+`DuaerAiDesk-<version>-x64.dmg` and `DuaerAiDesk-<version>-x64-mac.zip`. This
 applies to both unsigned and signed macOS lanes, including local release builds,
 and ensures each generated updater feed references its architecture-labelled
 asset names and matching checksums. Before upload, each macOS runner requires
@@ -254,17 +255,17 @@ The DMG uses a branded 720×440 background with a two-icon drag-to-Applications
 gesture. The app and Applications link are the only items in the window. The
 opening-help note and the executable command helper are not included in the DMG.
 
-The macOS ZIP includes both `PI-Desktop-macOS-opening-help.txt` and the
-executable `PI-Desktop-macOS-open.command` at the package root. After moving
-`PI-Desktop.app` to `/Applications` or `~/Applications`, ZIP users can
+The macOS ZIP includes both `DuaerAiDesk-macOS-opening-help.txt` and the
+executable `DuaerAiDesk-macOS-open.command` at the package root. After moving
+`DuaerAiDesk.app` to `/Applications` or `~/Applications`, ZIP users can
 double-click the helper. It searches only those two fixed locations, removes
 only the recursive `com.apple.quarantine` attribute when present, and opens
-PI-Desktop. Before doing so it verifies `CFBundleIdentifier=net.aiuo.pi-desktop`.
+DuaerAiDesk. Before doing so it verifies `CFBundleIdentifier=net.aiuo.duaer-ai-desk`.
 It does not use `sudo` or accept an arbitrary application path. The manual
 fallback for the standard system location is:
 
 ```sh
-xattr -r -d com.apple.quarantine /Applications/PI-Desktop.app
+xattr -r -d com.apple.quarantine /Applications/DuaerAiDesk.app
 ```
 
 This helper is only for a trusted unsigned artifact when macOS reports that the
@@ -275,7 +276,7 @@ compressed or compression-insensitive. The workflow therefore uploads their
 temporary Actions artifacts with compression level zero before the publish job
 assembles the GitHub Release. The Linux runner also copies
 `linux-unpacked/resources/app.asar` to the versioned
-`PI-Desktop-<version>-linux-x64.asar` asset before upload. This preserves the
+`DuaerAiDesk-<version>-linux-x64.asar` asset before upload. This preserves the
 exact archive used by the Linux installers for downstream repackaging with a
 system Electron.
 
@@ -290,13 +291,13 @@ initiated manually in Vercel when required.
 
 After `softprops/action-gh-release` publishes or updates a GitHub Release,
 `.github/workflows/mirror-to-cnb.yml` starts the CNB pipeline at
-`aixk/Pi-Desktop`. GitHub Release remains the canonical artifact source; CNB
+`aixk/DuaerAiDesk`. GitHub Release remains the canonical artifact source; CNB
 is a copy of the same tag for users who pull from
-https://cnb.cool/aixk/Pi-Desktop.
+https://cnb.cool/aixk/DuaerAiDesk.
 
 The job:
 
-- runs only on `vastsa/PI-Desktop`
+- runs only on `Duaer/DuaerAiDesk`
 - fires on `release` `published` / `edited`, and on `workflow_dispatch` with
   an explicit tag such as `v0.14.6`
 - sends event `api_trigger_mirror` and `MIRROR_TAGS` set to that tag
@@ -311,7 +312,7 @@ electron-updater feeds.
 
 ### 4.6 GitHub Actions secrets for macOS signing
 
-Create these under GitHub → repository `vastsa/PI-Desktop` → Settings →
+Create these under GitHub → repository `Duaer/DuaerAiDesk` → Settings →
 Secrets and variables → Actions. Never commit the p12, password, Apple ID, or
 app-specific password. Never `echo` these values in CI.
 
@@ -335,13 +336,13 @@ enter git: `*.p12`, `*.cer`, `*.p8`, `*.mobileprovision`.
 ### 4.7 macOS signing observability and timeouts
 
 `electron-builder` prints one line before signing — `signing
-file=release/mac-arm64/PI-Desktop.app platform=darwin type=distribution
+file=release/mac-arm64/DuaerAiDesk.app platform=darwin type=distribution
 identityName=...` — and then nothing until the phase is over. Three mechanisms
 hide in that gap, and the macOS lanes now expose all three:
 
 | Point in the phase | What happens | How it is visible |
 |---|---|---|
-| Walk | `@electron/osx-sign` walks `PI-Desktop.app/Contents` and collects every Mach-O file plus nested `.app` and `.framework` bundles | `DEBUG=electron-osx-sign*` prints `Walking... <dir>`; `scripts/macos-bundle-inventory.mjs` prints the same bundle's counts right after packaging |
+| Walk | `@electron/osx-sign` walks `DuaerAiDesk.app/Contents` and collects every Mach-O file plus nested `.app` and `.framework` bundles | `DEBUG=electron-osx-sign*` prints `Walking... <dir>`; `scripts/macos-bundle-inventory.mjs` prints the same bundle's counts right after packaging |
 | Per-file signing | `codesign --force --sign <identity> --timestamp --entitlements ... <file>` runs serially, deepest file first, the app bundle last | `DEBUG=electron-osx-sign*` prints `Signing... <file>` and `Executing... <file> codesign ...`; the codesign shim times every invocation. If a keychain ever refuses to hand the key to a wrapped `codesign`, `PI_SIGNING_NO_CODESIGN_SHIM=1` runs the phase without the shim |
 | Silent retry | A failing pass is retried up to three more times with a 5s/10s/15s backoff and no log line | The watchdog's `codesign-calls` and `failures` lines expose repeated passes |
 | App notarization | `@electron/notarize` zips the app, uploads it, and waits for Apple's queue (`mac.notarize=true`) | `DEBUG=electron-notarize*` prints `zipping application to`, `attempting to upload file to Apple`, `notarization success`, then electron-builder prints `notarization successful` |
@@ -414,8 +415,8 @@ artifact per submission and electron-builder only covers the app:
 
 | Artifact | Submitted by | Ticket |
 |---|---|---|
-| `PI-Desktop.app` (inside the ZIP) | electron-builder `-c.mac.notarize=true` | stapled by electron-builder |
-| `PI-Desktop-<version>-<arch>.dmg` | `scripts/notarize-and-staple-macos-release-dmg.sh` (`notarytool submit --wait`) | stapled by the same script after `status: Accepted` |
+| `DuaerAiDesk.app` (inside the ZIP) | electron-builder `-c.mac.notarize=true` | stapled by electron-builder |
+| `DuaerAiDesk-<version>-<arch>.dmg` | `scripts/notarize-and-staple-macos-release-dmg.sh` (`notarytool submit --wait`) | stapled by the same script after `status: Accepted` |
 
 A DMG that was never submitted has no ticket, so stapling it fails with
 `Could not find base64 encoded ticket ... Error 65`. Stapler retries are only
@@ -424,7 +425,7 @@ allowed after Apple returns `Accepted`.
 Run after every signed release build:
 
 ```bash
-for APP in apps/desktop/release/mac-*/PI-Desktop.app; do
+for APP in apps/desktop/release/mac-*/DuaerAiDesk.app; do
   codesign -dv --verbose=4 "$APP"          # identity + hardened runtime flags
   codesign --verify --deep --strict --verbose=2 "$APP"
   spctl --assess --type execute --verbose=4 "$APP"
@@ -545,20 +546,20 @@ legacy `woff`/`truetype` strip stays because KaTeX still declares those sources.
 The three-controls table above is the `v0.10.8` record and predates the removal,
 so its `woff2` row is no longer current.
 
-Manual smoke on a clean profile (`PI_DESKTOP_DATA_DIR=$(mktemp -d)`):
+Manual smoke on a clean profile (`DUAER_AI_DESK_DATA_DIR=$(mktemp -d)`):
 
-1. `pnpm dev` launches with `PI-Desktop` in the macOS application menu and the
+1. `pnpm dev` launches with `DuaerAiDesk` in the macOS application menu and the
    canonical icon in both the Dock and native About panel; no Electron brand is
    visible.
 2. App launches from DMG install, window appears, and the application-menu,
    About-panel, and Dock branding match the development lane.
-3. Empty home and expanded/collapsed sidebar show the canonical PI-Desktop
+3. Empty home and expanded/collapsed sidebar show the canonical DuaerAiDesk
    logo; composer prompt rows have no leading brand icon; New task and
    project/Temporary create controls use the message-plus session icon.
 4. Onboarding checklist appears; configure provider; one streamed chat turn.
 5. One permissioned tool call (Write) allow + deny paths.
 6. Quit/relaunch → session history restored, window bounds restored.
-7. `~/.pi-desktop/logs/` contains categorized NDJSON under `app/`, `host/`,
+7. `~/.duaer-ai-desk/logs/` contains categorized NDJSON under `app/`, `host/`,
    and `agent/`; key lifecycle, tool, provider, plugin, and error records are
    available without dedicated timing files.
 8. With network access disabled, the shell still starts; English/Chinese
@@ -574,32 +575,32 @@ runtime and Electron app. D126/D285/D603 tag workflows publish these outputs and
 their electron-updater manifests. Run a target command on that target OS:
 
 ```text
-macOS Apple Silicon: pnpm --filter @pi-desktop/desktop run dist:mac -- --arm64
-macOS Intel:         pnpm --filter @pi-desktop/desktop run dist:mac -- --x64
-Windows: pnpm --filter @pi-desktop/desktop dist:win
-Linux:   pnpm --filter @pi-desktop/desktop dist:linux
+macOS Apple Silicon: pnpm --filter @duaer-ai-desk/desktop run dist:mac -- --arm64
+macOS Intel:         pnpm --filter @duaer-ai-desk/desktop run dist:mac -- --x64
+Windows: pnpm --filter @duaer-ai-desk/desktop dist:win
+Linux:   pnpm --filter @duaer-ai-desk/desktop dist:linux
 ```
 
 The Windows `dist:win` command runs `scripts/build-desktop-release.mjs`,
 which invokes electron-builder once for NSIS and once for ZIP so each package
 gets the correct updater distribution marker.
 
-The macOS packages include `bin/pi-desktop-host-core` built for their runner
-architecture; Windows includes `bin/pi-desktop-host-core.exe`; Linux includes
-`bin/pi-desktop-host-core`. Signing, rollback, and installer upgrade
+The macOS packages include `bin/duaer-ai-desk-host-core` built for their runner
+architecture; Windows includes `bin/duaer-ai-desk-host-core.exe`; Linux includes
+`bin/duaer-ai-desk-host-core`. Signing, rollback, and installer upgrade
 qualification remain release hardening work; publication is active under
 D126/D285/D603.
 
 Native-runner output matrix:
 
-- macOS arm64: `PI-Desktop-<version>-arm64.dmg` and
-  `PI-Desktop-<version>-arm64-mac.zip`
-- macOS Intel x64: `PI-Desktop-<version>-x64.dmg` and
-  `PI-Desktop-<version>-x64-mac.zip`
-- Windows x64: NSIS installer `PI-Desktop-Setup-<version>.exe` and portable
-  ZIP `PI-Desktop-Portable-<version>.zip`
+- macOS arm64: `DuaerAiDesk-<version>-arm64.dmg` and
+  `DuaerAiDesk-<version>-arm64-mac.zip`
+- macOS Intel x64: `DuaerAiDesk-<version>-x64.dmg` and
+  `DuaerAiDesk-<version>-x64-mac.zip`
+- Windows x64: NSIS installer `DuaerAiDesk-Setup-<version>.exe` and portable
+  ZIP `DuaerAiDesk-Portable-<version>.zip`
 - Linux x64: AppImage, deb, and rpm
-- Linux x64 system Electron asset: `PI-Desktop-<version>-linux-x64.asar`
+- Linux x64 system Electron asset: `DuaerAiDesk-<version>-linux-x64.asar`
 
 The portable Windows ZIP target does not write `latest.yml`. The Windows
 release helper builds NSIS and ZIP separately and stamps the ZIP app metadata
@@ -607,11 +608,11 @@ with `piDistribution = "zip"`; packaged ZIP runs use notify-and-link delivery.
 Legacy portable executables remain manual when `PORTABLE_EXECUTABLE_FILE` is
 present. NSIS keeps the in-app download and quit-and-install lane. Data stays
 in the existing application data directory. Users extract the ZIP and launch
-`PI-Desktop.exe` directly, so the package does not run a self-extracting
+`DuaerAiDesk.exe` directly, so the package does not run a self-extracting
 wrapper or request administrator execution.
 
 RPM targets pass `_build_id_links none` to FPM. Bundled Electron binaries live
-under `/opt/PI-Desktop`; omitting global `/usr/lib/.build-id` links prevents
+under `/opt/DuaerAiDesk`; omitting global `/usr/lib/.build-id` links prevents
 collisions with other applications that bundle the same Electron binaries.
 
 The ASAR asset contains the Electron application archive, not a complete Linux
@@ -620,7 +621,7 @@ target Electron resources layout together with the native host and other
 resources from the target package, then launch it with:
 
 ```bash
-electron PI-Desktop-<version>-linux-x64.asar
+electron DuaerAiDesk-<version>-linux-x64.asar
 ```
 
 Shell smoke on each native runner:
@@ -629,7 +630,7 @@ Shell smoke on each native runner:
 2. Verify F10 and Shift+F10 remain available to focused content.
 3. Execute application and editing shortcuts from a focused editor.
 4. Minimize, maximize, restore, and close from the custom controls.
-5. Relaunch with `PI_DESKTOP_START_MAXIMIZED=1`; confirm the initial
+5. Relaunch with `DUAER_AI_DESK_START_MAXIMIZED=1`; confirm the initial
    maximize/restore glyph matches the queried native state.
 6. Verify unknown menu/window IPC actions fail with the window open and closed.
 

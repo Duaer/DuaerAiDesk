@@ -8,7 +8,7 @@ const main = createProviderCatalogRuntime({ getHost: () => null, modelsDevCatalo
 
 test("settings read-modify-write preserves disabled retry and unrelated preferences", () => {
   const previousWindow = globalThis.window;
-  globalThis.window = { piDesktop: { platform: "win32" } };
+  globalThis.window = { duaerAiDesk: { platform: "win32" } };
   try {
     for (const stored of [{}, { infiniteProviderRetry: false }, { infiniteProviderRetry: true }]) {
       const original = { defaultMode: "agent", theme: "light", ...stored };

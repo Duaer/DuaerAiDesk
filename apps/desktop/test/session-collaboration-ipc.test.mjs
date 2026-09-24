@@ -31,7 +31,7 @@ const { registerSessionIpc } = load("../electron/main/ipc/session-ipc.ts", {
   electron: { shell: {} },
   "node:fs": fs,
   "node:path": path,
-  "@pi-desktop/shared": shared,
+  "@duaer-ai-desk/shared": shared,
   "../importers": {},
   "../services/session-collaboration": collaboration,
   "../services/session-search": { searchSessionsAcrossSources: async () => ({ hits: [], nextOffset: null }) },
@@ -77,17 +77,17 @@ function rendererApi(invoke) {
   load("../electron/preload/index.ts", {
     electron: {
       contextBridge: { exposeInMainWorld: (name, value) => {
-        assert.equal(name, "piDesktop");
+        assert.equal(name, "duaerAiDesk");
         bridge = value;
       } },
       ipcRenderer: { invoke },
       webUtils: {},
     },
-    "@pi-desktop/shared": shared,
-    "@pi-desktop/shared/protocol": shared,
+    "@duaer-ai-desk/shared": shared,
+    "@duaer-ai-desk/shared/protocol": shared,
   });
-  const { api } = load("../src/lib/api.ts", { "@pi-desktop/shared": shared }, {
-    window: { piDesktop: bridge },
+  const { api } = load("../src/lib/api.ts", { "@duaer-ai-desk/shared": shared }, {
+    window: { duaerAiDesk: bridge },
   });
   return { api, bridge };
 }

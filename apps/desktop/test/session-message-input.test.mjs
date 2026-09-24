@@ -1,8 +1,9 @@
 import assert from "node:assert/strict";
 import { register } from "node:module";
 import test from "node:test";
-import { IPC } from "@pi-desktop/shared";
+import { IPC } from "@duaer-ai-desk/shared";
 
+register(new URL("./helpers/electron-stub-hook.mjs", import.meta.url));
 register(new URL("./helpers/ts-import-hooks.mjs", import.meta.url));
 const { resolveSessionMessageInput } = await import("../../../packages/host-runtime/src/session-message-input.ts");
 const { registerAgentIpc } = await import("../electron/main/ipc/agent-ipc.ts");
@@ -109,4 +110,67 @@ test("prompt IPC persists original session text, skips slash expansion and binds
   assert.deepEqual(sidecarCalls[0].params.sessionMessage, origin);
   assert.equal(events.length, 2);
   assert.equal(released, true);
+});
+
+test("an untracked running turn is closed before the next prompt starts", async () => {
+  const handlers = new Map();
+  const calls = [];
+  const sidecarCalls = [];
+  const orphan = "11111111-1111-4111-8111-111111111111";
+  let begins = 0;
+  const host = {
+    async call(method, params) {
+      calls.push({ method, params });
+      if (method === "settings.get") return {};
+      if (method === "session.get") return { session: { id: "s1", messages: [] } };
+      if (method === "session.beginTurn") {
+        begins += 1;
+        if (begins === 1) {
+          throw Object.assign(new Error(`AGENT_BUSY: ${orphan}`), {
+            errorCode: "AGENT_BUSY",
+            data: { errorCode: "AGENT_BUSY" },
+          });
+        }
+        return { turnId: "turn-2" };
+      }
+      if (method === "session.endTurn") return { ok: true };
+      if (method === "session.appendMessage") return {};
+      assert.fail(`unexpected RPC ${method}`);
+    },
+  };
+  registerAgentIpc({
+    registrar: { handle: (channel, handler) => handlers.set(channel, handler) },
+    getHost: () => host,
+    getSidecar: () => ({
+      setProjectInstructionRoot() {},
+      async call(method, params) {
+        sidecarCalls.push({ method, params });
+        return { accepted: true, turnId: "turn-2" };
+      },
+    }),
+    getAgentHostBridge: () => null,
+    logger: { app() {} }, vendorOAuth: {}, agentExtensions: {}, cancelSessionTools() {},
+    persistenceOutbox: {}, dataDir: "/unused-for-no-attachments",
+    activeTurns: new Map(), activeTurnUsages: new Map(), approvedExecutionIdsBySession: new Map(), claimedExecutionSessions: new Map(),
+    resolveAgentRuntimeLaunch: async () => ({
+      providerId: "provider", modelId: "model",
+      sidecarParams: { sessionId: "s1", provider: { modelConfig: { input: ["text"] } } },
+    }),
+    acquireSessionOperation: async () => () => {},
+    finishTurn: async () => { assert.fail("the recovered prompt should succeed"); },
+    emitAgentEvent() {}, setNotificationViewingSessionId() {},
+    optionalWorkspaceRoot: async () => null,
+    composerCommandService: { buildComposerCommands: async () => [] },
+    loadComposerTemplatesCached: async () => [],
+  });
+  assert.deepEqual(
+    await handlers.get(IPC.invoke.agentPrompt)({ sessionId: "s1", content: "继续" }),
+    { accepted: true, turnId: "turn-2" },
+  );
+  const ended = calls.find((entry) => entry.method === "session.endTurn");
+  assert.equal(ended.params.turnId, orphan);
+  assert.equal(ended.params.status, "aborted");
+  assert.equal(ended.params.createNotification, false);
+  assert.equal(sidecarCalls.some((entry) => entry.method === "agent.abort"), true);
+  assert.equal(begins, 2);
 });

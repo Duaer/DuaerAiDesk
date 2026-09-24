@@ -2,7 +2,7 @@
 
 - Status: Accepted (amended by D457 / [ADR 0296](0296-macos-signed-dmg-two-icon-install.md))
 - Date: 2026-09-12
-- Deciders: PI-Desktop release maintainers
+- Deciders: DuaerAiDesk release maintainers
 - Amends: D371 / [ADR 0204](0204-unsigned-macos-first-launch-helper.md)
 - Related: [E2E-196b](../spec/06-delivery/04-e2e-test-plan.md)
 
@@ -18,13 +18,13 @@ command item beside the normal installation action.
 
 1. The macOS DMG contains the app, the Applications link, and the opening-help
    note only. The note is displayed in Finder as `If app won't open, read this.txt` and the
-   executable `PI-Desktop-macOS-open.command` is not included or exposed in the
+   executable `DuaerAiDesk-macOS-open.command` is not included or exposed in the
    DMG contents.
-2. The macOS ZIP package retains both `PI-Desktop-macOS-opening-help.txt` and
-   the executable `PI-Desktop-macOS-open.command` at its root. The helper keeps
+2. The macOS ZIP package retains both `DuaerAiDesk-macOS-opening-help.txt` and
+   the executable `DuaerAiDesk-macOS-open.command` at its root. The helper keeps
    D371's fixed-path, bundle-id, quarantine-only, and no-`sudo` boundaries.
 3. The shared opening note leads with the narrow Terminal fallback
-   `xattr -r -d com.apple.quarantine /Applications/PI-Desktop.app`, limits it
+   `xattr -r -d com.apple.quarantine /Applications/DuaerAiDesk.app`, limits it
    to trusted unsigned builds, and states that signed and notarized builds do
    not need the fallback.
 

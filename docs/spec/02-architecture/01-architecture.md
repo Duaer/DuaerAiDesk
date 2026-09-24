@@ -2,7 +2,7 @@
 
 ## 1. Overview
 
-PI-Desktop uses a layered desktop architecture:
+DuaerAiDesk uses a layered desktop architecture:
 
 ```text
 ┌──────────────────────────────────────────────────────────┐
@@ -86,7 +86,7 @@ not pass through Rust host-core or the agent sidecar (D120 / ADR 0022).
 
 ### 3.6 Local MCP control plane
 
-When `PI_DESKTOP_MCP_CONTROL=1` is set, Electron Main starts an optional
+When `DUAER_AI_DESK_MCP_CONTROL=1` is set, Electron Main starts an optional
 Streamable HTTP MCP server on `127.0.0.1`. The server exposes named tools for
 the common project/session/Agent/workspace flows and a reviewed catalog of
 generic desktop operations. Each call delegates to the same registered main
@@ -114,7 +114,7 @@ It does not expose Electron IPC, `host.proxy`, or host-core RPC, and it does
 not change the current MVP exclusion of a remote Gateway. The first
 implementation hosts the module inside Electron Main, where desktop IPC,
 local MCP, and RACP call it. The first remote deployment (D375) packages the
-same module as a headless `pi-host` on another machine, reached from the
+same module as a headless `duaer-ai-desk-host` on another machine, reached from the
 desktop over an SSH tunnel; Gateway routing and browser access remain
 specified but unscheduled.
 

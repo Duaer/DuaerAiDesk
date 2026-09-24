@@ -14,7 +14,7 @@ import {
   type MarketSource,
   type McpCatalogCategory,
   type McpCatalogEntry,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import { api } from "../../lib/api";
 import { useAppStore } from "../../stores/app-store";
 import {

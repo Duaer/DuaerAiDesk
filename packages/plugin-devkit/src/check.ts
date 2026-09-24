@@ -9,7 +9,7 @@ import {
   PLUGIN_VIEW_ICONS,
   validateManifest,
   type PluginManifest,
-} from "@pi-desktop/plugin-sdk";
+} from "@duaer-ai-desk/plugin-sdk";
 import {
   MAX_PACKAGE_BYTES,
   MAX_PACKAGE_FILES,
@@ -281,7 +281,7 @@ export async function check(dirInput: string): Promise<CheckResult> {
     }
     errors.push({
       code: "permission.unknown",
-      message: `permission "${permission}" is not a known PI-Desktop permission`,
+      message: `permission "${permission}" is not a known DuaerAiDesk permission`,
     });
   }
   // A write or delete permission with no declared range installs and then

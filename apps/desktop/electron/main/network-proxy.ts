@@ -20,11 +20,11 @@ import {
   validateNetworkProxy,
   type ChromiumProxyConfig,
   type NetworkProxySettings,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import {
   startAuthenticatedProxyRelay,
   type AuthenticatedProxyRelay,
-} from "@pi-desktop/agent-runtime";
+} from "@duaer-ai-desk/agent-runtime";
 import { applyUserEndpointPolicyFromAppSettings } from "./endpoint-policy";
 
 const originalEnv = snapshotProxyEnv(process.env);
@@ -50,9 +50,9 @@ export async function applyNetworkProxy(
   if (next.mode === "system") restoreProxyEnv(originalEnv, process.env);
   else applyProxyEnvAssignments(proxyEnvAssignments(next), process.env);
   if (next.mode === "custom") {
-    process.env.PI_DESKTOP_PROXY_JSON = JSON.stringify(next);
+    process.env.DUAER_AI_DESK_PROXY_JSON = JSON.stringify(next);
   } else {
-    delete process.env.PI_DESKTOP_PROXY_JSON;
+    delete process.env.DUAER_AI_DESK_PROXY_JSON;
   }
 
   installSessionHook();

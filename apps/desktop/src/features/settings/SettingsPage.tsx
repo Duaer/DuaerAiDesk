@@ -5,7 +5,7 @@ import type {
   GlobalPermissionMode,
   PluginScenicThemesDestinationMeta,
   ShortcutPlatform,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import { useAppStore } from "../../stores/app-store";
 import { api } from "../../lib/api";
 import {
@@ -23,6 +23,7 @@ import {
   IconDownload,
   IconFileText,
   IconGlobe,
+  IconKey,
   IconInfo,
   IconKeyboard,
   IconPalette,
@@ -46,6 +47,7 @@ import { ProjectsPage } from "../../pages/ProjectsPage";
 import { AgentSkillsPage } from "../../components/settings/AgentSkillsPage";
 import { AgentMcpPage } from "../../components/settings/AgentMcpPage";
 import { AgentSubagentsPage } from "../../components/settings/AgentSubagentsPage";
+import { DeploySettingsPage } from "../../components/settings/DeploySettingsPage";
 import { RemoteHostsPage } from "../../components/settings/RemoteHostsPage";
 import {
   CommandShellRow,
@@ -86,7 +88,7 @@ export function SettingsPage() {
   const settings = useAppStore((s) => s.settings);
   const version = useAppStore((s) => s.version);
   const refreshProviders = useAppStore((s) => s.refreshProviders);
-  const platform = (window.piDesktop?.platform ?? "darwin") as ShortcutPlatform;
+  const platform = (window.duaerAiDesk?.platform ?? "darwin") as ShortcutPlatform;
 
   // Developer-only destinations (Cloud sync and Remote Hosts) exist only
   // while developer mode is on; the rail, page, and search drop them together.
@@ -228,6 +230,7 @@ export function SettingsPage() {
       subagents: <IconBot size={14} />,
       import: <IconDownload size={14} />,
       projects: <IconArchive size={14} />,
+      deploy: <IconKey size={14} />,
       sync: <IconCloudDown size={14} />,
       remoteHosts: <IconGlobe size={14} />,
       about: <IconInfo size={14} />,
@@ -546,6 +549,8 @@ export function SettingsPage() {
 
           {tab === "projects" && <ProjectsPage />}
 
+          {tab === "deploy" && <DeploySettingsPage />}
+
           {tab === "sync" && !tabHidden && <ConfigSyncPage />}
 
           {tab === "remoteHosts" && !tabHidden && <RemoteHostsPage />}
@@ -556,7 +561,7 @@ export function SettingsPage() {
                 <SettingsRow title={t("settings.application")}>
                   <div className="settings-about-meta">
                     <div className="font-medium">
-                      {version?.name || "PI-Desktop"} {version?.version}
+                      {version?.name || "DuaerAiDesk"} {version?.version}
                     </div>
                     <div className="font-mono text-xs-plus text-text-muted">
                       protocol {version?.protocolVersion} · host {version?.hostVersion}

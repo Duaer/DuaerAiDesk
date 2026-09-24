@@ -3,8 +3,8 @@ import {
   isActiveInProject,
   type McpServerRecord,
   type McpServerStatus,
-} from "@pi-desktop/shared";
-import { userMcpToolName } from "@pi-desktop/plugin-sdk";
+} from "@duaer-ai-desk/shared";
+import { userMcpToolName } from "@duaer-ai-desk/plugin-sdk";
 import type { McpServerClient, McpTool } from "./plugin-mcp";
 
 /**

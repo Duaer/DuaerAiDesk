@@ -5,7 +5,7 @@
 
 ## 1. Goal
 
-PI-Desktop 必须支持用户通常需要的**所有主要市场模型供应商和模型**，而无需将一个微小的允许列表硬编码为产品上限。
+DuaerAiDesk 必须支持用户通常需要的**所有主要市场模型供应商和模型**，而无需将一个微小的允许列表硬编码为产品上限。
 
 策略：
 
@@ -72,8 +72,8 @@ OpenCode Go 以一个名为 `opencode_go` 的 API 风格预设暴露。它仍然
 第二条传输链路，也不会形成封闭的模型许可名单。Agent 运行时会在每一次 LLM
 请求上注入 OpenCode 路由标头（会话回合、子代理、上下文压缩摘要、提示增强以及
 插件的一次性调用）：`x-opencode-session` 是持久的对话 id（调用方没有会话时则是
-按次生成的 UUID），`x-opencode-client` 为 `pi-desktop`，`User-Agent` 为
-`pi-desktop/<APP_VERSION>`，除非该行设置了 `headers["User-Agent"]`。base URL
+按次生成的 UUID），`x-opencode-client` 为 `duaer-ai-desk`，`User-Agent` 为
+`duaer-ai-desk/<APP_VERSION>`，除非该行设置了 `headers["User-Agent"]`。base URL
 主机为 `opencode.ai` 的自定义 OpenAI 兼容行也会收到同样的标头。系统不依赖
 pi-ai 去发出 `x-opencode-session`。每个提供商行（AI 服务或 OAuth 账户）都可以
 设置可选的 `headers`；留空则保持适配器默认值。一层 fetch 包装是最后的写入方，
@@ -95,7 +95,7 @@ pi-ai 去发出 `x-opencode-session`。每个提供商行（AI 服务或 OAuth �
 使用 `thinkingFormat: "zai"` 与 `zaiToolStream: true`。DeepSeek 系 Completions
 在 `vendorKey`、Base URL、模型 ID 或目录 `family` 能识别为 DeepSeek 时设置
 `requiresReasoningContentOnAssistantMessages: true`。pi-ai 只根据
-`provider === "deepseek"` 或 `deepseek.com` URL 自动检测，而 PI-Desktop 把 UUID
+`provider === "deepseek"` 或 `deepseek.com` URL 自动检测，而 DuaerAiDesk 把 UUID
 存成 `model.provider`，因此聚合网关与自定义端点会在无思考内容的助手回合漏掉
 `reasoning_content`。非官方 DeepSeek 端点还会设置 `requiresNonEmptyReasoningReplay`，
 用文档化的非空占位符而不是 `""` 填补缺失推理（OpenCode / 第三方中转在压缩后拒绝空回传；
@@ -145,7 +145,7 @@ pi-ai 去发出 `x-opencode-session`。每个提供商行（AI 服务或 OAuth �
 ## 6. 模型支持策略
 
 ### 6.1 无硬性模型许可名单上限
-PI-Desktop 不得把用户永久限制在一份简短的固定模型列表上。
+DuaerAiDesk 不得把用户永久限制在一份简短的固定模型列表上。
 
 ### 6.2 目录职责
 1. **models.dev**（`https://models.dev/api.json`）是唯一的模型元数据来源。
@@ -313,7 +313,7 @@ type ThinkingLevel =
   | "max"
 ```
 
-上面这些兼容性字段，是为老客户端保留的持久化模式兼容面。PI-Desktop 不再把
+上面这些兼容性字段，是为老客户端保留的持久化模式兼容面。DuaerAiDesk 不再把
 它们当作运行时的模型覆盖来读取。`ModelInfo` 的推理支持与受支持的思考级别
 描述的是解析出的 models.dev 记录；有效的 provider/会话能力则来自那个确切的
 `ModelBinding`。未知的自由格式 id 以通用形态起步，不带任何推断出的推理能力，

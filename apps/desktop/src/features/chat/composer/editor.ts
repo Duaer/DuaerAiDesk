@@ -1,7 +1,7 @@
 import {
   fileReferenceLabel,
   formatFileInsert,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import type { ComposerFileReference } from "./model";
 
 export { type ComposerFileReference } from "./model";

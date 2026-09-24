@@ -1,7 +1,7 @@
 import { existsSync } from "node:fs";
 import { join } from "node:path";
-import { IPC, type PluginScenicThemesDestinationMeta, type PluginViewMeta } from "@pi-desktop/shared";
-import { normalizeThemeAssetPath, pluginThemeId, resolvePluginLocalizedString, themeAssetUrl } from "@pi-desktop/plugin-sdk";
+import { IPC, type PluginScenicThemesDestinationMeta, type PluginViewMeta } from "@duaer-ai-desk/shared";
+import { normalizeThemeAssetPath, pluginThemeId, resolvePluginLocalizedString, themeAssetUrl } from "@duaer-ai-desk/plugin-sdk";
 import type { BrowserHost } from "../browser-host";
 import { BROWSER_PLUGIN_ID, BROWSER_VIEW_ID } from "../browser-host";
 import type { PluginRuntime } from "../plugin-runtime";

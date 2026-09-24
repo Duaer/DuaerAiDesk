@@ -10,13 +10,13 @@ import {
   type ShortcutPlatform,
   type ThinkingLevel,
   type UiMessage,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import type {
   PluginCompleteResult,
   PluginNativeNotificationInput,
   PluginNativeNotificationResult,
   PluginNotificationPermission,
-} from "@pi-desktop/plugin-sdk";
+} from "@duaer-ai-desk/plugin-sdk";
 import {
   asPluginThinkingLevel,
   listReadyPluginModels,
@@ -27,7 +27,7 @@ import {
 import {
   completeOneShot,
   type RuntimeProviderConfig,
-} from "@pi-desktop/agent-runtime";
+} from "@duaer-ai-desk/agent-runtime";
 import { createFsConsentService } from "../plugin-fs-consent";
 import { pluginWorkspaceInfo } from "../workspace-roots";
 import { createDesktopConsentService } from "../plugin-desktop-consent";
@@ -317,7 +317,7 @@ export function createPluginServices({
       const detail = await getHost()!.call<{
         session?: {
           messages?: UiMessage[];
-          compaction?: import("@pi-desktop/shared").ContextCompactionRecord;
+          compaction?: import("@duaer-ai-desk/shared").ContextCompactionRecord;
           providerId?: string;
           modelId?: string;
           thinkingLevel?: string;

@@ -11,7 +11,7 @@
 ## Context
 
 ADR 0285 delivered the `RACP-WS` transport and pairing on both ends. The
-`pi-host` bundle now binds a real WebSocket server on loopback and speaks the
+`duaer-ai-desk-host` bundle now binds a real WebSocket server on loopback and speaks the
 frozen contract; a `RacpClient` in `packages/racp` reaches it with header
 authentication. What was still missing on the desktop side of R2 was the
 kernel — the code that lets the renderer treat a remote session exactly the
@@ -37,7 +37,7 @@ Three constraints shaped the kernel:
 The desktop-side R2 kernel is five modules and one boot hook, all under
 `apps/desktop/electron/main/remote/` (module state) and
 `apps/desktop/electron/main/bootstrap/` (boot state), and one new workspace
-dependency (`@pi-desktop/racp`).
+dependency (`@duaer-ai-desk/racp`).
 
 1. **A single interception seam: `backend-router.ts`.** The router is
    consulted from `ipc/register.ts`'s `handle()` wrapper; it returns the
@@ -101,7 +101,7 @@ dependency (`@pi-desktop/racp`).
    `RacpClient.onEvent` as a single-slot construction option, which is not
    enough for a bridge + resync watchdog + later features. `racp-remote-host-client.ts`
    is the only file in `electron/main/remote/` that imports
-   `@pi-desktop/racp`; it wraps the client, fans out its callback to every
+   `@duaer-ai-desk/racp`; it wraps the client, fans out its callback to every
    `subscribe()` listener, and swallows listener throws so a bad subscriber
    cannot silence the others.
 
@@ -153,14 +153,14 @@ events. What is scheduled for later stages of R2:
   pairing token, exchange it, and store the device token. The registry API
   is ready for this; the surface is not.
 - **SSH bootstrap (Stage 4).** A supervisor that detects system `ssh`,
-  downloads the `pi-host-bundle` (verified by SHA-256 from ADR 0285's
+  downloads the `duaer-ai-desk-host-bundle` (verified by SHA-256 from ADR 0285's
   release pipeline), starts the remote binary, and opens the `-L` tunnel.
   Every paired host today assumes the loopback URL already exists.
 - **Terminal work-panel client (Stage 5).** RACP terminal events are dropped
   by the event bridge; the work-panel session client will consume them.
 - **Reverse tool relay (Stage 6).** A `RelayToolPort` bridge that lets the
   agent host run local desktop tools against a remote session. Belongs on the
-  agent-host and pi-host, not on `packages/racp`.
+  agent-host and duaer-ai-desk-host, not on `packages/racp`.
 - **Resync watchdog.** `resync.required` events are dropped today; the
   connection layer will eventually rebuild subscriptions from the last
   cursor per session (`RacpClient.cursorFor`).
@@ -183,14 +183,14 @@ events. What is scheduled for later stages of R2:
   watchdog and the event bridge to share the same callback. Rejected: their
   concerns are independent and their subscriptions should be too.
 - **Plain-text registry.** Simpler read/write, but a compromised backup would
-  hand attackers a device token that authenticates against a real `pi-host`.
+  hand attackers a device token that authenticates against a real `duaer-ai-desk-host`.
   Rejected by security §3.4.
 
 ## Testing
 
 Every module has a `node --test` fixture that exercises the seam in isolation
 (fake RACP client, fake encryption, fake router). The RACP adapter runs
-against the real in-memory harness (`@pi-desktop/racp/test-harness`), so its
+against the real in-memory harness (`@duaer-ai-desk/racp/test-harness`), so its
 fan-out and lifecycle contracts are checked against the same client the
 production factory builds. The full desktop suite runs 2120+ tests with the
 kernel on and every one passes; no `test:e2e:*` scenario is scheduled for the
@@ -198,11 +198,11 @@ kernel alone because it is dead code until pairing lands.
 
 ## Consequences
 
-- The desktop can host a paired remote `pi-host` today; adding a URL and
+- The desktop can host a paired remote `duaer-ai-desk-host` today; adding a URL and
   device token to `<dataDir>/remote-hosts.json` (encrypted-at-rest through
   `safeStorage`) makes the kernel connect, register sessions, and stream
   events into the existing renderer, no other flag or setting required.
-- `apps/desktop` now depends on `@pi-desktop/racp`, and the racp package
+- `apps/desktop` now depends on `@duaer-ai-desk/racp`, and the racp package
   publishes a `./test-harness` export subpath. Both changes are additive.
 - `apps/desktop/electron/main/index.ts` stays at exactly 1500 LOC. The
   startup/shutdown bridge is a module-level handle inside

@@ -96,7 +96,7 @@ test("settings import and protocol expose model-config import independently of s
   assert.match(settingsPage, /scanImportModelConfigs/);
   assert.match(settingsPage, /ModelConfigImportPanel/);
   assert.match(apiSource, /modelConfigImportScan/);
-  assert.match(protocol, /pi-desktop\/modelConfig\/importScan/);
+  assert.match(protocol, /duaer-ai-desk\/modelConfig\/importScan/);
   assert.match(mainSource, /providers\.create/);
   assert.match(mainSource, /providers\.getSecret/);
   assert.match(mainSource, /secretValue: draft\.secretValue/);

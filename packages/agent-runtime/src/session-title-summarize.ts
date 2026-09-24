@@ -4,8 +4,8 @@ import type {
   Context,
   Model,
   SimpleStreamOptions,
-} from "@earendil-works/pi-ai";
-import type { ThinkingLevel } from "@pi-desktop/shared";
+} from "@duaer-ai-desk/upstream-ai";
+import type { ThinkingLevel } from "@duaer-ai-desk/shared";
 import { completeOneShot } from "./one-shot-complete.js";
 import type { RuntimeProviderConfig } from "./provider-binding.js";
 

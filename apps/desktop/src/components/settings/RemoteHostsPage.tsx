@@ -1,5 +1,5 @@
 /**
- * Settings destination for paired remote `pi-host` machines (R2b pairing UX,
+ * Settings destination for paired remote `duaer-ai-desk-host` machines (R2b pairing UX,
  * ADR 0286 §Registry).
  *
  * Inventory of `<dataDir>/remote-hosts.json` plus one Add form: SSH install
@@ -11,7 +11,7 @@
  */
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import type { RemoteHostSshAuth, RemoteHostSummary } from "@pi-desktop/shared";
+import type { RemoteHostSshAuth, RemoteHostSummary } from "@duaer-ai-desk/shared";
 import { api } from "../../lib/api";
 import { useAppStore } from "../../stores/app-store";
 import { Badge, Button, Field, Input, PasswordInput, cx } from "../ui";

@@ -3,7 +3,7 @@ import {
   addUsage,
   type AgentEventEnvelope,
   type MessageUsage,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import {
   shouldCreateTaskNotification as shouldCreateTaskNotificationPolicy,
 } from "../notification-policy";

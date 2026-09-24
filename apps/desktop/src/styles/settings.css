@@ -3779,3 +3779,52 @@
 .sklm-page-jump::placeholder {
   color: var(--ds-text-muted);
 }
+
+.settings-deploy {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.settings-deploy-note {
+  margin: 0;
+  color: var(--ds-text-secondary);
+  font-size: var(--text-xs);
+  line-height: 1.4;
+}
+
+.settings-deploy-row {
+  display: grid;
+  grid-template-columns: 6.5rem minmax(0, 1fr) minmax(0, 1fr) auto;
+  gap: 6px;
+  align-items: center;
+}
+
+.settings-deploy-row.is-wide {
+  grid-template-columns: 6.5rem minmax(0, 1fr) minmax(0, 1fr) 5.5rem auto;
+}
+
+.settings-deploy-name {
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-semibold);
+  line-height: 1.2;
+}
+
+.settings-deploy-state {
+  display: block;
+  color: var(--ds-text-muted);
+  font-size: var(--text-xs);
+  font-weight: var(--font-weight-regular);
+}
+
+.settings-deploy-row .field-input {
+  min-height: 28px;
+  padding: 2px 8px;
+  font-size: var(--text-sm);
+}
+
+.settings-deploy-actions {
+  display: flex;
+  gap: 4px;
+}

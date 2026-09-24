@@ -44,7 +44,7 @@ type PluginManifestV1 = {
  fs?: PluginFsPolicy; // 每个文件权限可以触碰哪些路径（§5.2）
  net?: { domains?: string[] }; // 出网白名单（§5.3）
  engines?: {
- piDesktop?: string; // semver range
+ duaerAiDesk?: string; // semver range
  };
  entrypoints?: {
  onInstall?: string;

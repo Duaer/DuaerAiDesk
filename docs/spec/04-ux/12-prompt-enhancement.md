@@ -35,7 +35,7 @@ There is no multi-level history, keyboard shortcut, or cancel action.
 
 ## 3. Request and provider boundary
 
-Renderer requests use the allowlisted `pi-desktop/prompt/enhance` invoke
+Renderer requests use the allowlisted `duaer-ai-desk/prompt/enhance` invoke
 channel. Electron main resolves the effective provider/model through the same
 runtime launch resolver used for agent turns, reads API credentials only in
 main, and invokes agent-runtime's one-shot completion helper. Vendor OAuth

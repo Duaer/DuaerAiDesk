@@ -4,13 +4,13 @@ import { join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 import { describe, expect, it } from "vitest";
-import { LocalRequestError } from "@earendil-works/pi-ai";
-import type { Api, AssistantMessage, HostedSearchContent, Message, Model } from "@earendil-works/pi-ai";
+import { LocalRequestError } from "@duaer-ai-desk/upstream-ai";
+import type { Api, AssistantMessage, HostedSearchContent, Message, Model } from "@duaer-ai-desk/upstream-ai";
 import {
   estimateContextTokens as estimateProviderContextTokens,
   estimateMessageTokens,
-} from "@earendil-works/pi-ai/utils/estimate";
-import { hostedSearchReplayProjection } from "@earendil-works/pi-ai/utils/hosted-search";
+} from "@duaer-ai-desk/upstream-ai/utils/estimate";
+import { hostedSearchReplayProjection } from "@duaer-ai-desk/upstream-ai/utils/hosted-search";
 
 /**
  * Compaction hosted-search contract tests.
@@ -93,8 +93,8 @@ interface CompactionSerialization {
 interface Pico3Collapse {
   chooseThrough(entries: { id: string; model?: Message[] }[], keepRecent: number, model?: Model<Api>): string | undefined;
 }
-const CORE = "@earendil-works/pi-agent-core";
-const CODING = "@earendil-works/pi-coding-agent";
+const CORE = "@duaer-ai-desk/upstream-agent-core";
+const CODING = "@duaer-ai-desk/upstream-coding-agent";
 
 const coreEstimation = await load<CompactionEstimation>(CORE, "dist/harness/compaction/compaction.js");
 const coreSerialization = await load<CompactionSerialization>(CORE, "dist/harness/compaction/utils.js");

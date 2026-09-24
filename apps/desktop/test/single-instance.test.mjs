@@ -57,13 +57,13 @@ test("a second launch surfaces the running window instead of a new one", () => {
 });
 
 test("a run with its own data directory keeps the current start behavior", () => {
-  // The lock is scoped to the installation, not to `PI_DESKTOP_DATA_DIR`. E2E
+  // The lock is scoped to the installation, not to `DUAER_AI_DESK_DATA_DIR`. E2E
   // harnesses, the capture rig, and side-by-side profiles point at their own
   // data directory, share no database, outbox, or logs with the default
   // installation, and have to stay launchable while one is running.
   assert.match(
     mainSource,
-    /const singleInstanceRequired = !process\.env\.PI_DESKTOP_DATA_DIR;/,
+    /const singleInstanceRequired = !process\.env\.DUAER_AI_DESK_DATA_DIR;/,
   );
   assert.match(
     mainSource,

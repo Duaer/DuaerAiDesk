@@ -158,8 +158,8 @@ MCP 市场只接受无凭据的公网 HTTPS 源和目录端点。Main 在每一�
   错误。
 - 未签名 macOS 分发包为可信来源保留范围明确的首次启动兜底路径。DMG 是双图标安装，
   不再放入该说明。ZIP 安装包包含文本说明和可执行助手：它只搜索
-  `/Applications/PI-Desktop.app` 和 `~/Applications/PI-Desktop.app`，并在删除前先校验
-  `CFBundleIdentifier=net.aiuo.pi-desktop`，再删除唯一的 `com.apple.quarantine` 属性并
+  `/Applications/DuaerAiDesk.app` 和 `~/Applications/DuaerAiDesk.app`，并在删除前先校验
+  `CFBundleIdentifier=net.aiuo.duaer-ai-desk`，再删除唯一的 `com.apple.quarantine` 属性并
   打开应用。它不接受任意路径，不提升权限，也不替代 Developer ID 签名或公证。说明给出
   手动的 `com.apple.quarantine` 命令，并说明已签名/公证版本无需执行。
 - 本地化产品“新增内容”文本 (D164/D345) 在 Main 中从
@@ -173,7 +173,7 @@ MCP 市场只接受无凭据的公网 HTTPS 源和目录端点。Main 在每一�
 
 本地 MCP 控制服务是明确的自动化边界，不是通用的远程控制监听器：
 
-- 默认关闭，只有设置 `PI_DESKTOP_MCP_CONTROL=1` 才会启动。
+- 默认关闭，只有设置 `DUAER_AI_DESK_MCP_CONTROL=1` 才会启动。
 - 只绑定 `127.0.0.1`，若监听地址不是回环则拒绝启动。不存在绑定局域网或公网接口的
   配置路径，也不会重新打开被延后的远程 Gateway / WebUI 范围。
 - 校验请求中提供的 `Origin`，只允许本地回环主机名，以阻止远程网页通过 DNS

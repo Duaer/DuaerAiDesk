@@ -12,7 +12,7 @@ import {
   formatCompactTokenCount,
   type MessageUsage,
   type UiMessage,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import { useAppStore } from "../stores/app-store";
 import { TooltipButton } from "./ui";
 import {

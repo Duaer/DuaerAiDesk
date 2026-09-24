@@ -20,19 +20,17 @@ destination, chat as the home surface, tools and permissions inline.
 |                  |  chat home / transcript        |  (optional,      |
 |                  |  or Extensions page            |   resizable      |
 |                  |                                |   ≥244px, dynamic|
-|  Sessions     +↕ |                                | surface          |
-|   Recent rows ↕  |                                |                  |
-|  Projects      + |                                | ◫ | App.tsx  ⌄ × |
-|   Project A      |                                | > |              |
-|   Project B      |                                | ◎ | Active       |
+|  Projects   ↕ + |                                | surface          |
+|   Project A      |                                | ◫ | App.tsx  ⌄ × |
+|   Project B      |                                | > |              |
+|                  |                                | ◎ | Active       |
 | Footer [⚙][plug][☾][bell] |  Floating composer (chat) |   | resource     |
 +------------------+--------------------------------+------------------+
 ```
 
-- **Sidebar**: primary navigation — path-less conversations under a compact
-  **Sessions** section with new-session and sort actions, retained open-project
-  groups under a following **Projects** section with a persistent new-project
-  action, and the WorkBuddy-inspired footer. The footer keeps compact Settings,
+- **Sidebar**: primary navigation — retained open-project groups under
+  **Projects**, with sort before the new-project action, and the
+  WorkBuddy-inspired footer. Path-less conversations are not listed. The footer keeps compact Settings,
   Extensions, Scheduled (clock), and notification icon actions; Pull requests
   remains omitted from the home sidebar. Each retained project is a
   path-keyed tab/group that can be
@@ -42,7 +40,7 @@ destination, chat as the home surface, tools and permissions inline.
   discoverable through Settings → Project archive.
   Collapsible to an icon rail (Cmd/Ctrl+B). Its expanded column is user-resizable
   from 240px to 520px (default 275px); dragging below 160px collapses it.
-- **Product identity**: runtime shell copy uses `PI-Desktop`; the home hero and
+- **Product identity**: runtime shell copy uses `DuaerAiDesk`; the home hero and
   sidebar reuse the derived `src/assets/brand/logo-*.png` marks, while composer prompt
   rows have no leading brand icon and session-creation controls use a dedicated
   message-plus icon. On
@@ -95,7 +93,7 @@ destination, chat as the home surface, tools and permissions inline.
   exclusion is unchanged. Header paint fills the excluded lane without an
   opaque overlay hiding tabs or panel actions. The macOS inset uses the shared
   `--ds-window-lead-inset` token — the cluster's 76px right edge (from
-  `@pi-desktop/shared`) plus a 12px gap — and the main process positions the
+  `@duaer-ai-desk/shared`) plus a 12px gap — and the main process positions the
   buttons from that same shared geometry.
 - **Work panel**: docked right column (not an overlay) opened by an artifact,
   the viewport-fixed toggle, or `Cmd/Ctrl + J`. File, URL, browser-preview, and
@@ -115,7 +113,115 @@ destination, chat as the home surface, tools and permissions inline.
   discarding one; the create trigger remains unavailable while the panel is
   closed. Closing the final tab keeps the panel open and shows the New launcher.
   No agent or tool result opens, activates, or resizes the panel: Review is
-  reached only through an explicit user action, so a successful workspace
+  reached only through an explicit user action. A project-header control opens
+  the host-owned Requirements tab for that project: four fields (goal, out of
+  scope, acceptance, assumptions), module tabs, and a confirm lock that requires
+  the same local checks as the Duaer-spec live desk: a concrete goal, a
+  checkable acceptance, and the eight baseline fields (or an explicit
+  opt-out). The Requirements panel leads with the project background and an
+  iteration timeline. A kickoff background is the first point for a new project.
+  An older project that only stored a background string shows that text as its
+  first point. A later background edit, revision, or opened change appends a
+  point. The first module is the global card. The shared baseline must pass
+  the local checklist. Style and layout stay empty during requirements.
+  After architecture is confirmed, the built-in ui-designer writes those two
+  fields onto the global card. Implementation dispatch waits until both are
+  concrete, and the coder follows that text. Later modules do not
+  require those shared fields when they are empty. A unique requirement written
+  on a later module, including its own device matrix, still has to pass that
+  field's check. A complaint about a confirmed module or the finished product, such
+  as a request to make it look better, does not rewrite that confirm card and
+  does not ask for a style menu. It is stored as a separate revision: what to
+  change, what to leave, a checkable result, and why it was unsatisfactory.
+  The revision names one module or the whole product. Each field is a card;
+  list items are inset rows with a marker or a
+  number, and a click opens those rows for editing. Modules are split from
+  the chat `modules` inventory, the same way the Duaer-spec live desk does it.
+  Module tabs show draft, ready, or confirmed, plus a confirmed count. When those
+  local checks pass, DuaerAiDesk reviews the card with the built-in `judge`
+  employee. That employee can use only the judgment model (Model Advanced,
+  **Set as judgment model**, one binding such as `jev-latest`). A `jev-*`
+  model is reviewed through that provider's judgments endpoint
+  (`POST /v1/judgments`):
+  the call decides whether the card can lock and does not rewrite the card.
+  Other models still use a one-shot chat completion. Task can call
+  the same employee wherever a pass or fail judgment is needed. With no
+  judgment model set, the review follows the conversation model and Task does
+  not offer `judge`, and
+  narrates start/pass/fail in the requirements chat (same pattern as the
+  Duaer-spec live desk). The checking line is that same note; pass or fail
+  replaces it, so a finished review does not leave a checking note above the
+  result. Confirm stays off until that review passes for the
+  current card. If the local checklist or that review fails, Auto-fix stays a
+  choice chip on the latest requirements chat turn (not on the right panel).
+  While the only failures are a goal or acceptance that is still too short,
+  Auto-fix stays off so the chat can keep asking what to build.
+  A later reply does not hide it while the card still fails.   Choosing it sends only the failing fields and the items they still lack
+  into that chat as a user turn. That turn does not attach the requirements
+  instruction or the other card fields, so the desktop model rewrites those fields
+  and leaves the rest of the card alone. The reply fills those fields through the usual `<<<JSON>>>` path, then
+  review runs again. Incomplete baseline fields can be filled
+  with the same explicit defaults before that review. The sidebar stage chip appears only after
+  that card exists. On the chat page the dialog column is at most 460px, and the
+  divider cannot drag it wider.   With the sidebar expanded, the sidebar and the
+  dialog share that 460px; with the sidebar collapsed, the dialog uses all of it.
+  The sidebar starts as a 56px icon rail. Hovering the rail opens the session
+  list over the dialog without changing that width. The sidebar shortcut pins
+  the list open.
+  Switching Requirements, Architecture, Dispatch,
+  and Review keeps that same width. The right
+  column stays open on the chat page.   After every module is confirmed, Architecture opens
+  and DuaerAiDesk starts one architecture-design chat turn (live-desk style). The Architecture
+  panel mirrors the live-desk layout: title, hint, summary, a dark diagram mount with
+  component nodes at their authored size (the figure shrinks only when it is wider than the panel), then action buttons (confirm / regenerate / redesign). Chat `<<<JSON>>>`
+  fills `summary` + `components`. When the diagram can be locked, the chat
+  offers two choices: confirm the architecture, or keep revising. Confirm
+  locks the board. When style and layout are still empty, one chat turn asks
+  the UI designer for them and writes them onto the global card. Implementation
+  dispatch and the task split start only after both are concrete. The
+  architecture panel shows the diagram and does not carry process buttons.
+  Archify HTML diagrams, revise dual-diagram, and bug-desk skip-architecture
+  remain follow-ups. Dispatch stays closed
+  until someone signs the scope and acceptance baseline. Opening a change
+  clears that signature, returns every module to draft, and asks for the
+  architecture to be confirmed again.   Creating a project requires a background description; DuaerAiDesk then sends
+  the live-desk kickoff into that project's requirements chat. When the folder already
+  contains product files, those same confirm cards record the current functions, and the
+  architecture turn records the current system, so a later change is an increment on that
+  baseline. An empty folder keeps the new-product kickoff. While the Requirements or
+  Architecture tab is active, the assistant reply fills the open card while
+  the turn is still streaming. Labeled lines and an incomplete `<<<JSON>>>`
+  tail update the card on the next paint; the finished `<<<JSON>>>` or a
+  trailing JSON card commits it. The fill follows only the live tail message,
+  and short options become reply chips. Bullets that restate confirm-card
+  fields are not chips, and emphasis markers are stripped from chips and from
+  the user message that echoes them. Once the goal and acceptance already
+  pass, empty baseline fields are filled with the opt-out defaults so confirm
+  can proceed. A local static page can satisfy that baseline in ordinary
+  words: no backend, an HTML file, no interaction, no import, no external
+  dependency, and no performance budget. Naming a modern browser is enough
+  for that page. A `file://` page that already states a measured limit (time,
+  size, or frame rate) does not also need INP, virtual scroll, weak-network,
+  and large-data tokens. The compat-lab checklist stays for a card that has a
+  backend or a customer environment. An app performance budget still needs
+  that lab list.
+  Dispatch lists the acceptance tasks and starts them with DuaerAiDesk Task
+  subagents. An implement task calls the built-in coder (Duaer Coder), who writes
+  only the code that meets that task's acceptance. Choosing more than one employee spreads independent tasks across
+  those employees. The app releases one ready task per employee. The next wave
+  is sent only after the chat is idle and every task in the current wave is
+  stored as done. Finished task ids are not dispatched again, and the model
+  does not choose the next wave. A wave that does not succeed is left for the
+  user; it is not retried on its own. Starting execution stays
+  on the Dispatch tab so progress stays visible. Digital employees are configured
+  in Settings, on the page named for them; each one stores its own model there,
+  and an empty model follows the current chat. Dispatch offers a host choice of none or GitHub Pages.
+  Cloudflare, Alibaba Cloud, and AWS appear there only after both keys are saved under Settings → Deploy.
+  A chosen host adds a closing publish task and shows the preview URL written back on that
+  page. The dispatch graph uses the same flowing canvas as the
+  architecture diagram, and each dependency runs through the gutter between
+  columns. Ordinary coding
+  sessions do not open this tab. A successful workspace
   Write/Edit leaves the panel exactly as the user left it and shows its
   evidence as a transcript card instead. The inner
   divider resizes the panel through the shared three-column budget; moving it
@@ -187,16 +293,13 @@ destination, chat as the home surface, tools and permissions inline.
 
 ### 3.2 Sidebar project groups
 
-- **Sections**: the compact `Sessions` heading precedes `Projects` and owns
-  path-less conversation creation plus the existing sort/archive-view menu. Its
-  toolbar places sorting before new-session creation. Both headings keep quiet
-  glyph actions and also accept a right-click create menu on the heading or empty
-  list chrome so section creation stays discoverable
-  without extra chrome. Its list shows at most five compact rows (146px) before
-  scrolling internally, so standalone work stays visible without displacing
-  project navigation. The following `Projects` heading exposes the
-  folder-picker action; retained project groups use the remaining height and
-  scroll independently.
+- **Sections**: the sidebar lists retained projects only. Path-less
+  conversations are not given a section, a create action, or an empty state.
+  The `Projects` heading owns the sort/archive-view menu and the folder-picker
+  action. Its toolbar places sorting before new-project creation. The heading
+  keeps quiet glyph actions and also accepts a right-click create menu on the
+  heading or empty list chrome. Retained project groups use the remaining
+  height and scroll independently.
 - **Identity**: each project group is keyed by a host-owned logical group id;
   each root path remains canonical and is never inferred from an ambiguous
   folder basename. Legacy single-folder projects are compatibility groups.

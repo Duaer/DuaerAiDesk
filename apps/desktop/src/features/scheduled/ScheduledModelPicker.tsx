@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { imageGenerationBindings, modelIdsMatch } from "@pi-desktop/shared";
+import { imageGenerationBindings, modelIdsMatch } from "@duaer-ai-desk/shared";
 import { useAppStore } from "../../stores/app-store";
 import { composerModelDisplayName, composerModelsForProvider } from "../../lib/composer-models";
 import { ComposerModelPicker } from "../chat/composer/ComposerModelPicker";

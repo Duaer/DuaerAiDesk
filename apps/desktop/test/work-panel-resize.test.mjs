@@ -3,8 +3,11 @@ import test from "node:test";
 import {
   WORK_PANEL_CHAT_MAX_WIDTH,
   WORK_PANEL_CHAT_MIN_WIDTH,
+  DELIVERY_CHAT_MAX_WIDTH,
+  DELIVERY_CHAT_MIN_WIDTH,
   MAIN_PANE_MIN_WIDTH,
   MAIN_PANE_REOPEN_TARGET_WIDTH,
+  deliveryWorkPanelWidth,
   WORK_PANEL_DEFAULT_WIDTH,
   WORK_PANEL_COMPACT_MIN_WIDTH,
   WORK_PANEL_MIN_WIDTH,
@@ -17,6 +20,7 @@ import {
   workPanelWidthBounds,
   workPanelChatWidthFromPointer,
   workPanelWidthForSidebarReopen,
+  SIDEBAR_RAIL_WIDTH,
 } from "../src/lib/work-panel-resize.ts";
 
 test("the three-column budget protects MainChat and collapses the sidebar at the threshold", () => {
@@ -63,8 +67,8 @@ test("a collapsed sidebar exposes the full dynamic right-column budget", () => {
     requestedPanelWidth: 720,
   });
 
-  assert.equal(layout.maxPanelWidth, 590);
-  assert.equal(layout.panelWidth, 590);
+  assert.equal(layout.maxPanelWidth, 1040 - SIDEBAR_RAIL_WIDTH - MAIN_PANE_MIN_WIDTH);
+  assert.equal(layout.panelWidth, 1040 - SIDEBAR_RAIL_WIDTH - MAIN_PANE_MIN_WIDTH);
   assert.equal(layout.mainWidth, MAIN_PANE_MIN_WIDTH);
   assert.equal(layout.shouldCollapseSidebar, false);
 });
@@ -135,8 +139,8 @@ test("a wide window lets the panel grow past the old fixed cap", () => {
     sidebarCollapsed: true,
     requestedPanelWidth: 1500,
   });
-  assert.equal(yielded.maxPanelWidth, 1150);
-  assert.equal(yielded.panelWidth, 1150);
+  assert.equal(yielded.maxPanelWidth, 1600 - SIDEBAR_RAIL_WIDTH - MAIN_PANE_MIN_WIDTH);
+  assert.equal(yielded.panelWidth, 1600 - SIDEBAR_RAIL_WIDTH - MAIN_PANE_MIN_WIDTH);
   assert.equal(yielded.mainWidth, MAIN_PANE_MIN_WIDTH);
 });
 
@@ -160,7 +164,7 @@ test("preview mode gives the panel the whole client area beside the sidebar", ()
     requestedPanelWidth: 500,
     maximized: true,
   });
-  assert.equal(collapsed.panelWidth, 1200);
+  assert.equal(collapsed.panelWidth, 1200 - SIDEBAR_RAIL_WIDTH);
   assert.equal(collapsed.mainWidth, 0);
 });
 
@@ -235,6 +239,50 @@ test("double-click resets the panel to its default width", () => {
     workPanelResetWidth(WORK_PANEL_MIN_WIDTH, 400),
     WORK_PANEL_DEFAULT_WIDTH,
   );
+});
+
+test("delivery columns cap the chat column at 460px", () => {
+  const available = 1165;
+  const panel = deliveryWorkPanelWidth(available);
+  const chat = available - panel;
+  assert.equal(chat, DELIVERY_CHAT_MAX_WIDTH);
+  assert.equal(panel, available - DELIVERY_CHAT_MAX_WIDTH);
+  assert.equal(deliveryWorkPanelWidth(DELIVERY_CHAT_MIN_WIDTH), 0);
+
+  const layout = workPanelLayout({
+    containerWidth: 275 + available,
+    sidebarWidth: 275,
+    sidebarCollapsed: false,
+    requestedPanelWidth: 360,
+    mainMinWidth: DELIVERY_CHAT_MIN_WIDTH,
+    mainMaxWidth: DELIVERY_CHAT_MAX_WIDTH,
+  });
+  assert.equal(layout.mainWidth, DELIVERY_CHAT_MAX_WIDTH);
+  assert.equal(layout.panelWidth, available - DELIVERY_CHAT_MAX_WIDTH);
+  assert.equal(layout.shouldCollapseSidebar, false);
+
+  const draggedNarrow = workPanelLayout({
+    containerWidth: 275 + available,
+    sidebarWidth: 275,
+    sidebarCollapsed: false,
+    requestedPanelWidth: 244,
+    mainMinWidth: DELIVERY_CHAT_MIN_WIDTH,
+    mainMaxWidth: DELIVERY_CHAT_MAX_WIDTH,
+  });
+  assert.equal(draggedNarrow.mainWidth, DELIVERY_CHAT_MAX_WIDTH);
+  assert.ok(draggedNarrow.panelWidth > 244);
+
+  // A wide persisted panel (typical after the sidebar was collapsed) must not
+  // immediately auto-collapse the sidebar when the chat column is capped.
+  const widePersisted = workPanelLayout({
+    containerWidth: 275 + available,
+    sidebarWidth: 275,
+    sidebarCollapsed: false,
+    requestedPanelWidth: available,
+    mainMinWidth: DELIVERY_CHAT_MIN_WIDTH,
+    mainMaxWidth: DELIVERY_CHAT_MAX_WIDTH,
+  });
+  assert.equal(widePersisted.shouldCollapseSidebar, false);
 });
 
 test("a reset stays inside the live bounds instead of breaching MainChat", () => {

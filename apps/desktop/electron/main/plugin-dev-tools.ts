@@ -5,8 +5,8 @@ import {
   pack,
   scaffold,
   type CheckResult,
-} from "@pi-desktop/plugin-devkit";
-import { resolveWithinRoot } from "@pi-desktop/host-runtime";
+} from "@duaer-ai-desk/plugin-devkit";
+import { resolveWithinRoot } from "@duaer-ai-desk/host-runtime";
 import type { AgentSidecar, LocalToolResult } from "./agent-sidecar";
 
 /**

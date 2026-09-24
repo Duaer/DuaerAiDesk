@@ -11,13 +11,13 @@ import type {
   MessageAttachment,
   MessageUsage,
   UiMessage,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import {
   formatCompactTokenCount,
   isCertificateVerificationError,
   THINKING_LEVELS,
   type ThinkingLevel,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import { useOpenChatFileRef, useOpenPreviewTarget } from "../../../hooks/use-preview-target";
 import { useDisclosureAnchorNotifier } from "../../../lib/disclosure-anchor-context";
 import { isThinkingActive, resolveThinkingDisplayMode } from "../../../lib/turn-process";

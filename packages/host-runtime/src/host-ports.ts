@@ -6,9 +6,9 @@ import type {
   QueuedTurnRecord,
   SessionPort,
   SessionSummary,
-} from "@pi-desktop/agent-host";
-import { RacpError } from "@pi-desktop/agent-host";
-import type { RacpItemSummary, RacpPermissionMode, UiMessage } from "@pi-desktop/shared";
+} from "@duaer-ai-desk/agent-host";
+import { RacpError } from "@duaer-ai-desk/agent-host";
+import type { RacpItemSummary, RacpPermissionMode, UiMessage } from "@duaer-ai-desk/shared";
 
 /** Rust host-core over stdio JSON-RPC, as the ports below need it. */
 export type HostRpc = {

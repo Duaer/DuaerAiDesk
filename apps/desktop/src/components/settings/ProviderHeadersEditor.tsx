@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type ChangeEvent } from "react";
 import { useTranslation } from "react-i18next";
-import { APP_VERSION, inspectHeaderValue } from "@pi-desktop/shared";
+import { APP_VERSION, inspectHeaderValue } from "@duaer-ai-desk/shared";
 import {
   KeyValueRows,
   pairsToRecord,
@@ -16,9 +16,9 @@ type HeaderPreset = {
 };
 
 const HEADER_PRESETS: HeaderPreset[] = [
-  { key: "User-Agent", value: `pi-desktop/${APP_VERSION}` },
-  { key: "X-Client-Name", value: "PI-Desktop" },
-  { key: "X-Title", value: "PI-Desktop" },
+  { key: "User-Agent", value: `duaer-ai-desk/${APP_VERSION}` },
+  { key: "X-Client-Name", value: "DuaerAiDesk" },
+  { key: "X-Title", value: "DuaerAiDesk" },
 ];
 
 function isRecord(value: unknown): value is Record<string, unknown> {

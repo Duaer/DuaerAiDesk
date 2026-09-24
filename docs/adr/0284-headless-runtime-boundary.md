@@ -22,7 +22,7 @@ handlers. `HostProcess` resolved the binary from `process.resourcesPath`, and
 `AgentSidecar` could only start the sidecar as
 `process.execPath` + `ELECTRON_RUN_AS_NODE`.
 
-R2 needs the same runtime on a machine that has no Electron: the `pi-host`
+R2 needs the same runtime on a machine that has no Electron: the `duaer-ai-desk-host`
 bundle (`02-architecture/05-remote-agent-control.md` §5.2) must run the Agent
 Host module, the sidecar, and host-core behind a RACP server. Re-implementing
 the turn lifecycle in a second place would create a second source of truth
@@ -58,7 +58,7 @@ durable settlement).
    - `TurnEventPipeline` and `TurnPersistence`: the per-event pass
      (tool-call tracking, D299 checkpoints, terminal events, completed rows)
      and an in-memory ordered append queue with a bounded retry while
-     host-core restarts. A `pi-host` process ends only with its supervisor,
+     host-core restarts. A `duaer-ai-desk-host` process ends only with its supervisor,
      so the desktop's file-backed outbox is not duplicated.
    - `createHeadlessLaunchResolver`: launch resolution from host-core's own
      registries (providers and secrets, the effective command shell, project
@@ -90,7 +90,7 @@ durable settlement).
 
 ## Consequences
 
-- `pi-host` (R2) can compose `HostProcess + AgentSidecar + RuntimeService +
+- `duaer-ai-desk-host` (R2) can compose `HostProcess + AgentSidecar + RuntimeService +
   AgentHost + RuntimeSupervisor` in plain Node; the RACP server binds to the
   module, never to Electron IPC.
 - The restart policy, the turn lifecycle, and the transports now have unit
@@ -108,10 +108,10 @@ durable settlement).
 ## Alternatives considered
 
 - **Extract only the transports and re-implement the turn lifecycle in
-  `pi-host`.** Rejected: the lifecycle invariants are the hard part, and a
+  `duaer-ai-desk-host`.** Rejected: the lifecycle invariants are the hard part, and a
   second copy would drift from the desktop's.
 - **Keep the modules in `apps/desktop/electron/main` and import them from
-  `pi-host`.** Rejected: `packages/*` must not depend on desktop
+  `duaer-ai-desk-host`.** Rejected: `packages/*` must not depend on desktop
   implementation code, and the modules would keep growing Electron imports.
 - **Put the runtime into `packages/agent-host`.** Rejected: the module is the
   transport-free semantic core with no process or filesystem knowledge, and

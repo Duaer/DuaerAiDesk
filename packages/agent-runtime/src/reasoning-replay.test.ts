@@ -3,9 +3,9 @@ import type {
   AgentMessage,
   CompactionEntry,
   MessageEntry,
-} from "@earendil-works/pi-agent-core";
-import { convertMessages } from "@earendil-works/pi-ai/api/openai-completions";
-import { DEEPSEEK_REASONING_REPLAY_PLACEHOLDER } from "@pi-desktop/shared";
+} from "@duaer-ai-desk/upstream-agent-core";
+import { convertMessages } from "@duaer-ai-desk/upstream-ai/api/openai-completions";
+import { DEEPSEEK_REASONING_REPLAY_PLACEHOLDER } from "@duaer-ai-desk/shared";
 import {
   alignRetainedReasoningIdentity,
   harvestRetainedReasoning,

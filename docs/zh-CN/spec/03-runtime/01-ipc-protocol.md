@@ -42,29 +42,29 @@
 ## 3. 通道约定
 
 ```text
-invoke: pi-desktop/<domain>/<action>
-event: pi-desktop/<domain>/event/<name>
+invoke: duaer-ai-desk/<domain>/<action>
+event: duaer-ai-desk/<domain>/event/<name>
 ```
 
 示例：
 
-- `pi-desktop/agent/prompt`
-- `pi-desktop/agent/steer`
-- `pi-desktop/agent/abort`
-- `pi-desktop/agent/event/message`
-- `pi-desktop/agent/askTool/resolve`
-- `pi-desktop/session/list`
-- `pi-desktop/project/open`
-- `pi-desktop/project/clone`
-- `pi-desktop/project/cloneCheckout`
-- `pi-desktop/project/openFolder`
-- `pi-desktop/project-group/list`
-- `pi-desktop/project-group/create`
-- `pi-desktop/project-group/rename`
-- `pi-desktop/project-group/update`
-- `pi-desktop/project-group/memory/get` / `save`
-- `pi-desktop/project-group/instructions/get` / `save`
-- `pi-desktop/session/collaboration`
+- `duaer-ai-desk/agent/prompt`
+- `duaer-ai-desk/agent/steer`
+- `duaer-ai-desk/agent/abort`
+- `duaer-ai-desk/agent/event/message`
+- `duaer-ai-desk/agent/askTool/resolve`
+- `duaer-ai-desk/session/list`
+- `duaer-ai-desk/project/open`
+- `duaer-ai-desk/project/clone`
+- `duaer-ai-desk/project/cloneCheckout`
+- `duaer-ai-desk/project/openFolder`
+- `duaer-ai-desk/project-group/list`
+- `duaer-ai-desk/project-group/create`
+- `duaer-ai-desk/project-group/rename`
+- `duaer-ai-desk/project-group/update`
+- `duaer-ai-desk/project-group/memory/get` / `save`
+- `duaer-ai-desk/project-group/instructions/get` / `save`
+- `duaer-ai-desk/session/collaboration`
 
 ## 3.1 逻辑项目组
 
@@ -143,7 +143,7 @@ type AgentPromptResponse = {
 从持久会话记录和快照中获取有效的命令 shell ID 和
 Bash 的方言。
 渲染器通过以下方式更改这些值
-会话空闲时的 `pi-desktop/session/configure`：
+会话空闲时的 `duaer-ai-desk/session/configure`：
 
 ```ts
 type ThinkingLevel =
@@ -175,9 +175,9 @@ Plan/Goal `content = expanded text`/`command: string`/`content` 记录存在。�
 
 重新生成历史记录 (D109) 也使用会话通道：
 
-- `pi-desktop/session/saveRevision`
-- `pi-desktop/session/listRevisions`
-- `pi-desktop/session/activateRevision`
+- `duaer-ai-desk/session/saveRevision`
+- `duaer-ai-desk/session/listRevisions`
+- `duaer-ai-desk/session/activateRevision`
 
 Root 用户轮次可能包括 `revisionRootId`、`revisionCount` 和
 `activeRevision`。激活修订版将实时尾部替换为
@@ -188,7 +188,7 @@ Root 用户轮次可能包括 `revisionRootId`、`revisionCount` 和
 
 ### 5.1a 向当前回合补充指令
 
-`pi-desktop/agent/steer` 接受 `AgentSteerRequest`：
+`duaer-ai-desk/agent/steer` 接受 `AgentSteerRequest`：
 
 ```ts
 type AgentSteerRequest = {
@@ -230,7 +230,7 @@ type AgentStopResponse = {
 };
 ```
 
-`pi-desktop/agent/stop` 为活动运行时请求一次优雅停止。sidecar 在当前助手
+`duaer-ai-desk/agent/stop` 为活动运行时请求一次优雅停止。sidecar 在当前助手
 响应和已完成的工具批次之后评估这个一次性请求，也就是它本来会发起下一次
 模型请求的同一个边界。当前的持久回合随后发出 `agent_end` 并被终结为
 `completed`；该请求不会中止提供商流、取消正在运行的工具，也不会开启第二个
@@ -266,7 +266,7 @@ type AgentCompactRequest = { sessionId: string };
 type AgentCompactResponse = { accepted: boolean };
 ```
 
-`pi-desktop/agent/compact` 为空闲创建模型上下文检查点
+`duaer-ai-desk/agent/compact` 为空闲创建模型上下文检查点
 会话。即使自动上下文保护被禁用，它也可用。
 缺少 provider/session 配置无法通过正常的 `AppError`
 信封；主动转向或压实返回 `AGENT_BUSY`。
@@ -410,12 +410,12 @@ type PlanResolutionResult = {
 
 预加载方法：
 
-- `pi-desktop/plans/pending({ sessionId? }) -> PlansPendingResult`
-- `pi-desktop/plans/resolve(PlanResolveRequest) -> PlanResolutionResult`
+- `duaer-ai-desk/plans/pending({ sessionId? }) -> PlansPendingResult`
+- `duaer-ai-desk/plans/resolve(PlanResolveRequest) -> PlanResolutionResult`
 
 Electron 将每个主机 `plans.changed` 通知原封不动地转发到
 通过稳定的共享 `IPC.event.plansChanged` 通道渲染器
-（`pi-desktop/plans/event/changed`）。这是 Plan/Goal 更改事件表面；
+（`duaer-ai-desk/plans/event/changed`）。这是 Plan/Goal 更改事件表面；
 的
 渲染器不会接收作为 AgentEvent 变体的合同批准转换。
 `plans.pending` 仅返回当前待批准的行。终端
@@ -466,8 +466,8 @@ type AgentStatus = {
 ### 5.6 回合队列（D375 / D386）
 
 Host 拥有每会话的 prompt 队列，renderer 只做镜像。运行中发送经
-`pi-desktop/agent/queue/push` 推入，无头 Agent Host 模块负责准入、排序并释放持久
-条目（`turn_queue`，架构 v18）。每次变化都以 `pi-desktop/agent/event/queueChanged`
+`duaer-ai-desk/agent/queue/push` 推入，无头 Agent Host 模块负责准入、排序并释放持久
+条目（`turn_queue`，架构 v18）。每次变化都以 `duaer-ai-desk/agent/event/queueChanged`
 扇出。
 
 ```ts
@@ -486,7 +486,7 @@ renderer 的“立即发送”随后请求优雅停止，使该条目在下一�
 的队列在桌面以 owner 身份接入之前保持挂起，因此重启绝不无人值守地启动工作。
 
 优先区块以**相邻消息**的形式投递，而不是拆成多个回合：第一个已优先条目在边界处启动回合，
-其后每个已优先条目都通过引导通道（`pi-desktop/agent/steer`，携带运行中回合的 id）注入同一
+其后每个已优先条目都通过引导通道（`duaer-ai-desk/agent/steer`，携带运行中回合的 id）注入同一
 回合，因此转录里用户行紧挨着出现、模型只回复一次。被注入的条目离开队列，它自己的回合被标记
 为已取消，因为它从不单独运行。运行时拒绝接收的条目仍留在队列中，在下一个边界作为自己的回合
 启动。
@@ -500,7 +500,7 @@ renderer 的“立即发送”随后请求优雅停止，使该条目在下一�
 渲染器通过一个只读 Electron 通道为侧边栏悬浮卡片读取协作状态：
 
 ```ts
-// pi-desktop/session/collaboration({ sessionId }) -> SessionCollaborationSummary
+// duaer-ai-desk/session/collaboration({ sessionId }) -> SessionCollaborationSummary
 type SessionCollaborationSummary = {
  sessionId: string;
  title: string;
@@ -642,20 +642,20 @@ type AgentEvent =
 持久收件箱请求已列入允许名单 preload 调用 Electron 转发
 到单一主机 RPC 域，无需渲染器访问 SQLite：
 
-- `pi-desktop/notification/list({ unreadOnly?, limit? })`
-- `pi-desktop/notification/markRead({ id })`
-- `pi-desktop/notification/markAllRead()`
-- `pi-desktop/notification/clear()`
+- `duaer-ai-desk/notification/list({ unreadOnly?, limit? })`
+- `duaer-ai-desk/notification/markRead({ id })`
+- `duaer-ai-desk/notification/markAllRead()`
+- `duaer-ai-desk/notification/clear()`
 
 渲染器调用
-`pi-desktop/notification/setViewingSession({ sessionId })` 每当聊天时
+`duaer-ai-desk/notification/setViewingSession({ sessionId })` 每当聊天时
 页面的活动会话发生变化； `sessionId: null` 清除查看上下文
 非聊天页面。渲染器发起的 `agent/prompt` 也会携带匹配的
 `viewingSessionId` 快照，Electron 会在异步回合初始化之前安装它，
 避免快速完成先于查看上下文更新。Electron 将此提示与 Main 拥有的窗口
 visibility/focus 结合起来，在终态事件边界进行判断。缺失、null 或不匹配的
 上下文都会安全地创建公告。它还调用
-`pi-desktop/notification/showNative({ id, sessionId, title, body, source? })` 之后
+`duaer-ai-desk/notification/showNative({ id, sessionId, title, body, source? })` 之后
 本地化新记录。可选的 `source` 对终端任务结果使用 `"task"`，对 asktool、
 工具权限和 Plan 审批询问使用 `"interactive"`；省略或未知值默认为
 `"task"`。这个仅限 Electron 的请求永远不会进入主机 RPC 域。
@@ -695,17 +695,17 @@ type SessionsChangedEvent = {
 
 Main 发送两个事件：
 
-- `session.endTurn` 返回后的 `pi-desktop/notification/event/changed`
+- `session.endTurn` 返回后的 `duaer-ai-desk/notification/event/changed`
   新插入的记录。 Renderer 将记录合并到其有界本地列表中
   并重新计算确切的未读计数。最终结果已经可见
   聚焦的当前聊天、重复的终端更新和中止的回合会发出
   什么也没有。
-- 用户点击 Electron 后的 `pi-desktop/notification/event/activated`
+- 用户点击 Electron 后的 `duaer-ai-desk/notification/event/activated`
   本机系统通知。 Renderer 遵循其现有的会话选择
   路径，包括项目绑定会话的项目激活。
 
 插件会话变更成功后还会发送
-`pi-desktop/session/event/changed`。渲染器通过现有的 `refreshSessions()` 链处理
+`duaer-ai-desk/session/event/changed`。渲染器通过现有的 `refreshSessions()` 链处理
 该宿主事件；插件不发送侧栏事件，跳过的导入也不会发送该事件。
 
 渲染器 store 的 `refreshSessions()` 会话列表刷新路径在每个 store 实例中，
@@ -727,10 +727,10 @@ Electron 拥有本机表面，而渲染器则派生本地化表面
 `activated` 之前恢复/显示并聚焦窗口。交互询问不会创建持久任务收件箱行；
 计划提醒和插件本机通知仍是独立合约。本机交付是尽力而为；耐用的
 收件箱仍是操作系统抑制横幅时的权威来源。在 Windows 上，
-Electron 主将 `net.aiuo.pi-desktop` 注册为进程 AppUserModelID
+Electron 主将 `net.aiuo.duaer-ai-desk` 注册为进程 AppUserModelID
 在准备就绪之前和创建任何窗口之前。 ID 与 NSIS 匹配
 包标识所以通知属性、通知设置、任务栏
-分组，安装的快捷方式解析为 `PI-Desktop`，而不是库存
+分组，安装的快捷方式解析为 `DuaerAiDesk`，而不是库存
 Electron 主机。
 
 查看会话提示是建议性的和自动防故障的：丢失、陈旧、隐藏或
@@ -810,9 +810,9 @@ ID、或会话无法解析出默认目标时，得到 `supportsReasoning: false`
 
 全局插件启动器使用仅 Electron 允许的通道：
 
-- `pi-desktop/pluginLauncher/toggle` 显示或隐藏居中的实用程序窗口
-- `pi-desktop/pluginLauncher/dismiss` 仅在被该窗口调用时才隐藏它
-- `pi-desktop/pluginLauncher/event/shown` 重置其查询，重新加载安装
+- `duaer-ai-desk/pluginLauncher/toggle` 显示或隐藏居中的实用程序窗口
+- `duaer-ai-desk/pluginLauncher/dismiss` 仅在被该窗口调用时才隐藏它
+- `duaer-ai-desk/pluginLauncher/event/shown` 重置其查询，重新加载安装
   插件，并在每次调用后恢复输入焦点
 
 启动器重用 `plugin/list` 和 `plugin/openPanel`；它不添加 host-core
@@ -829,7 +829,7 @@ ID、或会话无法解析出默认目标时，得到 `supportsReasoning: false`
 设置字体选择器（ADR 0083）通过一个仅 Electron 的允许通道读取
 系统已安装字体：
 
-- `pi-desktop/app/systemFonts` 返回 `string[]`，即系统已安装字体的
+- `duaer-ai-desk/app/systemFonts` 返回 `string[]`，即系统已安装字体的
   字体系列名称（Electron 主进程使用平台工具——macOS 用
   `system_profiler`、Windows 用 PowerShell、Linux 用 `fc-list`），
   去重、排序并排除隐藏的 `.` 前缀字体系列。主进程将结果缓存
@@ -884,7 +884,7 @@ Electron拥有本地化并提供面向用户的分支名称；主机
 直播 stdout/stderr 事件。 v7 或更旧的主机，以及任何不兼容的 v8
 对等方，握手必须失败，以便桌面无法静默显示 Plan
 丢失工件、队列、shell 或策略边界。
-`pi-desktop/agent/compact` 和 `session.appendCompaction` 仍然是 v9 的一部分
+`duaer-ai-desk/agent/compact` 和 `session.appendCompaction` 仍然是 v9 的一部分
 合同。 Goal 合约在 v9 (**D198**) 中是附加的：`kind` 是可选的
 在线且缺席意味着 `plan`，因此早于 Goal 的对等点继续工作
 并且根本不进行谈判。
@@ -908,7 +908,7 @@ sidecar 用于显示每秒输出令牌的流时间。 `ToolTokenUsage`
 
 ### stats
 
-- `pi-desktop/stats/getTokenUsageHistory({ startDate?, endDate?, bucket? }) -> TokenUsageHistoryResult`
+- `duaer-ai-desk/stats/getTokenUsageHistory({ startDate?, endDate?, bucket? }) -> TokenUsageHistoryResult`
 
 `bucket` 取 `day` | `week` | `month`。省略日期时使用主机默认窗口
 （53 周 / 52 周 / 24 个月），按主机本地日历计算。`week` 的键使用 ISO 周年
@@ -970,8 +970,8 @@ type CommandShellCatalog = {
 
 预加载方法：
 
-- `pi-desktop/commandShell/list() -> CommandShellCatalog`
-- `pi-desktop/settings/set({ defaultCommandShell }) -> { ok: true }`
+- `duaer-ai-desk/commandShell/list() -> CommandShellCatalog`
+- `duaer-ai-desk/settings/set({ defaultCommandShell }) -> { ok: true }`
 
 设置 shell 写入仅接受当前平台的可用 ID，并且
 拒绝未知、不可用或错误的平台 ID。真正有效的外壳
@@ -997,13 +997,13 @@ type CommandShellCatalog = {
 用厂商订阅账户登录是 Electron 主进程内的会话，因此只走 IPC —— 主机协议
 版本不变。五条调用通道加一条事件通道：
 
-- `pi-desktop/providers/oauth/vendors() -> { vendors: OAuthVendor[] }`
-- `pi-desktop/providers/oauth/start({ vendorId }) -> { loginId }`
-- `pi-desktop/providers/oauth/respond({ loginId, promptId, value? })` ——
+- `duaer-ai-desk/providers/oauth/vendors() -> { vendors: OAuthVendor[] }`
+- `duaer-ai-desk/providers/oauth/start({ vendorId }) -> { loginId }`
+- `duaer-ai-desk/providers/oauth/respond({ loginId, promptId, value? })` ——
   不带 `value` 表示取消该提问，从而中止整个流程
-- `pi-desktop/providers/oauth/cancel({ loginId }) -> { ok: boolean }`
-- `pi-desktop/providers/oauth/logout({ vendorId }) -> { ok: true }`
-- `pi-desktop/providers/oauth/event` 推送 `OAuthLoginEvent`
+- `duaer-ai-desk/providers/oauth/cancel({ loginId }) -> { ok: boolean }`
+- `duaer-ai-desk/providers/oauth/logout({ vendorId }) -> { ok: true }`
+- `duaer-ai-desk/providers/oauth/event` 推送 `OAuthLoginEvent`
 
 ```ts
 type OAuthLoginEvent = { loginId: string; vendorId: string } & (
@@ -1226,29 +1226,29 @@ ASCII slug：frontmatter `name` 能 slugify 时用它，否则 `SKILL.md` 用技
 
 桌面专用技能市场通道（不是 host RPC）走 Electron IPC：
 
-- `pi-desktop/skill/market/search` — `{ query, sources[] }` →
+- `duaer-ai-desk/skill/market/search` — `{ query, sources[] }` →
   `{ entries, failedSources, failureKinds, failureDetails }`。
   主进程聚合目录 JSON 与 GitHub 仓库 SKILL.md 扫描。源 URL 必须通过公网 HTTPS 策略（ADR 0243）。单源失败只丢掉该源。
   `failureKinds` 把 `failedSources` 中的每个名字映射到 `policy`（守卫判定了目标自身的非公网地址并拒绝）、`fake-ip`（判定的是本地代理伪造的 fake-IP 占位地址，如 Clash 默认的 `198.18.0.0/15`；在直连或读不出线路时默认仍被拒绝，显式 `allowFakeIp` 只可为透明路由器/TUN 部署放行 benchmark 占位地址）、`unresolved`（本地 DNS 解析没有返回答案，因此没有判定任何地址）或 `network`。`failureDetails` 以同样的键携带真正失败的主机、解析到的地址、守卫自己的 `reason`、地址类别以及判定该地址的线路（`proxied`、`direct` 或传输层读不出线路时的 `unknown`，ADR 0272）；面板据此说明**被拒的是什么**，而不只是哪个源没出结果。
   判定型拒绝与 fake-IP 拒绝都以 `NETWORK_POLICY_BLOCKED` 暴露（两者都是守卫作出的拒绝）,解析器无应答以 `NETWORK_RESOLVE_FAILED` 暴露（spec 08 §3.1）；安装面板正是按这些错误码与结构化 `reason` 分类。
-- `pi-desktop/skill/market/fetch` — `{ entry }` → `{ name?, description?, body, resources? }`。
+- `duaer-ai-desk/skill/market/fetch` — `{ entry }` → `{ name?, description?, body, resources? }`。
   主进程按同一策略拉取文档、拆 frontmatter，并可能附上 jsDelivr 目录中的兄弟 `.md`。渲染层通过现有 `skills.create` 安装。该策略即主进程公网网络客户端：语法 URL 防护、按承载 `net.fetch` 的会话线路判定的逐跳 DNS 分类（ADR 0272）、逐跳重定向复核与响应上限——渲染层绝不直接触网。目录 id 会净化为 host `valid_capability_id`。
 
 
 桌面专用 MCP 市场通道（不是 host RPC）走 Electron IPC：
 
-- `pi-desktop/mcp/market/search` — `{ query?, sources[], more? }` →
+- `duaer-ai-desk/mcp/market/search` — `{ query?, sources[], more? }` →
   `{ entries, failedSources, exhausted }`。Main 校验源 URL，并在每一跳向 Electron session 询问线路。完整代理线路使用 session 传输；直连和未知线路默认固定解析出的公网地址，显式 `allowFakeIp` 仅限 benchmark 占位地址。重定向仍是有界 HTTPS，browse 与服务端搜索保留 cursor 状态；单个源失败不会丢弃成功源，响应和缓存均有界。
 
 ### MCP OAuth（ADR 0283）
 
 HTTP MCP 服务的基于浏览器的 OAuth 2.1 认证在 Electron 主进程中通过非阻塞 IPC 与事件流处理：
 
-- `pi-desktop/mcp/oauth/start({ id, level?, projectPath? }) -> { ok: true, loginId }`
+- `duaer-ai-desk/mcp/oauth/start({ id, level?, projectPath? }) -> { ok: true, loginId }`
   启动 OAuth 元数据发现与 PKCE 授权码流程。立即返回，用户的浏览器交互与回调交换在后台异步执行。
-- `pi-desktop/mcp/oauth/cancel({ loginId?, id? }) -> { ok: boolean }`
+- `duaer-ai-desk/mcp/oauth/cancel({ loginId?, id? }) -> { ok: boolean }`
   中止正在进行的授权尝试，关闭本地回环 HTTP 服务并清理定时器。
-- `pi-desktop/mcp/oauth/event` 向渲染层推送 `McpOAuthLoginEvent`：
+- `duaer-ai-desk/mcp/oauth/event` 向渲染层推送 `McpOAuthLoginEvent`：
 
 ```ts
 type McpOAuthLoginEvent = {
@@ -1524,14 +1524,14 @@ Electron 报告的右侧角）改变的是面板目标。Main 通过
 
 ### Tray session shortcuts (ADR tray-session-shortcuts)
 
-- `pi-desktop/tray/setSessionPreferences({ sessionMeta, archivedProjectPaths, sort })`
+- `duaer-ai-desk/tray/setSessionPreferences({ sessionMeta, archivedProjectPaths, sort })`
   returns `{ ok: true }`. `sessionMeta` maps IDs to optional boolean `pinned`
   and `archived` flags plus a non-negative safe integer `order`. `sort` is
   `recent`, `created`, `oldest`, `name`, or `manual`; the renderer mirrors the
   sidebar's effective sort. Main validates the payload, strips unrelated
   metadata, and rejects senders other than the current main window. The setter
   is excluded from the local MCP catalog and persists nothing.
-- Main emits `pi-desktop/tray/event/sessionActivated { sessionId: string | null }`
+- Main emits `duaer-ai-desk/tray/event/sessionActivated { sessionId: string | null }`
   after restoring/focusing the window, waiting for post-bootstrap
   `menu/rendererReady`, and checking that the session still exists and is not
   archived. Renderer enters normal session selection, including cross-project
@@ -1695,19 +1695,19 @@ app/openFeedback() -> { ok: true }
 ```
 
 Electron Main 构造固定的 GitHub bug 表单 URL
-（`https://github.com/vastsa/PI-Desktop/issues/new?template=bug_report.yml`），
+（`https://github.com/Duaer/DuaerAiDesk/issues/new?template=bug_report.yml`），
 并用 `shell.openExternal` 打开。查询字段 `app-version`、`os` 和 `environment`
 由主进程版本信息填充。渲染器不能提供 URL。离开该 origin 或模板的构造会被拒绝。
 此通道不进入 host-core，也不改变 host RPC 协议版本。
 
 ## 13d. 本地 MCP 控制 API（D370）
 
-PI-Desktop 可以为外部 Agent 暴露本地自动化接口，而不改变渲染器 preload
+DuaerAiDesk 可以为外部 Agent 暴露本地自动化接口，而不改变渲染器 preload
 契约或 host RPC 协议。服务默认关闭，只有 Electron 进程收到以下配置时才启动：
 
 ```text
-PI_DESKTOP_MCP_CONTROL=1
-PI_DESKTOP_MCP_PORT=37123       # 可选；默认 37123
+DUAER_AI_DESK_MCP_CONTROL=1
+DUAER_AI_DESK_MCP_PORT=37123       # 可选；默认 37123
 ```
 
 Electron Main 只绑定 `127.0.0.1`，并在 `/mcp` 提供 Streamable HTTP MCP。
@@ -1727,7 +1727,7 @@ Electron Main 只绑定 `127.0.0.1`，并在 `/mcp` 提供 Streamable HTTP MCP�
 ```json
 {
   "active": true,
-  "serverName": "pi-desktop",
+  "serverName": "duaer-ai-desk",
   "protocol": "streamable-http",
   "url": "http://127.0.0.1:37123/mcp",
   "token": "<redacted>",
@@ -1737,7 +1737,7 @@ Electron Main 只绑定 `127.0.0.1`，并在 `/mcp` 提供 Streamable HTTP MCP�
 ```
 
 在支持 POSIX 权限的平台上，两个文件都以 `0600` 模式写入。每个请求都必须包含
-`Authorization: Bearer <token>`（保留 `X-Pi-Desktop-Token` 头，方便简单的本地客户端）。
+`Authorization: Bearer <token>`（保留 `X-DuaerAiDesk-Token` 头，方便简单的本地客户端）。
 其他路径、缺少 token 的请求，以及除 POST/DELETE/OPTIONS 以外的方法都会被拒绝。
 Electron 等待主机关闭之前会停止服务，并将清单标记为非活动。
 
@@ -1760,7 +1760,7 @@ Electron 等待主机关闭之前会停止服务，并将清单标记为非活�
 - `pi_plans_pending`、`pi_plans_resolve`
 - `pi_workspace_diff`、`pi_fs_list`、`pi_fs_read`
 
-`pi_control_describe` 返回经过审查的操作目录。`pi_desktop_invoke` 接受操作 id
+`pi_control_describe` 返回经过审查的操作目录。`duaer_ai_desk_invoke` 接受操作 id
 和位置参数形式的 IPC 参数：
 
 ```json
@@ -1781,11 +1781,11 @@ Electron 等待主机关闭之前会停止服务，并将清单标记为非活�
 
 六个 `session/collaboration/*` 操作仅限第一方插件：它们要求经过认证的插件工具调用上下文，
 因此会出现在 `pi.desktop.listOperations` 中并可通过 `pi.desktop.invoke` 调用，但被排除在
-MCP 可见目录（`tools/list`、`pi_control_describe` 以及 `pi_desktop_invoke` 的操作枚举）之外，
+MCP 可见目录（`tools/list`、`pi_control_describe` 以及 `duaer_ai_desk_invoke` 的操作枚举）之外，
 MCP 调用方无法调用它们。
 
 **变更性** 外部调用成功后，Electron Main 可以通过现有的
-`pi-desktop/session/event/changed` 事件发送附加字段：
+`duaer-ai-desk/session/event/changed` 事件发送附加字段：
 
 ```ts
 {
@@ -1815,7 +1815,7 @@ MCP 调用方无法调用它们。
 
 ### Provider ordering
 
-`pi-desktop/providers/reorder({ id, targetId, placement: "before" | "after" })`
+`duaer-ai-desk/providers/reorder({ id, targetId, placement: "before" | "after" })`
 returns `{ ok: true }` and forwards to host `providers.reorder`. The sandboxed
 preload permits this channel through the shared IPC registry. Invalid placement
 or missing providers returns `INVALID_PARAMS`; configuration and defaults are
@@ -1827,18 +1827,18 @@ unchanged. See [provider configuration](12-provider-config-schema.md).
 
 | IPC 通道 | Host 方法 | 契约 |
 |---|---|---|
-| `pi-desktop/configSync/getState` | `configSync.getState` | 脱敏状态、类别选择、预览计数和待审批摘要 |
-| `pi-desktop/configSync/test` | `configSync.test` | 使用临时对象进行 WebDAV 能力探测；不持久化配置 |
-| `pi-desktop/configSync/configure` | `configSync.configure` | 校验 endpoint、保存加密的本地同步元数据并启用 vault |
-| `pi-desktop/configSync/syncNow` | `configSync.syncNow` | 执行一次由 Host 所有的协调周期 |
-| `pi-desktop/configSync/pause` | `configSync.pause` | 仅暂停或恢复本设备 |
-| `pi-desktop/configSync/unlock` | `configSync.unlock` | 为当前进程/设备解锁本地 vault |
-| `pi-desktop/configSync/approve` / `reject` | `configSync.approve` / `configSync.reject` | 记录绑定 digest 的本地激活决定 |
-| `pi-desktop/configSync/mapProject` | `configSync.mapProject` | 将一个不透明项目/组身份绑定到一个或多个明确选择的本地文件夹，并保留 primary-root 顺序 |
-| `pi-desktop/configSync/listHistory` | `configSync.listHistory` | 只列出脱敏的可达 revision 元数据 |
-| `pi-desktop/configSync/restore` | `configSync.restore` | 根据明确确认的历史 revision 创建新的传播 revision，并暂存本地审批/恢复信息 |
-| `pi-desktop/configSync/changePassword` | `configSync.changePassword` | CAS 重新包裹 vault key header，不返回 key 或秘密值 |
-| `pi-desktop/configSync/disconnect` | `configSync.disconnect` | 移除本地同步元数据和 key；不会删除远端 vault 数据 |
+| `duaer-ai-desk/configSync/getState` | `configSync.getState` | 脱敏状态、类别选择、预览计数和待审批摘要 |
+| `duaer-ai-desk/configSync/test` | `configSync.test` | 使用临时对象进行 WebDAV 能力探测；不持久化配置 |
+| `duaer-ai-desk/configSync/configure` | `configSync.configure` | 校验 endpoint、保存加密的本地同步元数据并启用 vault |
+| `duaer-ai-desk/configSync/syncNow` | `configSync.syncNow` | 执行一次由 Host 所有的协调周期 |
+| `duaer-ai-desk/configSync/pause` | `configSync.pause` | 仅暂停或恢复本设备 |
+| `duaer-ai-desk/configSync/unlock` | `configSync.unlock` | 为当前进程/设备解锁本地 vault |
+| `duaer-ai-desk/configSync/approve` / `reject` | `configSync.approve` / `configSync.reject` | 记录绑定 digest 的本地激活决定 |
+| `duaer-ai-desk/configSync/mapProject` | `configSync.mapProject` | 将一个不透明项目/组身份绑定到一个或多个明确选择的本地文件夹，并保留 primary-root 顺序 |
+| `duaer-ai-desk/configSync/listHistory` | `configSync.listHistory` | 只列出脱敏的可达 revision 元数据 |
+| `duaer-ai-desk/configSync/restore` | `configSync.restore` | 根据明确确认的历史 revision 创建新的传播 revision，并暂存本地审批/恢复信息 |
+| `duaer-ai-desk/configSync/changePassword` | `configSync.changePassword` | CAS 重新包裹 vault key header，不返回 key 或秘密值 |
+| `duaer-ai-desk/configSync/disconnect` | `configSync.disconnect` | 移除本地同步元数据和 key；不会删除远端 vault 数据 |
 
 输入密码只会被传给需要它的操作。原始秘密、vault key、解密资源或远端 archive 不会返回到 Renderer。`configSync.changed` 事件携带相同的脱敏状态，并由 Host 发起的变更（包括 Host scheduler）触发。Main 只是传输/生命周期协调器，不负责调度、合并、加密或应用配置。
 

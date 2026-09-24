@@ -547,7 +547,7 @@ test("the real pi-ai catalog offers every vendor account we ship", async () => {
 });
 
 test("the Meta OAuth catalog includes Muse Spark 1.3", async () => {
-  const { META_MODELS } = await import("@earendil-works/pi-ai/providers/meta.models");
+  const { META_MODELS } = await import("@duaer-ai-desk/upstream-ai/providers/meta.models");
   const model = META_MODELS["muse-spark-1.3"];
   assert.ok(model, "Meta catalog must include muse-spark-1.3");
   assert.equal(model.api, "openai-responses");
@@ -557,7 +557,7 @@ test("the Meta OAuth catalog includes Muse Spark 1.3", async () => {
 
 test("the ChatGPT OAuth catalog includes GPT-6 Astra", async () => {
   const { OPENAI_CODEX_MODELS } = await import(
-    "@earendil-works/pi-ai/providers/openai-codex.models"
+    "@duaer-ai-desk/upstream-ai/providers/openai-codex.models"
   );
   const model = OPENAI_CODEX_MODELS["gpt-6-astra"];
   assert.ok(model, "openai-codex catalog must include gpt-6-astra");
@@ -567,7 +567,7 @@ test("the ChatGPT OAuth catalog includes GPT-6 Astra", async () => {
 
 test("the pi-ai 0.87.1 OAuth catalogs include the latest model wires", async () => {
   const { OPENAI_CODEX_MODELS } = await import(
-    "@earendil-works/pi-ai/providers/openai-codex.models"
+    "@duaer-ai-desk/upstream-ai/providers/openai-codex.models"
   );
   for (const modelId of ["gpt-6-sol", "gpt-6-luna"]) {
     const model = OPENAI_CODEX_MODELS[modelId];
@@ -580,7 +580,7 @@ test("the pi-ai 0.87.1 OAuth catalogs include the latest model wires", async () 
   }
 
   const { GITHUB_COPILOT_MODELS } = await import(
-    "@earendil-works/pi-ai/providers/github-copilot.models"
+    "@duaer-ai-desk/upstream-ai/providers/github-copilot.models"
   );
   assert.equal(GITHUB_COPILOT_MODELS["claude-opus-5.5"]?.api, "anthropic-messages");
   for (const modelId of ["gpt-6-sol", "gpt-6-luna", "grok-4.7"]) {
@@ -591,12 +591,12 @@ test("the pi-ai 0.87.1 OAuth catalogs include the latest model wires", async () 
   }
 
   const { ANTHROPIC_MODELS } = await import(
-    "@earendil-works/pi-ai/providers/anthropic.models"
+    "@duaer-ai-desk/upstream-ai/providers/anthropic.models"
   );
   assert.equal(ANTHROPIC_MODELS["claude-opus-5-5"]?.api, "anthropic-messages");
   assert.equal(ANTHROPIC_MODELS["claude-opus-5-5"]?.contextWindow, 1_000_000);
 
-  const { XAI_MODELS } = await import("@earendil-works/pi-ai/providers/xai.models");
+  const { XAI_MODELS } = await import("@duaer-ai-desk/upstream-ai/providers/xai.models");
   assert.equal(XAI_MODELS["grok-4.7"]?.api, "openai-responses");
   assert.deepEqual(
     Object.entries(XAI_MODELS["grok-4.7"]?.thinkingLevelMap ?? {})

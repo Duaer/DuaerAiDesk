@@ -16,11 +16,16 @@ import { createRequire } from "node:module";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const APP_NAME = "PI-Desktop";
-const DEV_BUNDLE_ID = "net.aiuo.pi-desktop.dev";
-const BRANDING_SCHEMA = "v3";
+const APP_NAME = "DuaerAiDesk";
+const DEV_BUNDLE_ID = "net.aiuo.duaer-ai-desk.dev";
+const BRANDING_SCHEMA = "v4";
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const DESKTOP_ROOT = join(ROOT, "apps", "desktop");
+const DEV_ENTITLEMENTS = join(
+  DESKTOP_ROOT,
+  "build",
+  "entitlements.mac.plist",
+);
 
 function resolvePackagePath(packageName) {
   const require = createRequire(join(DESKTOP_ROOT, "package.json"));
@@ -100,10 +105,19 @@ export function prepareMacDevelopmentBundle({
       // app bundles (returns "bundle format is ambiguous" on frameworks).
       // The bundled frameworks are already signed by Electron; we only
       // need to re-sign the top-level app since we changed Info.plist.
+      // Hardened runtime plus the packaged-app entitlements stay on that
+      // ad-hoc signature. A terminal-launched host without runtime dies in
+      // ImageIO (SIGBUS at 0xbad4007) when the input-method candidate bar
+      // draws an Apple Color Emoji bitmap. JIT entitlements are required
+      // for V8 once runtime is enabled.
       execFileSync("codesign", [
         "--force",
         "--sign",
         "-",
+        "--options",
+        "runtime",
+        "--entitlements",
+        DEV_ENTITLEMENTS,
         "--identifier",
         DEV_BUNDLE_ID,
         stagingBundle,
@@ -128,7 +142,7 @@ export function prepareMacDevelopmentBundle({
 }
 
 function run() {
-  const env = { ...process.env, PI_DESKTOP_DEV: "1" };
+  const env = { ...process.env, DUAER_AI_DESK_DEV: "1" };
   if (process.platform === "darwin") {
     const electron = resolveElectronInstallation();
     env.ELECTRON_EXEC_PATH = prepareMacDevelopmentBundle({

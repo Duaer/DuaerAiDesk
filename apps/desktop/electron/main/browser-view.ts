@@ -2,7 +2,7 @@ import { shell, WebContentsView, type BrowserWindow } from "electron";
 import { statSync, watch, type FSWatcher } from "node:fs";
 import { dirname, isAbsolute, resolve, sep } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
-import type { BrowserState } from "@pi-desktop/shared";
+import type { BrowserState } from "@duaer-ai-desk/shared";
 import { isAllowedHttpUrl, parseAllowedExternalUrl } from "./safe-open-external";
 
 /**

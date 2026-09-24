@@ -6,9 +6,9 @@ import {
   type AssistantMessage,
   type HostedSearchContent,
   type Model,
-} from "@earendil-works/pi-ai";
-import { estimateMessageTokens } from "@earendil-works/pi-ai/utils/estimate";
-import { streamSimple } from "@earendil-works/pi-ai/api/anthropic-messages";
+} from "@duaer-ai-desk/upstream-ai";
+import { estimateMessageTokens } from "@duaer-ai-desk/upstream-ai/utils/estimate";
+import { streamSimple } from "@duaer-ai-desk/upstream-ai/api/anthropic-messages";
 
 const model: Model<"anthropic-messages"> = {
   id: "offline-anthropic", name: "Offline", api: "anthropic-messages", provider: "anthropic",

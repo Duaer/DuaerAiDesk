@@ -15,7 +15,7 @@ create noise in local log directories during normal use.
 
 1. Stop emitting sidecar `[timing]` lines, host `tool timing` lines, boot-phase
    timing records, updater timing records, and renderer bootstrap timing output.
-2. Remove the dedicated `timing` log category and the `PI_DESKTOP_TIMING`
+2. Remove the dedicated `timing` log category and the `DUAER_AI_DESK_TIMING`
    suppression environment variable. The updater's functional timeout remains.
 3. Keep key lifecycle, state-change, permission, tool, plugin, provider,
    persistence, updater, and error records. Keep structured audit fields and

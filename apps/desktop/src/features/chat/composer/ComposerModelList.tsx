@@ -1,6 +1,6 @@
 import type { RefObject } from "react";
 import type { TFunction } from "i18next";
-import { formatTokenCount, modelIdsMatch, type ModelInfo, type ProviderPublic } from "@pi-desktop/shared";
+import { formatTokenCount, modelIdsMatch, type ModelInfo, type ProviderPublic } from "@duaer-ai-desk/shared";
 import { IconCheck, IconSearch } from "../../../components/icons";
 import { composerModelBadges } from "../../../lib/composer-models";
 

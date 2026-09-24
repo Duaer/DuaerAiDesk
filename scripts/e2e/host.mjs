@@ -13,10 +13,10 @@ const root = join(dirname(fileURLToPath(import.meta.url)), "../..");
 export function hostBinaryCandidates() {
   const names =
     process.platform === "win32"
-      ? ["pi-desktop-host-core.exe", "pi-desktop-host-core"]
-      : ["pi-desktop-host-core"];
+      ? ["duaer-ai-desk-host-core.exe", "duaer-ai-desk-host-core"]
+      : ["duaer-ai-desk-host-core"];
   const candidates = [];
-  const configured = process.env.PI_DESKTOP_HOST_BIN;
+  const configured = process.env.DUAER_AI_DESK_HOST_BIN;
   if (configured) {
     const configuredPath = resolve(configured);
     candidates.push(configuredPath);
@@ -39,7 +39,7 @@ export function resolveHostBinary() {
   const binary = candidates.find((candidate) => existsSync(candidate));
   if (!binary) {
     throw new Error(
-      "host binary missing; set PI_DESKTOP_HOST_BIN. Tried: " + candidates.join(", "),
+      "host binary missing; set DUAER_AI_DESK_HOST_BIN. Tried: " + candidates.join(", "),
     );
   }
   return resolve(binary);
@@ -82,7 +82,7 @@ export class Host {
     const child = spawn(this.binary, [], {
       stdio: ["pipe", "pipe", "pipe"],
       windowsHide: true,
-      env: { ...process.env, PI_DESKTOP_DATA_DIR: this.dataDir },
+      env: { ...process.env, DUAER_AI_DESK_DATA_DIR: this.dataDir },
     });
     this.child = child;
     this.exitPromise = new Promise((resolveExit) => {

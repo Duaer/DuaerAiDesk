@@ -1,4 +1,4 @@
-import { IPC } from "@pi-desktop/shared";
+import { IPC } from "@duaer-ai-desk/shared";
 import type { SpeechService } from "../services/speech-service";
 import type { IpcRegistrar } from "./types";
 

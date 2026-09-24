@@ -1,4 +1,4 @@
-import { modelIdsMatch, OAUTH_AUTH_KIND } from "@pi-desktop/shared";
+import { modelIdsMatch, OAUTH_AUTH_KIND } from "@duaer-ai-desk/shared";
 
 type TranscriptMessage = {
   role: string;

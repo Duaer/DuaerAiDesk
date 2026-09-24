@@ -63,7 +63,7 @@ test("preset ids and builtin document ids agree", () => {
   // "explorer" in the editor and the runtime loads a different prompt.
   const presetIds = [
     ...presetSource.matchAll(
-      /id: "(explorer|code-reviewer|test-runner|fixer|ui-designer)",/g,
+      /id: "(explorer|code-reviewer|test-runner|fixer|ui-designer|coder|judge)",/g,
     ),
   ].map((m) => m[1]);
   assert.deepEqual(presetIds, [
@@ -72,6 +72,8 @@ test("preset ids and builtin document ids agree", () => {
     "test-runner",
     "fixer",
     "ui-designer",
+    "coder",
+    "judge",
   ]);
 });
 
@@ -82,7 +84,9 @@ test("preset tools match the runtime builtin documents", () => {
   assert.match(presetSource, /id: "code-reviewer"[\s\S]*?tools: \["Read", "Glob", "Grep"\]/);
   assert.match(presetSource, /id: "test-runner"[\s\S]*?tools: \["Read", "Glob", "Grep", "Bash"\]/);
   assert.match(presetSource, /id: "fixer"[\s\S]*?tools: \["Read", "Glob", "Grep", "Edit", "Write", "Bash"\]/);
-  assert.match(presetSource, /id: "ui-designer"[\s\S]*?tools: \["Read", "Glob", "Grep", "BrowserPreview", "Bash", "Edit", "Write"\]/);
+  assert.match(presetSource, /id: "ui-designer"[\s\S]*?tools: \["Read", "Glob", "Grep"\]/);
+  assert.match(presetSource, /id: "coder"[\s\S]*?tools: \["Read", "Glob", "Grep", "Edit", "Write", "Bash"\]/);
+  assert.match(presetSource, /id: "judge"[\s\S]*?tools: \["Read", "Glob", "Grep"\]/);
 });
 
 test("preset bodies mirror the runtime markdown frontmatter bodies", () => {
@@ -102,11 +106,11 @@ test("preset bodies mirror the runtime markdown frontmatter bodies", () => {
   assert.match(bodies[2], /Run the command the task names/);
   // fixer
   assert.match(bodies[3], /fast, focused implementation specialist/);
-  // ui-designer (the extraction stops at the body's first escaped backtick,
-  // so only the leading bullets are visible here; the BrowserPreview grant is
-  // asserted by the tools test above)
   assert.match(bodies[4], /UI designer/);
   assert.match(bodies[4], /design contract/);
+  assert.match(bodies[5], /Duaer Coder/);
+  assert.match(bodies[5], /acceptance is the bar/);
+  assert.match(bodies[6], /Duaer Judge/);
 });
 
 test("the removed turn cap leaves no trace in the editor or the presets", () => {

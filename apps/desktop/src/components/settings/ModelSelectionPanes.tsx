@@ -26,7 +26,7 @@ import {
   type ModelInfo,
   type SessionThinkingLevel,
   type ThinkingLevel,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import {
   CONTEXT_WINDOW_PRESETS,
   MAX_OUTPUT_PRESETS,
@@ -189,6 +189,8 @@ export function applyVisibleModelSelection(
 export type ModelSelectionPanesProps = {
   imageModelIds?: string[];
   onImageModelChange?: (id: string, selected: boolean) => void;
+  judgmentModelId?: string | null;
+  onJudgmentModelChange?: (id: string, selected: boolean) => void;
   discovery: ProviderModelsState & { canReload?: boolean };
   selection: ModelSelection;
   /** Heading of the discovered list: a service's models, or an account's. */
@@ -226,6 +228,8 @@ export function ModelSelectionPanes({
   imageModelIds,
   lookupContext,
   onImageModelChange,
+  judgmentModelId,
+  onJudgmentModelChange,
 }: ModelSelectionPanesProps) {
   const { t } = useTranslation();
   const { rows, models, publishedLevelsById, setModels } = selection;
@@ -583,6 +587,7 @@ export function ModelSelectionPanes({
                 publishedContextWindow !== undefined;
               const publishedDocuments = info ? modelMatchesFilter(info, "pdf") : false;
               const expanded = expandedModelId === binding.id;
+              const judgmentSelected = !!judgmentModelId && modelIdsMatch(judgmentModelId, binding.id);
               const imageModelSelected = imageModelIds?.some((modelId) =>
                 modelIdsMatch(modelId, binding.id),
               ) ?? false;
@@ -899,6 +904,30 @@ export function ModelSelectionPanes({
                                 imageModelSelected
                                   ? "settings.imageModelSelected"
                                   : "settings.setImageModel",
+                              )}
+                            </span>
+                          </label>
+                        ) : null}
+                        {onJudgmentModelChange ? (
+                          <label className="provider-chosen-capability">
+                            <input
+                              type="checkbox"
+                              checked={judgmentSelected}
+                              disabled={busy}
+                              aria-label={t(
+                                judgmentSelected
+                                  ? "settings.judgmentModelSelected"
+                                  : "settings.setJudgmentModel",
+                              )}
+                              onChange={(event) =>
+                                onJudgmentModelChange(binding.id, event.target.checked)
+                              }
+                            />
+                            <span>
+                              {t(
+                                judgmentSelected
+                                  ? "settings.judgmentModelSelected"
+                                  : "settings.setJudgmentModel",
                               )}
                             </span>
                           </label>

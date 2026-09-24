@@ -1,9 +1,9 @@
 import { BrowserWindow, ipcMain, Menu, session, systemPreferences } from "electron";
 import { pathToFileURL } from "node:url";
 import { join, resolve } from "node:path";
-import { catalogs, resolveLocale } from "@pi-desktop/i18n";
-import { isNetUrlAllowed, THEME_ASSET_SCHEME } from "@pi-desktop/plugin-sdk";
-import { builtinWindowBackground } from "@pi-desktop/shared";
+import { catalogs, resolveLocale } from "@duaer-ai-desk/i18n";
+import { isNetUrlAllowed, THEME_ASSET_SCHEME } from "@duaer-ai-desk/plugin-sdk";
+import { builtinWindowBackground } from "@duaer-ai-desk/shared";
 import { suppressLinuxFramelessSystemMenu } from "./frameless-system-menu";
 import {
   isPluginPanelWindowControlAction,

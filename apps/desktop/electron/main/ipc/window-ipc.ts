@@ -1,5 +1,5 @@
 import { BrowserWindow } from "electron";
-import { isWindowBackgroundColor } from "@pi-desktop/plugin-sdk";
+import { isWindowBackgroundColor } from "@duaer-ai-desk/plugin-sdk";
 import {
   builtinWindowBackground,
   ErrorCodes,
@@ -11,7 +11,7 @@ import {
   type NativeMenuAction,
   type WindowControlAction,
   type TraySessionPreferences,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import {
   emptyWorkPanelReservationState,
   parseWorkPanelChatWidth,

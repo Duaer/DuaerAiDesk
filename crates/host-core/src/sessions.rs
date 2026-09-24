@@ -3292,6 +3292,26 @@ pub fn session_count(db: &Database) -> Result<i64> {
 
 // ---- turns ------------------------------------------------------------------
 
+fn running_turn_id(db: &Database, session_id: &str) -> Result<Option<String>> {
+    db.conn()
+        .query_row(
+            "SELECT id FROM turns WHERE session_id = ?1 AND status = 'running'",
+            params![session_id],
+            |row| row.get(0),
+        )
+        .optional()
+        .map_err(Into::into)
+}
+
+/// A second `begin_turn` names the turn that is still running, so a desktop
+/// that lost track of it can close that row instead of blocking forever.
+fn agent_busy_error(db: &Database, session_id: &str) -> anyhow::Error {
+    match running_turn_id(db, session_id) {
+        Ok(Some(id)) => anyhow!("AGENT_BUSY: {id}"),
+        _ => anyhow!("AGENT_BUSY"),
+    }
+}
+
 pub fn begin_turn(
     db: &Database,
     session_id: &str,
@@ -3315,7 +3335,7 @@ pub fn begin_turn(
             if message.contains("turns.session_id")
                 || message.contains("idx_turns_one_running_session")
             {
-                anyhow!("AGENT_BUSY")
+                agent_busy_error(db, session_id)
             } else {
                 error.into()
             }
@@ -3329,7 +3349,7 @@ pub fn begin_turn(
         if !session_exists {
             return Err(anyhow!("session not found: {session_id}"));
         }
-        return Err(anyhow!("AGENT_BUSY"));
+        return Err(agent_busy_error(db, session_id));
     }
     Ok(id)
 }
@@ -3773,7 +3793,7 @@ mod tests {
     use crate::workspace::simple_canonicalize;
 
     fn test_db() -> Database {
-        let dir = std::env::temp_dir().join(format!("pi-desktop-test-{}", Uuid::new_v4()));
+        let dir = std::env::temp_dir().join(format!("duaer-ai-desk-test-{}", Uuid::new_v4()));
         std::fs::create_dir_all(&dir).unwrap();
         Database::open(&dir.join("test.sqlite")).unwrap()
     }
@@ -4969,7 +4989,7 @@ mod tests {
                     {
                         "id": "srvtoolu_01",
                         "status": "completed",
-                        "query": "pi-desktop release notes",
+                        "query": "duaer-ai-desk release notes",
                         "sources": [
                             { "url": "https://example.com/a", "title": "A" }
                         ]
@@ -4981,7 +5001,7 @@ mod tests {
                         "phase": "server_tool_use",
                         "blockId": "srvtoolu_01",
                         "name": "web_search",
-                        "input": { "query": "pi-desktop release notes" }
+                        "input": { "query": "duaer-ai-desk release notes" }
                     }
                 ]
             })),
@@ -5001,7 +5021,7 @@ mod tests {
                     {
                         "id": "srvtoolu_01",
                         "status": "completed",
-                        "query": "pi-desktop release notes",
+                        "query": "duaer-ai-desk release notes",
                         "sources": [
                             { "url": "https://example.com/a", "title": "A" }
                         ]
@@ -5013,7 +5033,7 @@ mod tests {
                         "phase": "server_tool_use",
                         "blockId": "srvtoolu_01",
                         "name": "web_search",
-                        "input": { "query": "pi-desktop release notes" }
+                        "input": { "query": "duaer-ai-desk release notes" }
                     }
                 ]
             })
@@ -5028,7 +5048,7 @@ mod tests {
                     {
                         "id": "srvtoolu_01",
                         "status": "completed",
-                        "query": "pi-desktop release notes",
+                        "query": "duaer-ai-desk release notes",
                         "sources": [
                             { "url": "https://example.com/a", "title": "A" }
                         ]
@@ -5040,7 +5060,7 @@ mod tests {
                         "phase": "server_tool_use",
                         "blockId": "srvtoolu_01",
                         "name": "web_search",
-                        "input": { "query": "pi-desktop release notes" }
+                        "input": { "query": "duaer-ai-desk release notes" }
                     }
                 ]
             }))
@@ -5650,7 +5670,7 @@ mod tests {
         let first = begin_turn(&db, &session.id, None, None).unwrap();
 
         let error = begin_turn(&db, &session.id, None, None).unwrap_err();
-        assert_eq!(error.to_string(), "AGENT_BUSY");
+        assert_eq!(error.to_string(), format!("AGENT_BUSY: {first}"));
 
         end_turn(&db, &first, "aborted", None, None, false).unwrap();
         assert!(begin_turn(&db, &session.id, None, None).is_ok());

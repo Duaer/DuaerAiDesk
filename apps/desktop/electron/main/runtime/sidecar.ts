@@ -1,11 +1,11 @@
-import { IPC, type AgentEventEnvelope, type UiMessage } from "@pi-desktop/shared";
+import { IPC, type AgentEventEnvelope, type UiMessage } from "@duaer-ai-desk/shared";
 import {
   findSubagentProviderSource,
   genericModelConfig,
   loadInstructionChain,
   modelConfigWithBinding,
   subagentProviderLookupError,
-} from "@pi-desktop/agent-runtime";
+} from "@duaer-ai-desk/agent-runtime";
 import { loadBuiltinSkillBody } from "../builtin-skills";
 import { createImageGenerationTool } from "../services/image-generation-service";
 import { registerPluginDevTools } from "../plugin-dev-tools";
@@ -16,7 +16,7 @@ import { relaxedNetworkPolicyEnabled } from "../endpoint-policy";
 import { OAUTH_AUTH_KIND, type VendorOAuth } from "../oauth";
 import type { AgentExtensionBridge } from "../agent-extensions";
 import type { BrowserHost } from "../browser-host";
-import type { InflightCheckpointer } from "@pi-desktop/host-runtime";
+import type { InflightCheckpointer } from "@duaer-ai-desk/host-runtime";
 import { summarizeToolResult, type Logger } from "../logger";
 import type { ModelsDevCatalog } from "../models-dev-catalog";
 import type { PluginRuntime } from "../plugin-runtime";

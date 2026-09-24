@@ -4,7 +4,7 @@
  *
  * Discovery has two sources, in shadowing order: the user's global
  * `~/.agents/subagents/*.md` documents handed in by Electron main (D202), and
- * the definitions PI-Desktop ships. Project workspaces never provide subagents;
+ * the definitions DuaerAiDesk ships. Project workspaces never provide subagents;
  * a repository cannot silently add a delegate to a user's agent catalog.
  *
  * Builtins are inline rather than packaged resource files. There are a handful
@@ -17,13 +17,15 @@ import { readdir, readFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import {
+  JUDGE_SUBAGENT_NAME,
   mergeSubagentDefinitions,
   parseSubagentDefinition,
   subagentModelKey,
   subagentPinnedProviders,
   OAUTH_AUTH_KIND,
   type SubagentDefinition,
-} from "@pi-desktop/shared";
+  type SubagentModelPin,
+} from "@duaer-ai-desk/shared";
 import {
   capabilitiesFromModelConfig,
   genericModelConfig,
@@ -50,7 +52,7 @@ export function subagentDefinitionDir(_workspaceRoot: string): string {
 }
 
 /**
- * Definitions PI-Desktop ships. Each one earns its prompt-token cost by being
+ * Definitions DuaerAiDesk ships. Each one earns its prompt-token cost by being
  * a delegation the main agent would otherwise do inline at full context cost:
  * fast codebase navigation, a second opinion on a diff, running a test
  * command, and — for `fixer` — implementing a multi-file change in its own
@@ -150,58 +152,70 @@ Report in this shape:
 </verification>`,
   `---
 name: ui-designer
-description: Design and implement a web interface from a brief — visual system, motion and complete interaction states, inspected in the browser preview or project browser tests. Use for building or restyling a UI when the visual work should run in its own context.
-tools: [Read, Glob, Grep, BrowserPreview, Bash, Edit, Write]
+description: Write the site style and layout for a confirmed architecture. Use after the desk locks architecture and before implementation. Does not edit files or split tasks.
+tools: [Read, Glob, Grep]
 ---
 
-You are UI designer — a senior UI/UX designer and frontend engineer. The main
-agent hands you one interface task with its brief; deliver a working,
-browser-checked implementation, not a static mock and not a generic hero,
-features, pricing template.
+You are UI designer — the digital employee who writes site style and layout. The parent agent hands you one confirmed architecture. Return a style and a layout a coder can implement. Do not edit files and do not split tasks.
 
-- Read the files you will touch and the project's existing design system
-  first. Established tokens, stack and components outrank your own taste;
-  preserve them instead of migrating to satisfy a preference.
-- When the project has no UI to match, write a small design contract before
-  coding: mission, semantic color/typography/spacing/radius/motion tokens on
-  a 4px/8px rhythm, and the Do/Don't rules you will hold the result to.
-- Build the whole interaction: semantic controls with real actions, visible
-  keyboard focus, and the loading, empty, error, success, disabled and
-  selected states the flow can reach. Keep grid tracks stable so long
-  content reflows without overlap; never hide a layout defect behind
-  overflow clipping. No TODOs, pseudo-handlers or invented backend behavior
-  — label fixture data as demo data.
-- Motion carries state changes, never decorates: immediate hover and press
-  feedback, spring-like entrances with a small stagger for lists, and
-  reduced-motion variants. Do not use \`transition: all\`, a generic
-  \`0.3s ease\`, or constant-speed linear movement for stateful UI, and do
-  not add an animation dependency for what one CSS transition covers.
-- The brief is your confirmation; there is no user to ask mid-run. State
-  the assumptions a silent brief forced, and stay inside the files the task
-  scopes.
-- Verify before reporting: after the first meaningful visual edit, call
-  BrowserPreview with a workspace-relative HTML path and inspect the live-
-  reloading page it opens. BrowserPreview opens a page but does not provide
-  screenshots, viewport controls, DOM interaction, keyboard simulation or
-  reduced-motion emulation. Use project-provided browser or E2E tooling through
-  Bash for responsive, keyboard-focus and reduced-motion checks when available;
-  otherwise report those checks as skipped instead of implying BrowserPreview
-  performed them. Fix what you observe and re-check. Run the project's build or
-  typecheck when it covers your change. A result you did not look at is not
-  evidence.
+- Style names colors, type, and spacing. Layout names columns, navigation, and the main area.
+- When the product already has a look, write a design contract that keeps it and names the concrete tokens. Do not invent a second visual system.
+- Do not ask the user to pick from a style menu.
+
+Report in this shape:
+
+<style>
+colors, type, and spacing
+</style>
+<layout>
+columns, navigation, and the main area
+</layout>`,
+  `---
+name: coder
+description: Write the code for one dispatched implement task so its acceptance holds. Use when a desk task says implement. Does not review, restyle, deploy, or split more tasks.
+tools: [Read, Glob, Grep, Edit, Write, Bash]
+---
+
+You are the Duaer Coder — the digital employee who writes code for one dispatched task. The parent agent hands you one implement task: its id, title, and acceptance. That acceptance is the bar.
+
+- Read every file you will change before Edit or Write.
+- Write the smallest change that makes this acceptance hold. Do not split more tasks, reopen requirements, restyle, or deploy.
+- A page task is still this acceptance, not a new visual system.
+- Do not judge the desk card. Do not ask the user. Do not delegate.
+- Run the check the task names. If it names none, run the nearest project check for the files you touched, or say skipped and why.
 
 Report in this shape:
 
 <summary>
-2-3 sentences: what was built and the design direction taken.
+2-3 sentences: what now holds against the acceptance.
 </summary>
 <changes>
-- path/file.tsx: what changed
+- path: what changed
 </changes>
 <verification>
-- Browser: [what was opened and checked, issues fixed, issues remaining]
-- Build: [passed / failed / skipped: reason]
+- Check: [passed / failed / skipped: reason]
 </verification>`,
+  `---
+name: judge
+description: Judge a requirement, a scope call, or whether written acceptance is specific enough. Use for a pass or fail decision. Does not implement or restyle.
+tools: [Read, Glob, Grep]
+---
+
+You are the Duaer Judge — a read-only digital employee. The main agent delegates one judgment: pass or fail, in or out of scope, or whether a written requirement is specific enough. You do not implement, restyle, or pick a visual style.
+
+- Judge only what the task states. Read files when the task names them; do not search the whole repo for extra work.
+- A pass needs a checkable bar: what is opened, what is seen, or which number is met. Looks better is not a pass.
+- A local file page that already states a measured limit (time, size, or frame rate) does not also need an app lab list.
+- Do not edit files. Do not ask the user to choose among styles.
+
+Report in this shape:
+
+<verdict>
+pass or fail
+</verdict>
+<reasons>
+- one checkable reason per line
+</reasons>`,
 ];
 
 /** Parsed builtins, rebuilt per call so a bad constant surfaces as a
@@ -280,7 +294,83 @@ export type LoadSubagentOptions = {
    * stay out of `definitions` but still reach `builtins`.
    */
   disabledBuiltins?: readonly string[];
-};
+  /**
+   * Model pins the user saved for shipped handles. A present pin replaces the
+   * constant; an absent handle keeps following the session.
+   */
+  builtinModels?: Readonly<Record<string, { model?: string; fallbackModels?: string[] }>>;
+  /**
+   * The app's judgment-model binding. The built-in `judge` employee runs only
+   * on this model. Absent, he stays listed in Settings but is not offered to Task.
+   */
+  judgmentModel?: { providerId: string; modelId: string } | null;
+}
+
+function storedModelPin(value: string | undefined): SubagentModelPin | undefined {
+  const trimmed = value?.trim();
+  if (!trimmed) return undefined;
+  const slash = trimmed.indexOf("/");
+  if (slash < 1 || slash === trimmed.length - 1) return undefined;
+  return {
+    providerId: trimmed.slice(0, slash),
+    modelId: trimmed.slice(slash + 1),
+  };
+}
+
+function applyBuiltinModelOverrides(
+  definitions: SubagentDefinition[],
+  overrides: LoadSubagentOptions["builtinModels"],
+): SubagentDefinition[] {
+  if (!overrides) return definitions;
+  return definitions.map((definition) => {
+    const override = overrides[definition.name];
+    if (!override) return definition;
+    const model = storedModelPin(override.model);
+    const fallbackModels = (override.fallbackModels ?? [])
+      .map((pin) => storedModelPin(pin))
+      .filter((pin): pin is SubagentModelPin => pin !== undefined);
+    const next: SubagentDefinition = { ...definition };
+    if (model) next.model = model;
+    else delete next.model;
+    if (fallbackModels.length > 0) next.fallbackModels = fallbackModels;
+    else delete next.fallbackModels;
+    return next;
+  });
+}
+
+export function judgmentModelFromSettings(
+  settings: unknown,
+): { providerId: string; modelId: string } | null {
+  if (!settings || typeof settings !== "object") return null;
+  const binding = (settings as { judgmentModel?: unknown }).judgmentModel;
+  if (!binding || typeof binding !== "object") return null;
+  const providerId = (binding as { providerId?: unknown }).providerId;
+  const modelId = (binding as { modelId?: unknown }).modelId;
+  if (typeof providerId !== "string" || typeof modelId !== "string") return null;
+  const provider = providerId.trim();
+  const model = modelId.trim();
+  if (!provider || !model) return null;
+  return { providerId: provider, modelId: model };
+}
+
+function applyJudgmentEmployee(
+  definitions: SubagentDefinition[],
+  judgment: LoadSubagentOptions["judgmentModel"],
+): SubagentDefinition[] {
+  const providerId = judgment?.providerId?.trim() ?? "";
+  const modelId = judgment?.modelId?.trim() ?? "";
+  return definitions.map((definition) => {
+    if (definition.name !== JUDGE_SUBAGENT_NAME) return definition;
+    const next: SubagentDefinition = { ...definition };
+    delete next.fallbackModels;
+    if (!providerId || !modelId) {
+      delete next.model;
+      return next;
+    }
+    next.model = { providerId, modelId };
+    return next;
+  });
+}
 
 function loadUserSubagents(documents: readonly UserSubagentDocument[]): {
   definitions: SubagentDefinition[];
@@ -321,6 +411,10 @@ export async function loadSubagentDefinitions(
   diagnostics: string[];
 }> {
   const builtin = builtinSubagents();
+  builtin.definitions = applyJudgmentEmployee(
+    applyBuiltinModelOverrides(builtin.definitions, options.builtinModels),
+    options.judgmentModel,
+  );
   const dir =
     options.overrideDir ??
     (workspaceRoot ? subagentDefinitionDir(workspaceRoot) : undefined);
@@ -352,10 +446,11 @@ export async function loadSubagentDefinitions(
     (definition) => definition.source === "builtin",
   );
   return {
-    definitions: merged.definitions.filter(
-      (definition) =>
-        !(definition.source === "builtin" && disabled.has(definition.name)),
-    ),
+    definitions: merged.definitions.filter((definition) => {
+      if (definition.source === "builtin" && disabled.has(definition.name)) return false;
+      if (definition.name === JUDGE_SUBAGENT_NAME && !definition.model) return false;
+      return true;
+    }),
     builtins,
     diagnostics,
   };

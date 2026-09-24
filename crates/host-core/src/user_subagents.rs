@@ -8,9 +8,9 @@ use crate::agent_capabilities::{
 use anyhow::{bail, Context, Result};
 use chrono::Utc;
 use serde::{Deserialize, Serialize};
-use std::collections::HashSet;
+use std::collections::{BTreeMap, HashSet};
 use std::fs;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 const MAX_USER_SUBAGENTS: usize = 64;
 pub const MAX_SUBAGENT_BYTES: usize = 32 * 1024;
@@ -92,9 +92,27 @@ pub struct UserSubagentInput {
     pub scope: Option<ActivationScope>,
 }
 
+/// A model pin stored for one shipped subagent. Empty means the session model.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct BuiltinModelOverride {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub model: Option<String>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub fallback_models: Vec<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+struct BuiltinModelFile {
+    #[serde(default)]
+    models: BTreeMap<String, BuiltinModelOverride>,
+}
+
 pub struct UserSubagentRegistry {
     state: CapabilityState,
     builtins: CapabilityState,
+    builtin_models_path: PathBuf,
+    builtin_models: BTreeMap<String, BuiltinModelOverride>,
 }
 
 fn normalize_name(value: &str) -> String {
@@ -267,9 +285,19 @@ fn default_body(name: &str) -> String {
 
 impl UserSubagentRegistry {
     pub fn new(data_dir: &Path) -> Self {
+        let builtin_models_path = data_dir
+            .join("agent-capabilities")
+            .join("subagent-builtin-models.json");
+        let builtin_models = fs::read_to_string(&builtin_models_path)
+            .ok()
+            .and_then(|raw| serde_json::from_str::<BuiltinModelFile>(&raw).ok())
+            .map(|file| file.models)
+            .unwrap_or_default();
         Self {
             state: CapabilityState::new(data_dir, SUBAGENT_KIND),
             builtins: CapabilityState::new(data_dir, SUBAGENT_BUILTIN_KIND),
+            builtin_models_path,
+            builtin_models,
         }
     }
 
@@ -543,6 +571,62 @@ impl UserSubagentRegistry {
         )?;
         Ok(name)
     }
+
+    /// Model pins for shipped subagents. Absent handles follow the session.
+    pub fn builtin_models(&self) -> BTreeMap<String, BuiltinModelOverride> {
+        self.builtin_models.clone()
+    }
+
+    /// Store or clear the model pin for one shipped handle.
+    ///
+    /// An empty model and no fallbacks delete the override, so the builtin
+    /// follows the session again. The handle is not checked against the
+    /// current builtin list: the pin stays if a later build restores it.
+    pub fn set_builtin_model(
+        &mut self,
+        handle: &str,
+        model: Option<&str>,
+        fallbacks: &[String],
+    ) -> Result<String> {
+        let name = normalize_name(handle);
+        if name.is_empty() {
+            bail!("SUBAGENT_INVALID: a builtin handle is required");
+        }
+        let model = normalize_model(model)?;
+        let mut fallback_models = Vec::new();
+        for pin in fallbacks {
+            if let Some(normalized) = normalize_model(Some(pin))? {
+                if !fallback_models.contains(&normalized) {
+                    fallback_models.push(normalized);
+                }
+            }
+        }
+        if model.is_none() && fallback_models.is_empty() {
+            self.builtin_models.remove(&name);
+        } else {
+            self.builtin_models.insert(
+                name.clone(),
+                BuiltinModelOverride {
+                    model,
+                    fallback_models,
+                },
+            );
+        }
+        self.save_builtin_models()?;
+        Ok(name)
+    }
+
+    fn save_builtin_models(&self) -> Result<()> {
+        if let Some(parent) = self.builtin_models_path.parent() {
+            fs::create_dir_all(parent)?;
+        }
+        let raw = serde_json::to_string_pretty(&BuiltinModelFile {
+            models: self.builtin_models.clone(),
+        })?;
+        fs::write(&self.builtin_models_path, raw)
+            .with_context(|| format!("write {}", self.builtin_models_path.display()))?;
+        Ok(())
+    }
 }
 
 #[cfg(test)]
@@ -808,5 +892,47 @@ mod tests {
             .path()
             .join("agent-capabilities/subagent-builtins.json")
             .exists());
+    }
+
+    #[test]
+    fn a_builtin_model_pin_round_trips_and_clears() {
+        let dir = tempdir().unwrap();
+        let mut registry = UserSubagentRegistry::new(dir.path());
+        let rejected = registry
+            .set_builtin_model(
+                "Code-Reviewer",
+                Some("openai/gpt-4.1"),
+                &["anthropic/claude".into(), "not-a-pin".into()],
+            )
+            .unwrap_err();
+        assert!(rejected.to_string().contains("SUBAGENT_INVALID"));
+        let handle = registry
+            .set_builtin_model(
+                "Code-Reviewer",
+                Some("openai/gpt-4.1"),
+                &["anthropic/claude".into()],
+            )
+            .unwrap();
+        assert_eq!(handle, "code-reviewer");
+        let stored = registry.builtin_models();
+        assert_eq!(
+            stored.get("code-reviewer").unwrap().model.as_deref(),
+            Some("openai/gpt-4.1")
+        );
+        assert_eq!(
+            stored.get("code-reviewer").unwrap().fallback_models,
+            vec!["anthropic/claude".to_string()]
+        );
+
+        let reopened = UserSubagentRegistry::new(dir.path());
+        assert_eq!(
+            reopened.builtin_models().get("code-reviewer").unwrap().model.as_deref(),
+            Some("openai/gpt-4.1")
+        );
+
+        registry
+            .set_builtin_model("code-reviewer", None, &[])
+            .unwrap();
+        assert!(registry.builtin_models().get("code-reviewer").is_none());
     }
 }

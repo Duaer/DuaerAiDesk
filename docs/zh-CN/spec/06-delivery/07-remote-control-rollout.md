@@ -36,11 +36,11 @@ Linux 或 WSL 机器上的项目，即 SSH 隧道远端 Host 拓扑；#100 要�
   - R2a — 桌面内核（已交付，见 ADR 0286）：backend-router seam、传输无关的 remote-backend、
     event bridge、per-host coordinator、safeStorage 加密的 remote-host 注册表以及启动引导。
     默认注册表为空即完整 no-op：router 无远程 backend，renderer 每次调用仍逐字节走本地
-    handler。`node --test` 用 fake 或真实的 `@pi-desktop/racp/test-harness` 覆盖每个模块。
+    handler。`node --test` 用 fake 或真实的 `@duaer-ai-desk/racp/test-harness` 覆盖每个模块。
   - R2b — 配对、SSH 引导、终端、反向工具中继。R2 的出口条件保持不变，随 R2b 一并达成；
     R2a 单独不面向用户，且不尝试完成这些条件。
 
-  交付项：`pi-host` 包（模块、Node pi sidecar 与平台
+  交付项：`duaer-ai-desk-host` 包（模块、Node pi sidecar 与平台
   host-core 二进制，与桌面同版本，只绑定 loopback，由桌面经 SSH 上传的引导脚本从
   GitHub Releases 下载并校验公布的 SHA-256，再经该 SSH 会话启动并配对）；位于 `lib/api.ts` 之下的桌面 RACP 客户端适配层，使远程会话像本地
   一样渲染；转发端口上的 `RACP-WS` header profile，遵守安全规格的 loopback 规则
@@ -64,7 +64,7 @@ Linux 或 WSL 机器上的项目，即 SSH 隧道远端 Host 拓扑；#100 要�
 R2 的设计决定（D375，2026-09-10 记录）：远端 Host 的 provider 配置经 SSH 引导通道
 写入，不经 RACP；桌面用户 MCP 服务器与不需工作区的插件工具在本里程碑通过反向工具
 中继进入远程会话，需要工作区或文件系统访问的插件工具排除；工作面板终端在本里程碑
-以 `terminal/*` 操作交付，在远端机器运行；`pi-host` 由桌面经 SSH 上传的引导脚本按
+以 `terminal/*` 操作交付，在远端机器运行；`duaer-ai-desk-host` 由桌面经 SSH 上传的引导脚本按
 平台从 GitHub Releases 下载桌面版本并校验公布的 SHA-256，版本不匹配即
 `PROTOCOL_MISMATCH` 并提供重新下载，首版不支持没有 GitHub 出网能力的机器；SSH 配对
 的桌面设备持有 `owner` 并豁免远程权限上限，除非启用 Host 策略
@@ -83,7 +83,7 @@ E2E-232 通过、载荷只含摘要与 id、未关联聊天的指令无效、Hos
 
 RACP 服务只调用无头 Agent Host 模块，模块再调用 renderer 使用的同一套
 host 与 sidecar 路径；不从网络监听器调用 renderer、`host.proxy` 或 host-core；
-`pi-host` 在另一台机器上运行模块与监督而不改 RACP。Host 拥有活动回合、回合
+`duaer-ai-desk-host` 在另一台机器上运行模块与监督而不改 RACP。Host 拥有活动回合、回合
 队列和事件游标，客户端、浏览器标签、Electron 窗口与 SSH 会话的生命周期都不
 控制 Agent 执行，结束回合必须显式调用 `turn/stop` 或 `turn/interrupt`。队列
 只存在于 Host。renderer 保持与传输无关：它只经 `lib/api.ts` 访问后端，桌面
@@ -99,13 +99,13 @@ host 与 sidecar 路径；不从网络监听器调用 renderer、`host.proxy` �
 必须覆盖生成的 schema 校验、会话/回合/队列/审批/输入/附件状态机、幂等、
 游标回放与 epoch 变化、含权限上限及其 SSH 配对豁免与 `allow-session` 策略的
 角色矩阵、待处理请求读取与集成载荷的脱敏、已发布 binding 一致性；集成层面
-覆盖 Electron Main 内的模块、Linux 测试机上经 SSH 端口转发的 `pi-host`（含引导、
+覆盖 Electron Main 内的模块、Linux 测试机上经 SSH 端口转发的 `duaer-ai-desk-host`（含引导、
 配对、版本不匹配、重新配对）、不变的 renderer 经桌面适配层渲染远程会话、远程
 回合运行中 SSH 会话中断与恢复、Host 重启（含排队回合，验证持久化队列恢复并挂起）、SSH 中断下的中继工具执行与终端
 流式、引导下载的有效与篡改 checksum、针对 Webhook 接收端与
 长轮询 bot fixture 的集成适配层，排期后再覆盖 Gateway 路由、cookie profile 下的
 浏览器重连和 NAT 下的 Host link 中继。安全验证覆盖无效、过期、撤销、错误 Host
-的设备 token，`pi-host` 上非 loopback 对端与无 TLS 的非 loopback 绑定，配对 token
+的设备 token，`duaer-ai-desk-host` 上非 loopback 对端与无 TLS 的非 loopback 绑定，配对 token
 复用与非 SSH 通道配对，错误角色/会话/Host/revision，含 `workspace/read` 越界的
 SSRF 与路径攻击，超限与哈希不符的上传，试图选择 secret 或权限的注入请求，
 未关联聊天与重放的集成指令，慢读者与连接耗尽，审计脱敏与保留，排期后再覆盖
@@ -120,7 +120,7 @@ Host 连接健康与引导时长与版本不匹配、认证与授权失败、集
 SSH 隧道拓扑先对 allowlist 用户以 feature flag 启用再普遍开放；集成适配层作为
 默认不配置任何渠道的可选设置启用；Gateway、浏览器与 gRPC 只由记录在案的产品
 决策排期。kill switch 拒绝新的远程连接并取消远程主体提交的排队回合，不影响
-本地桌面。回滚必须停止接受新的远程连接并停止集成适配层，远端 `pi-host` 进程
+本地桌面。回滚必须停止接受新的远程连接并停止集成适配层，远端 `duaer-ai-desk-host` 进程
 按用户选择保留或停止但绝不删除其 transcript，保持本地 stdio、renderer 与 MCP
 路径可用，保留本地已完成的 transcript，且绝不因远程 feature flag 变化而重放回合。
 
@@ -129,7 +129,7 @@ SSH 隧道拓扑先对 allowlist 用户以 feature flag 启用再普遍开放；
 已排期的功能集只有在 E2E-221 至 E2E-226、E2E-229、E2E-230、E2E-231 通过，
 集成适配层的 E2E-232 通过，适用于已排期里程碑的远程安全门签核，故障注入证明
 含 SSH 会话中断在内的重连不重复执行，桌面发布流水线发布的每个 Linux 平台都有带
-checksum 发布到 GitHub Releases 的 `pi-host` 包且版本不匹配与篡改下载路径已测试，Host 运营指标可用，且新的发布/回滚
+checksum 发布到 GitHub Releases 的 `duaer-ai-desk-host` 包且版本不匹配与篡改下载路径已测试，Host 运营指标可用，且新的发布/回滚
 runbook 写明 feature flag、配对撤销路径、远端机器上的数据保留和事件负责人之后，
 才可进入生产。绑定 parity 与 E2E-227 / E2E-228 在其里程碑排期后成为门槛。
 
@@ -147,8 +147,8 @@ runbook 写明 feature flag、配对撤销路径、远端机器上的数据保�
   镜像 `agent/event/queueChanged`，“立即发送”即 `turn/prioritize` 加优雅停止。
 - R1 部分完成（2026-09-18）：运行时级别的逐回合权限上限已在 JS 端全链路串通（`AgentPromptRequest.permissionMode` → agent-ipc → `RuntimeService.startTurn` → sidecar `agent.prompt`），桥接层不再对每一处会话/生效模式不一致直接拒绝。生效模式比会话更宽的请求（提权）仍作为深度防御拒绝；更窄的上限透传并在 sidecar 侧作为文档化的占位收下。turn 级的真正执行还差 host-core 一步（`session.beginTurn` 接受覆盖参数），因此本地回合上的收紧目前尚未夹紧工具决策。
 - R2 已开始（2026-09-18，D447 / ADR 0284）：`packages/host-runtime` 承载与 Electron 无关的运行时层 —— host-core 与 sidecar 的 stdio 传输、重启监督器、`RuntimeService`（模块的 `RuntimePort`，含持久回合生命周期）、转录持久化、无头启动解析器与已批准 Plan/Goal 的派发 —— Electron main 通过薄适配层运行其上。
-- R2（2026-09-18，D448 / ADR 0285）：`packages/racp` 承载 `RACP-WS` 服务端与客户端核心、回环上的 `ws` 绑定与设备令牌配对；握手、鉴权、幂等、队列顺序、审批、游标重放、驱逐、epoch 变更、慢客户端与不重复执行的重连都是包内测试。`pi-host` 包、桌面适配器与 SSH 引导此后均已开始：R2a 桌面内核（D449 / ADR 0286）带来了适配器与 `pi-host` 包，SSH 引导随后在 D453 / ADR 0292 落地。
-- R2b 部分完成（2026-09-19，D453 / ADR 0292）：桌面使用用户自己的 `ssh` 客户端并以 `BatchMode=yes` 在远端安装并配对 `pi-host`，用户的配置、agent 与跳板机照常生效，应用不持有任何 SSH 密钥。`remote/pi-host-release.ts` 承载纯发布坐标（远端平台、桌面版本、已发布的 SHA-256、拒绝未发布的目标），`remote/pi-host-bootstrap-script.ts` 生成唯一的 `umask 077` 脚本：下载、校验、安装到远端 `$HOME`、以 `--pair` 在回环上重启主机，并回显 `PI_HOST_READY` / `PI_HOST_PAIRING_TOKEN`；`remote/ssh-transport.ts` 是可注入的传输端口，`remote/ssh-tunnel.ts` 为每台主机维护一条持久的 `ssh -N -L` 转发，每次启动重新建立，并在引导时被收编（adopt），使配对只建立一条隧道。记录以 `metadata.transport = "ssh"` 加 SSH 描述符取代 URL，`pi-desktop/remoteHost/bootstrap` 加入 `list` / `pair` / `remove`。终端工作面板客户端、反向工具中继，以及经 SSH 通道下发 provider 配置均不在本次范围内。
+- R2（2026-09-18，D448 / ADR 0285）：`packages/racp` 承载 `RACP-WS` 服务端与客户端核心、回环上的 `ws` 绑定与设备令牌配对；握手、鉴权、幂等、队列顺序、审批、游标重放、驱逐、epoch 变更、慢客户端与不重复执行的重连都是包内测试。`duaer-ai-desk-host` 包、桌面适配器与 SSH 引导此后均已开始：R2a 桌面内核（D449 / ADR 0286）带来了适配器与 `duaer-ai-desk-host` 包，SSH 引导随后在 D453 / ADR 0292 落地。
+- R2b 部分完成（2026-09-19，D453 / ADR 0292）：桌面使用用户自己的 `ssh` 客户端并以 `BatchMode=yes` 在远端安装并配对 `duaer-ai-desk-host`，用户的配置、agent 与跳板机照常生效，应用不持有任何 SSH 密钥。`remote/duaer-ai-desk-host-release.ts` 承载纯发布坐标（远端平台、桌面版本、已发布的 SHA-256、拒绝未发布的目标），`remote/duaer-ai-desk-host-bootstrap-script.ts` 生成唯一的 `umask 077` 脚本：下载、校验、安装到远端 `$HOME`、以 `--pair` 在回环上重启主机，并回显 `PI_HOST_READY` / `PI_HOST_PAIRING_TOKEN`；`remote/ssh-transport.ts` 是可注入的传输端口，`remote/ssh-tunnel.ts` 为每台主机维护一条持久的 `ssh -N -L` 转发，每次启动重新建立，并在引导时被收编（adopt），使配对只建立一条隧道。记录以 `metadata.transport = "ssh"` 加 SSH 描述符取代 URL，`duaer-ai-desk/remoteHost/bootstrap` 加入 `list` / `pair` / `remove`。终端工作面板客户端、反向工具中继，以及经 SSH 通道下发 provider 配置均不在本次范围内。
 
 ## 8. 修订记录
 
@@ -159,8 +159,8 @@ Host 队列与 `permissions.pending`，将 `RACP-WS` 定为 v1 唯一规范绑�
 
 D375（2026-09-10）按已记录的需求重排里程碑：R2 为桌面作为客户端的 SSH 隧道
 远端 Host，R3 为出站消息集成，Gateway、浏览器与 gRPC 里程碑不排期；并加入
-`pi-host` 包、桌面适配层规则以及作为验收目标的 E2E-231 / E2E-232。同日记录的设计
-决定把反向工具中继与终端放进 R2 并整体交付，`pi-host` 从 GitHub Releases 下载，
+`duaer-ai-desk-host` 包、桌面适配层规则以及作为验收目标的 E2E-231 / E2E-232。同日记录的设计
+决定把反向工具中继与终端放进 R2 并整体交付，`duaer-ai-desk-host` 从 GitHub Releases 下载，
 回合队列持久化到 host-core，远程审批默认寿命 30 分钟，配对设备豁免改为 Host 策略，
 Gateway 身份源定为 PI 账号服务。
 

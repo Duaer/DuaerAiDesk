@@ -51,12 +51,12 @@ test("Windows runtime registers the canonical native application identity", () =
   );
 });
 
-test("Windows packages pin PI-Desktop executable and shortcut names", () => {
-  assert.equal(packageJson.build.win.executableName, "PI-Desktop");
-  assert.equal(packageJson.build.nsis.shortcutName, "PI-Desktop");
+test("Windows packages pin DuaerAiDesk executable and shortcut names", () => {
+  assert.equal(packageJson.build.win.executableName, "DuaerAiDesk");
+  assert.equal(packageJson.build.nsis.shortcutName, "DuaerAiDesk");
 });
 
-test("Windows packages and windows use the canonical PI-Desktop icon", () => {
+test("Windows packages and windows use the canonical DuaerAiDesk icon", () => {
   assert.equal(packageJson.build.win.icon, "build/icon.ico");
   assert.deepEqual(
     packageJson.build.win.extraResources.find((resource) => resource.to === "app-icon.ico"),
@@ -76,11 +76,11 @@ test("Windows packages and windows use the canonical PI-Desktop icon", () => {
 });
 
 test("Linux packages align the desktop entry with the Wayland app identity", () => {
-  assert.equal(packageJson.desktopName, "pi-desktop.desktop");
+  assert.equal(packageJson.desktopName, "duaer-ai-desk.desktop");
   assert.equal(packageJson.build.linux.syncDesktopName, true);
 });
 
-test("macOS development uses the canonical PI-Desktop Dock icon", () => {
+test("macOS development uses the canonical DuaerAiDesk Dock icon", () => {
   assert.match(
     brandingSource,
     /process\.platform !== "darwin" \|\| !isDevelopmentBuild \|\| !app\.dock/,
@@ -113,7 +113,7 @@ test("macOS icon derivation preserves the canonical renderer asset", () => {
 test("macOS development launches from a branded host bundle", () => {
   assert.equal(packageJson.scripts.dev, "node ../../scripts/dev-electron.mjs");
   assert.match(devScriptSource, /process\.platform === "darwin"/);
-  assert.match(devScriptSource, /PI_DESKTOP_DEV: "1"/);
+  assert.match(devScriptSource, /DUAER_AI_DESK_DEV: "1"/);
   assert.match(devScriptSource, /ELECTRON_EXEC_PATH/);
   assert.match(devScriptSource, /CFBundleDisplayName", APP_NAME/);
   assert.match(devScriptSource, /CFBundleName", APP_NAME/);
@@ -125,6 +125,9 @@ test("macOS development launches from a branded host bundle", () => {
   );
   assert.match(devScriptSource, /verbatimSymlinks: true/);
   assert.match(devScriptSource, /join\(ROOT, "\.cache", "electron-dev"\)/);
+  assert.match(devScriptSource, /BRANDING_SCHEMA = "v4"/);
+  assert.match(devScriptSource, /--options",\s*"runtime"/);
+  assert.match(devScriptSource, /entitlements\.mac\.plist/);
   assert.doesNotMatch(devScriptSource, /node_modules.*Info\.plist/);
 });
 
@@ -140,7 +143,7 @@ test(
   "macOS development bundle rewrites native identity and reuses its cache",
   { skip: process.platform !== "darwin" },
   async () => {
-    const root = await mkdtemp(join(tmpdir(), "pi-desktop-dev-bundle-"));
+    const root = await mkdtemp(join(tmpdir(), "duaer-ai-desk-dev-bundle-"));
     const sourceBundle = join(root, "Electron.app");
     const contents = join(sourceBundle, "Contents");
     const macos = join(contents, "MacOS");
@@ -188,8 +191,8 @@ test(
         await readFile(join(brandedContents, "Resources", "icon.icns"), "utf8"),
         "canonical-icon",
       );
-      assert.match(plist, /<string>PI-Desktop<\/string>/);
-      assert.match(plist, /<string>net\.aiuo\.pi-desktop\.dev<\/string>/);
+      assert.match(plist, /<string>DuaerAiDesk<\/string>/);
+      assert.match(plist, /<string>net\.aiuo\.duaer-ai-desk\.dev<\/string>/);
       assert.equal(prepareMacDevelopmentBundle(options), brandedExecutable);
     } finally {
       await rm(root, { recursive: true, force: true });

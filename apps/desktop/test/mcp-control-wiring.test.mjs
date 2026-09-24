@@ -40,11 +40,11 @@ function ipcInvokeKeys(source) {
 
 test("the optional MCP control server reuses IPC and synchronizes renderer state", () => {
   assert.match(startup, /const invokeIpc = registerIpc\(\)/);
-  assert.match(startup, /process\.env\.PI_DESKTOP_MCP_CONTROL === "1"/);
+  assert.match(startup, /process\.env\.DUAER_AI_DESK_MCP_CONTROL === "1"/);
   assert.match(startup, /channels: IPC\.invoke/);
   assert.match(startup, /version: APP_VERSION/);
   assert.match(startup, /mcpControlRendererEvent/);
-  assert.match(startup, /process\.env\.PI_DESKTOP_MCP_PORT/);
+  assert.match(startup, /process\.env\.DUAER_AI_DESK_MCP_PORT/);
   assert.match(shutdown, /getMcpControl\(\)\?\.stop\(\)/);
   assert.match(api, /projectPath\?: string \| null/);
   assert.match(api, /selectSessionId\?: string/);
@@ -83,11 +83,11 @@ test("native picker handlers and secret-write channels stay out of the MCP catal
     assert.equal(invokeKeys.has(key), true, `${key} is not an IPC.invoke channel`);
   }
   const channels = Object.fromEntries(
-    MCP_CONTROL_CATALOG_CHANNEL_KEYS.map((key) => [key, `pi-desktop/${key}`]),
+    MCP_CONTROL_CATALOG_CHANNEL_KEYS.map((key) => [key, `duaer-ai-desk/${key}`]),
   );
-  channels.pluginLoadDev = "pi-desktop/plugin/loadDev";
-  channels.secretsSet = "pi-desktop/secrets/set";
-  channels.providersCreate = "pi-desktop/providers/create";
+  channels.pluginLoadDev = "duaer-ai-desk/plugin/loadDev";
+  channels.secretsSet = "duaer-ai-desk/secrets/set";
+  channels.providersCreate = "duaer-ai-desk/providers/create";
   const live = createMcpControlOperations(channels);
   assert.equal(live.some((operation) => operation.id === "plugin/loadDev"), false);
   assert.equal(live.some((operation) => operation.id === "providers/create"), false);

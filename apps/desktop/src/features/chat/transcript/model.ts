@@ -1,5 +1,5 @@
-import type { ThinkingLevel, UiMessage } from "@pi-desktop/shared";
-import { THINKING_LEVELS } from "@pi-desktop/shared";
+import type { ThinkingLevel, UiMessage } from "@duaer-ai-desk/shared";
+import { THINKING_LEVELS } from "@duaer-ai-desk/shared";
 import type { SubagentRun } from "../../../lib/assistant-turns";
 import { toolResultPayload } from "../../../lib/tool-presentation";
 

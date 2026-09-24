@@ -1,6 +1,6 @@
 import { useLayoutEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import type { UiMessage } from "@pi-desktop/shared";
+import type { UiMessage } from "@duaer-ai-desk/shared";
 import {
   buildTranscriptEntries,
   type AssistantActivityItem,

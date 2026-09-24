@@ -91,7 +91,7 @@ describe("hostedSearchFromBlocks", () => {
             type: "web_search_call",
             id: "ws_1",
             status: "completed",
-            action: { type: "search", query: "pi-desktop release notes" },
+            action: { type: "search", query: "duaer-ai-desk release notes" },
             results: [
               { url: "https://example.com/a", title: "A" },
               { url: "https://example.com/b", title: "  " },
@@ -111,7 +111,7 @@ describe("hostedSearchFromBlocks", () => {
         {
           id: "ws_1",
           status: "completed",
-          query: "pi-desktop release notes",
+          query: "duaer-ai-desk release notes",
           sources: [
             { url: "https://example.com/a", title: "A" },
             { url: "https://example.com/b" },
@@ -494,9 +494,9 @@ describe("hostedSearchReplayBlocks", () => {
           phase: "server_tool_use",
           blockId: "srvtoolu_01",
           name: "web_search",
-          input: { query: "pi-desktop" },
+          input: { query: "duaer-ai-desk" },
           index: 2,
-          inputJson: "{\"query\":\"pi-desktop\"}",
+          inputJson: "{\"query\":\"duaer-ai-desk\"}",
         },
         {
           type: "hostedSearch",
@@ -515,7 +515,7 @@ describe("hostedSearchReplayBlocks", () => {
         phase: "server_tool_use",
         blockId: "srvtoolu_01",
         name: "web_search",
-        input: { query: "pi-desktop" },
+        input: { query: "duaer-ai-desk" },
       },
       {
         type: "hostedSearch",

@@ -2,7 +2,7 @@
 
 - Status: Accepted for implementation
 - Date: 2026-08-18
-- Deciders: PI-Desktop core
+- Deciders: DuaerAiDesk core
 - Related: D237, D240, ADR 0098, D028, D031, ADR 0012, ADR 0020, ADR 0027
 
 ## Context
@@ -12,13 +12,13 @@ host-core encrypts it under `secret:provider:<id>:api_key`, and Electron main
 reads the plaintext back on every launch so the sidecar can sign requests with a
 constant `{ auth: { apiKey } }`. Users who already pay for a vendor
 subscription — Claude Pro/Max, ChatGPT Plus/Pro, GitHub Copilot — had to buy
-separate API credit to use PI-Desktop at all.
+separate API credit to use DuaerAiDesk at all.
 
 `@earendil-works/pi-ai` already ships everything the protocol side needs: seven
 OAuth flows, a `CredentialStore` contract, and locked token refresh. What it
 does not ship is the host half — its own `auth/types.d.ts` says "The app
 persists a credential after login via `modify(...)`. Login/logout orchestration
-is app-owned." PI-Desktop had no such half.
+is app-owned." DuaerAiDesk had no such half.
 
 Two properties made this more than an extra settings field. Vendor access
 tokens expire in about an hour, so a credential resolved once at launch goes
@@ -41,7 +41,7 @@ hand it to the sidecar at launch" pattern was not acceptable for it.
    `CredentialStore` over host-core's `secrets.*` RPC, serializing `modify` per
    provider so pi-ai's locked-refresh assumption holds, and bridges pi-ai's
    `AuthInteraction` to renderer events over five new invoke channels and one
-   event channel under `pi-desktop/providers/oauth/*`. Browser-callback,
+   event channel under `duaer-ai-desk/providers/oauth/*`. Browser-callback,
    device-code, select and paste-a-code steps are all the same event stream, so
    the renderer renders what the vendor asked for rather than a per-vendor
    script, and cancel aborts the local callback server or the polling loop.

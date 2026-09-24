@@ -5,9 +5,9 @@
  * shape, so the conversions live here instead of being duplicated per loop.
  */
 
-import type { AgentMessage, JsonValue } from "@earendil-works/pi-agent-core";
-import type { Usage } from "@earendil-works/pi-ai";
-import type { MessageUsage } from "@pi-desktop/shared";
+import type { AgentMessage, JsonValue } from "@duaer-ai-desk/upstream-agent-core";
+import type { Usage } from "@duaer-ai-desk/upstream-ai";
+import type { MessageUsage } from "@duaer-ai-desk/shared";
 
 export function nowIso(): string {
   return new Date().toISOString();

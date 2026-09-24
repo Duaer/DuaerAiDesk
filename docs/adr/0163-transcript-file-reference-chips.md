@@ -2,7 +2,7 @@
 
 - Status: Accepted
 - Date: 2026-09-05
-- Deciders: PI-Desktop core
+- Deciders: DuaerAiDesk core
 - Related: D124, D209, D320, ADR 0024, ADR 0070, ADR 0019
 
 ## Context
@@ -27,7 +27,7 @@ files were not clickable at all.
 2. Clicking a workspace `.html` / `.htm` chip opens the work-panel browser
    (existing local-file preview). Clicking any other allowed file opens it
    with the OS default application for that suffix via a new read-only
-   Electron channel `pi-desktop/fs/open`.
+   Electron channel `duaer-ai-desk/fs/open`.
 3. `fs/open` resolves relative paths inside the current workspace and
    absolute paths only when they already live under the workspace, 
    `<data_dir>/scratch/`, or `<data_dir>/attachments/`. Traversal, `~`, and

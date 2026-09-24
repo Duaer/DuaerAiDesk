@@ -8,7 +8,7 @@
  * "error") and the rejected-promise paths.
  */
 
-import { isCertificateVerificationError } from "@pi-desktop/shared";
+import { isCertificateVerificationError } from "@duaer-ai-desk/shared";
 import { readLocalRequestErrorDetails } from "./local-request-errors.js";
 
 export type ClassifiedAgentError = {

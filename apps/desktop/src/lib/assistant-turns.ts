@@ -3,8 +3,8 @@ import type {
   HostedSearchRound,
   MessageUsage,
   UiMessage,
-} from "@pi-desktop/shared";
-import { hostedSearchRounds } from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
+import { hostedSearchRounds } from "@duaer-ai-desk/shared";
 import { isDelegationStartTool } from "./tool-display";
 
 export type AssistantActivityItem =

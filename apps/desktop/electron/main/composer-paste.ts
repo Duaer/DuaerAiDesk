@@ -11,7 +11,7 @@ import { basename, extname, isAbsolute, join } from "node:path";
 import type {
   ComposerPasteFile,
   ComposerPastedFile,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 
 const SAFE_SESSION_ID = /^[A-Za-z0-9_-]+$/;
 const MAX_FILES = 20;

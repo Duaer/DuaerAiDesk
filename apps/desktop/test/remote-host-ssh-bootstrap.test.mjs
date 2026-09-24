@@ -15,8 +15,8 @@ const { sshHostRecord, sshMetadataOf, transportOf } = await import(
 );
 
 const VERSION = "0.15.1-beta.5";
-const ARTIFACT_NAME = `pi-host-${VERSION}-linux-x64.tar.gz`;
-const ARTIFACT_URL = `https://github.com/vastsa/PI-Desktop/releases/download/v${VERSION}/${ARTIFACT_NAME}`;
+const ARTIFACT_NAME = `duaer-ai-desk-host-${VERSION}-linux-x64.tar.gz`;
+const ARTIFACT_URL = `https://github.com/Duaer/DuaerAiDesk/releases/download/v${VERSION}/${ARTIFACT_NAME}`;
 const DIGEST = "0123456789abcdef".repeat(4);
 const RESERVED_PORT = 49_152;
 
@@ -183,7 +183,7 @@ test("an unpublished target fails without downloading anything", async () => {
 
 test("a checksum file with no digest for this artifact fails the bootstrap", async () => {
   const transport = fakeTransport();
-  const { bootstrap } = harness({ transport, checksum: `${DIGEST}  pi-host-0.15.0-linux-x64.tar.gz\n` });
+  const { bootstrap } = harness({ transport, checksum: `${DIGEST}  duaer-ai-desk-host-0.15.0-linux-x64.tar.gz\n` });
   const error = await catchError(() => bootstrap.bootstrap(request()));
   assert.equal(error.errorCode, "HOST_BOOTSTRAP_FAILED");
   assert.deepEqual(transport.calls.uploads, [], "the script must not run without a digest to verify");

@@ -9,7 +9,7 @@ import {
   type CloseBehavior,
   type KeybindingOverrides,
   type NativeMenuAction,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import { installApplicationMenu } from "../application-menu";
 import {
   installPluginAssetProtocol,
@@ -123,7 +123,7 @@ export function registerApplicationStartup(deps: StartupDependencies): void {
   registerPluginAssetScheme();
   // Crashpad ships with Electron, so the reporter needs no native dependency.
   // Dumps stay local (`uploadToServer: false`) under the installation data
-  // directory so a `PI_DESKTOP_DATA_DIR` profile does not share them. Started
+  // directory so a `DUAER_AI_DESK_DATA_DIR` profile does not share them. Started
   // before `ready`, so no crash can happen ahead of the handler. A failure
   // here is a warning: it never blocks boot.
   try {
@@ -220,7 +220,7 @@ export function registerApplicationStartup(deps: StartupDependencies): void {
       log: (level, message, data) =>
         logger.app("runtime", level, message, { data: formatRemoteLogData(data) }),
     });
-    // Every paired remote `pi-host` opens against the router this boot just
+    // Every paired remote `duaer-ai-desk-host` opens against the router this boot just
     // created. An empty registry (default install with no user pairing) makes
     // this a full no-op — nothing connects, no backend registers, every
     // renderer call keeps hitting the local handler byte-for-byte.
@@ -327,15 +327,15 @@ export function registerApplicationStartup(deps: StartupDependencies): void {
       applyToggleWindowShortcut();
     }
     await ensureWindow();
-    if (process.env.PI_DESKTOP_MCP_CONTROL === "1") {
+    if (process.env.DUAER_AI_DESK_MCP_CONTROL === "1") {
       try {
         state.mcpControl = new McpControlServer({
           dataDir,
           invoke: invokeIpc,
           channels: IPC.invoke,
           version: APP_VERSION,
-          port: process.env.PI_DESKTOP_MCP_PORT
-            ? Number(process.env.PI_DESKTOP_MCP_PORT)
+          port: process.env.DUAER_AI_DESK_MCP_PORT
+            ? Number(process.env.DUAER_AI_DESK_MCP_PORT)
             : undefined,
           controller: state.desktopControl ?? undefined,
           log: (level, message, data) => logger.app("runtime", level, message, { data }),
@@ -363,14 +363,14 @@ export function registerApplicationStartup(deps: StartupDependencies): void {
 
     // Headless boot probe for automated e2e (scripts/e2e-electron-boot.mjs):
     // verifies sandboxed preload bridge + a full IPC round-trip, then quits.
-    if (process.env.PI_DESKTOP_BOOT_PROBE === "1") {
+    if (process.env.DUAER_AI_DESK_BOOT_PROBE === "1") {
       setTimeout(() => {
         void (async () => {
           try {
             const window = getMainWindow();
             const probe = await window!.webContents.executeJavaScript(
               `(async () => {
-               const api = window.piDesktop;
+               const api = window.duaerAiDesk;
                if (!api || typeof api.invoke !== "function") {
                  return { ok: false, reason: "preload api missing" };
                }
@@ -386,7 +386,7 @@ export function registerApplicationStartup(deps: StartupDependencies): void {
                // as the documented idempotent no-op.
                const projectRemove = await api.invoke(
                  api.channels.invoke.projectRemove,
-                 { path: "pi-desktop-boot-probe-unknown-project" },
+                 { path: "duaer-ai-desk-boot-probe-unknown-project" },
                );
                return {
                  ok: version?.ok === true,
@@ -426,7 +426,7 @@ export function registerApplicationStartup(deps: StartupDependencies): void {
     // Supervision probe (scripts/e2e-supervision.mjs): SIGKILL our own
     // host-core child, then assert the supervisor brings a fresh one back
     // that answers RPCs. Deterministic crash-recovery e2e without pid hunts.
-    if (process.env.PI_DESKTOP_SUPERVISION_PROBE === "1") {
+    if (process.env.DUAER_AI_DESK_SUPERVISION_PROBE === "1") {
       const initialHost = getHost();
       setTimeout(() => {
         logger.app("runtime", "info", "supervision probe: killing host-core");

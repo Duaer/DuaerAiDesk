@@ -1,4 +1,4 @@
-import { IPC, ErrorCodes, trustedExtensionCommandId, trustedExtensionCommandName } from "@pi-desktop/shared";
+import { IPC, ErrorCodes, trustedExtensionCommandId, trustedExtensionCommandName } from "@duaer-ai-desk/shared";
 import { builtinPaletteItems } from "../builtin-commands";
 import type { AgentExtensionBridge } from "../agent-extensions";
 import type { HostProcess } from "../host-process";

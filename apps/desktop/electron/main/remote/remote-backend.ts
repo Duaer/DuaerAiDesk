@@ -6,11 +6,11 @@
  * the same instance is registered under each of the host's session ids.
  *
  * Ownership stays inside the frozen architecture: this runs in Electron Main and
- * speaks RACP-WS to the remote `pi-host`; the renderer is unaware of the
+ * speaks RACP-WS to the remote `duaer-ai-desk-host`; the renderer is unaware of the
  * transport (spec §3.4). Channels the remote profile does not cover return
  * `false` from {@link RemoteBackend.handles} and fall back to the local handler.
  */
-import { ErrorCodes, IPC } from "@pi-desktop/shared";
+import { ErrorCodes, IPC } from "@duaer-ai-desk/shared";
 import type {
   AgentCompactResponse,
   AgentPromptRequest,
@@ -30,7 +30,7 @@ import type {
   SessionDetail,
   SessionSummary,
   ToolPermissionResolution,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import type { RemoteBackend } from "./backend-router.js";
 import {
   makeRemoteSessionId,

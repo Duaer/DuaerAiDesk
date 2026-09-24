@@ -4,9 +4,9 @@ import {
   type AssistantMessageEventStream,
   type AssistantMessageFrame,
   type Model,
-} from "@earendil-works/pi-ai";
-import { stream as streamAnthropic } from "@earendil-works/pi-ai/api/anthropic-messages";
-import { stream as streamOpenAIResponses } from "@earendil-works/pi-ai/api/openai-responses";
+} from "@duaer-ai-desk/upstream-ai";
+import { stream as streamAnthropic } from "@duaer-ai-desk/upstream-ai/api/anthropic-messages";
+import { stream as streamOpenAIResponses } from "@duaer-ai-desk/upstream-ai/api/openai-responses";
 
 // A gateway that re-serializes provider events with `omitempty` (Go) or drops
 // `undefined` (JS) sends a delta event whose string field is simply absent

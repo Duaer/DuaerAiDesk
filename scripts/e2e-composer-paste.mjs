@@ -27,7 +27,7 @@ try {
     loader: { ".woff": "file", ".woff2": "file", ".ttf": "file" },
     define: { "process.env.NODE_ENV": '"production"' },
     alias: {
-      "@pi-desktop/i18n": join(root, "packages/i18n/src/index.ts"),
+      "@duaer-ai-desk/i18n": join(root, "packages/i18n/src/index.ts"),
       react: join(root, "apps/desktop/node_modules/react"),
       "react-dom": join(root, "apps/desktop/node_modules/react-dom"),
     },
@@ -73,7 +73,7 @@ const { readOpenableFile, readOpenableImage } = require("./reader.cjs");
 app.setPath("userData", path.join(__dirname, "profile"));
 const saved = [];
 const history = [];
-ipcMain.handle("pi-desktop/composer/pasteFiles", async (_event, input) => {
+ipcMain.handle("duaer-ai-desk/composer/pasteFiles", async (_event, input) => {
   const files = await saveComposerPasteFiles(__dirname, input.sessionId, input.files);
   for (let i = 0; i < files.length; i++) {
     assert.deepEqual(await fs.readFile(files[i].path), Buffer.from(input.files[i].data));
@@ -90,15 +90,15 @@ ipcMain.handle("pi-desktop/composer/pasteFiles", async (_event, input) => {
   });
   return { ok: true, data: { files } };
 });
-ipcMain.handle("pi-desktop/fs/readImageDataUrl", async (_event, input) => ({
+ipcMain.handle("duaer-ai-desk/fs/readImageDataUrl", async (_event, input) => ({
   ok: true,
   data: await readOpenableImage(input.ref, null, [path.join(__dirname, "scratch")], input.mimeType),
 }));
-ipcMain.handle("pi-desktop/fs/read", async (_event, input) => ({
+ipcMain.handle("duaer-ai-desk/fs/read", async (_event, input) => ({
   ok: true,
   data: await readOpenableFile(input.path, null, [path.join(__dirname, "scratch")], input.mimeType),
 }));
-ipcMain.handle("pi-desktop/clipboard/recordPaste", (_event, input) => {
+ipcMain.handle("duaer-ai-desk/clipboard/recordPaste", (_event, input) => {
   history.push(input.text);
   return { ok: true, data: null };
 });

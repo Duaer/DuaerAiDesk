@@ -11,7 +11,7 @@
  * `Invalid schema for function 'Read': null is not of type "array"` (#864).
  */
 
-import type { AgentTool } from "@earendil-works/pi-agent-core";
+import type { AgentTool } from "@duaer-ai-desk/upstream-agent-core";
 
 /**
  * Spell out `required` on an object tool schema before it reaches the provider.

@@ -1,8 +1,8 @@
 import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
 import { isIP } from "node:net";
 
-import type { Principal } from "@pi-desktop/agent-host";
-import { RACP_DEVICE_TOKEN_PREFIX, RACP_PAIRING_TOKEN_PREFIX, type RacpRole } from "@pi-desktop/shared";
+import type { Principal } from "@duaer-ai-desk/agent-host";
+import { RACP_DEVICE_TOKEN_PREFIX, RACP_PAIRING_TOKEN_PREFIX, type RacpRole } from "@duaer-ai-desk/shared";
 
 /**
  * Credentials for the header profile (security §3.1, §3.4). A device token
@@ -28,7 +28,7 @@ export type PairingRecord = {
   consumedAt?: string;
 };
 
-/** Durable credential storage; `pi-host` keeps it under its data directory. */
+/** Durable credential storage; `duaer-ai-desk-host` keeps it under its data directory. */
 export interface DeviceCredentialStore {
   findDeviceByTokenHash(tokenHash: string): Promise<DeviceRecord | null>;
   saveDevice(record: DeviceRecord): Promise<void>;

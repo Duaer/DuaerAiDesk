@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
-import { ErrorCodes } from "@pi-desktop/shared";
+import { ErrorCodes } from "@duaer-ai-desk/shared";
 import {
   createPublicHttpsClient,
   PublicNetworkPolicyError,

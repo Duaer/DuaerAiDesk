@@ -2,7 +2,10 @@ export type WorkPanelTabKind =
   | "new"
   | "review"
   | "file"
-  | "plugin";
+  | "plugin"
+  | "requirements"
+  | "architecture"
+  | "dispatch";
 
 export type WorkPanelTab = {
   id: string;
@@ -51,12 +54,30 @@ export function switchWorkPanelContextState(
     : sanitizeContext(currentVisible);
   const nextContexts = currentSessionId
     ? { ...contexts, [currentSessionId]: retainedCurrent }
-    : contexts;
+    : { ...contexts };
+  // Project home shows the delivery column before a session exists. The first
+  // prompt creates that session and must keep the tab the user is looking at.
+  const cloneContext = (context: WorkPanelContext): WorkPanelContext => ({
+    ...context,
+    tabs: context.tabs.map((tab) => ({ ...tab })),
+    fileRequest: context.fileRequest ? { ...context.fileRequest } : null,
+  });
+  let carriedVisible: WorkPanelContext | null = null;
+  if (
+    nextSessionId &&
+    !currentSessionId &&
+    !nextContexts[nextSessionId] &&
+    retainedCurrent.tabs.length > 0
+  ) {
+    nextContexts[nextSessionId] = cloneContext(retainedCurrent);
+    carriedVisible = cloneContext(retainedCurrent);
+  }
   return {
     contexts: nextContexts,
-    visible: nextSessionId
-      ? sanitizeContext(nextContexts[nextSessionId] ?? emptyWorkPanelContext())
-      : emptyWorkPanelContext(),
+    visible: carriedVisible
+      ?? (nextSessionId
+        ? sanitizeContext(nextContexts[nextSessionId] ?? emptyWorkPanelContext())
+        : emptyWorkPanelContext()),
   };
 }
 
@@ -177,11 +198,17 @@ export function parsePluginViewRef(
  * be ignored rather than handed to a component lookup that expects a known
  * icon and renderer.
  */
+export function isDeliveryColumnTab(kind: string | undefined): boolean {
+  return kind === "requirements" || kind === "architecture" || kind === "dispatch";
+}
+
 export function isKnownWorkPanelTab(tab: WorkPanelTab): boolean {
   return (
     Boolean(tab) &&
     (tab.kind === "new" || tab.kind === "review" ||
-      tab.kind === "file" || tab.kind === "plugin")
+      tab.kind === "file" || tab.kind === "plugin" ||
+      tab.kind === "requirements" || tab.kind === "architecture" ||
+      tab.kind === "dispatch")
   );
 }
 

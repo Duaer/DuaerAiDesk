@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import type { AssistantMessage, Model } from "@earendil-works/pi-ai";
-import type { AgentMessage } from "@earendil-works/pi-agent-core";
+import type { AssistantMessage, Model } from "@duaer-ai-desk/upstream-ai";
+import type { AgentMessage } from "@duaer-ai-desk/upstream-agent-core";
 import {
   COMPACTION_MAX_KEEP_RECENT_TOKENS,
   COMPACTION_MIN_KEEP_RECENT_TOKENS,

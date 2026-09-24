@@ -86,7 +86,7 @@ what to refetch: `install`, `loadDev`, `enable`, `disable`, `uninstall`, `crash`
 supervision transition and is the cheapest of them — only the service list needs
 a reload.
 
-`settingsChanged` (`pi-desktop/app/event/settingsChanged`) carries a settings
+`settingsChanged` (`duaer-ai-desk/app/event/settingsChanged`) carries a settings
 patch when the **host** writes app settings outside the renderer path — today
 only plugin `app.setTheme` (`{ theme }`). The renderer merges the patch into
 its store so the shell paints the new preference.

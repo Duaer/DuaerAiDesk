@@ -1,7 +1,7 @@
 import { memo, type MouseEvent as ReactMouseEvent } from "react";
 import { useTranslation } from "react-i18next";
-import type { PlanningState, UiMessage } from "@pi-desktop/shared";
-import { proposalKindForMode } from "@pi-desktop/shared";
+import type { PlanningState, UiMessage } from "@duaer-ai-desk/shared";
+import { proposalKindForMode } from "@duaer-ai-desk/shared";
 import { ConversationMinimap } from "../../../components/ConversationMinimap";
 import { PermissionCard } from "../../../components/PermissionCard";
 import { TooltipButton } from "../../../components/ui";

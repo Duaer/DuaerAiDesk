@@ -2,7 +2,7 @@ use super::*;
 use crate::activation::ActivationMode;
 use tempfile::tempdir;
 
-/// Serializes tests that repoint `PI_DESKTOP_PLUGIN_MARKET_URL`.
+/// Serializes tests that repoint `DUAER_AI_DESK_PLUGIN_MARKET_URL`.
 ///
 /// The marketplace source is process-global, so two tests pointing it at
 /// different catalogs — or one clearing it while another is mid-fetch —
@@ -19,13 +19,13 @@ fn with_local_market<T>(f: impl FnOnce() -> T) -> T {
     // Safety: test-only process env mutation.
     unsafe {
         std::env::set_var(
-            "PI_DESKTOP_PLUGIN_MARKET_URL",
+            "DUAER_AI_DESK_PLUGIN_MARKET_URL",
             "file:///nope/does-not-exist-catalog.json",
         );
     }
     let out = f();
     unsafe {
-        std::env::remove_var("PI_DESKTOP_PLUGIN_MARKET_URL");
+        std::env::remove_var("DUAER_AI_DESK_PLUGIN_MARKET_URL");
     }
     out
 }
@@ -35,7 +35,7 @@ fn install_market_package_and_check_update_metadata() {
     with_local_market(|| {
         let dir = tempdir().unwrap();
         unsafe {
-            std::env::set_var("PI_DESKTOP_DATA_DIR", dir.path());
+            std::env::set_var("DUAER_AI_DESK_DATA_DIR", dir.path());
         }
         let mut mgr = PluginManager::new(dir.path(), MarketChannel::Official, None);
         let search = mgr.market_search(Some("hello"), None).unwrap();
@@ -60,7 +60,7 @@ fn default_catalog_materializes_packages_under_manager_data_dir() {
         let manager_dir = tempdir().unwrap();
         let env_dir = tempdir().unwrap();
         unsafe {
-            std::env::set_var("PI_DESKTOP_DATA_DIR", env_dir.path());
+            std::env::set_var("DUAER_AI_DESK_DATA_DIR", env_dir.path());
         }
 
         let _manager = PluginManager::new(manager_dir.path(), MarketChannel::Official, None);
@@ -76,7 +76,7 @@ fn default_catalog_materializes_packages_under_manager_data_dir() {
         assert!(!env_package.exists());
 
         unsafe {
-            std::env::remove_var("PI_DESKTOP_DATA_DIR");
+            std::env::remove_var("DUAER_AI_DESK_DATA_DIR");
         }
     });
 }
@@ -101,7 +101,7 @@ fn marketplace_install_refreshes_catalog_before_checksum_verification() {
     with_local_market(|| {
         let dir = tempdir().unwrap();
         unsafe {
-            std::env::set_var("PI_DESKTOP_DATA_DIR", dir.path());
+            std::env::set_var("DUAER_AI_DESK_DATA_DIR", dir.path());
         }
         let mut mgr = PluginManager::new(dir.path(), MarketChannel::Official, None);
         let package_bytes = bundled_package_bytes("demo.hello", "0.2.0").unwrap();
@@ -138,7 +138,7 @@ fn marketplace_install_refreshes_catalog_before_checksum_verification() {
         .unwrap();
         unsafe {
             std::env::set_var(
-                "PI_DESKTOP_PLUGIN_MARKET_URL",
+                "DUAER_AI_DESK_PLUGIN_MARKET_URL",
                 format!("file://{}", remote_catalog_path.to_string_lossy()),
             );
         }
@@ -156,14 +156,14 @@ fn marketplace_uses_highest_semver_when_catalog_versions_are_unsorted() {
     with_local_market(|| {
         let dir = tempdir().unwrap();
         unsafe {
-            std::env::set_var("PI_DESKTOP_DATA_DIR", dir.path());
+            std::env::set_var("DUAER_AI_DESK_DATA_DIR", dir.path());
         }
         let mgr = PluginManager::new(dir.path(), MarketChannel::Official, None);
         let entry = MarketCatalogEntry {
             id: "pi.todo".into(),
             name: "Fresh Todo".into(),
             description: "Todo plugin".into(),
-            author: "PI-Desktop".into(),
+            author: "DuaerAiDesk".into(),
             icon_url: None,
             categories: vec![],
             verified: true,
@@ -177,7 +177,7 @@ fn marketplace_uses_highest_semver_when_catalog_versions_are_unsorted() {
                     version: "0.5.0".into(),
                     published_at: "2026-08-12T00:00:00Z".into(),
                     changelog: None,
-                    min_pi_desktop: None,
+                    min_duaer_ai_desk: None,
                     shasum: "old".into(),
                     url: "old.piplug".into(),
                     size_bytes: 1,
@@ -188,7 +188,7 @@ fn marketplace_uses_highest_semver_when_catalog_versions_are_unsorted() {
                     version: "0.5.1".into(),
                     published_at: "2026-08-13T00:00:00Z".into(),
                     changelog: None,
-                    min_pi_desktop: None,
+                    min_duaer_ai_desk: None,
                     shasum: "new".into(),
                     url: "new.piplug".into(),
                     size_bytes: 1,
@@ -235,7 +235,7 @@ fn market_entry_offers_an_update_only_when_the_catalog_is_newer() {
 
         let dir = tempdir().unwrap();
         unsafe {
-            std::env::set_var("PI_DESKTOP_DATA_DIR", dir.path());
+            std::env::set_var("DUAER_AI_DESK_DATA_DIR", dir.path());
         }
         let mut mgr = PluginManager::new(dir.path(), MarketChannel::Official, None);
         mgr.sync_builtin(Some(ship.path())).unwrap();
@@ -247,7 +247,7 @@ fn market_entry_offers_an_update_only_when_the_catalog_is_newer() {
             id: "pi.todo".into(),
             name: "Todo".into(),
             description: "Todo plugin".into(),
-            author: "PI-Desktop".into(),
+            author: "DuaerAiDesk".into(),
             versions: vec![MarketVersion {
                 version: latest.into(),
                 published_at: "2026-08-12T00:00:00Z".into(),
@@ -271,7 +271,7 @@ fn market_entry_offers_an_update_only_when_the_catalog_is_newer() {
         // The data directory is process-global; leaving it set would leak into
         // whichever test runs next.
         unsafe {
-            std::env::remove_var("PI_DESKTOP_DATA_DIR");
+            std::env::remove_var("DUAER_AI_DESK_DATA_DIR");
         }
     });
 }
@@ -281,7 +281,7 @@ fn announced_version_without_a_package_is_visible_but_not_installable() {
     with_local_market(|| {
         let dir = tempdir().unwrap();
         unsafe {
-            std::env::set_var("PI_DESKTOP_DATA_DIR", dir.path());
+            std::env::set_var("DUAER_AI_DESK_DATA_DIR", dir.path());
         }
         let mut mgr = PluginManager::new(dir.path(), MarketChannel::Official, None);
         mgr.install_from_market("demo.hello", None, true, true, None)
@@ -293,7 +293,7 @@ fn announced_version_without_a_package_is_visible_but_not_installable() {
             version: "0.9.0".into(),
             published_at: "2026-08-13T00:00:00Z".into(),
             changelog: None,
-            min_pi_desktop: None,
+            min_duaer_ai_desk: None,
             shasum: String::new(),
             url: String::new(),
             size_bytes: 0,
@@ -338,7 +338,7 @@ fn silent_update_check_uses_cached_catalog_without_refreshing_remote() {
     with_local_market(|| {
         let dir = tempdir().unwrap();
         unsafe {
-            std::env::set_var("PI_DESKTOP_DATA_DIR", dir.path());
+            std::env::set_var("DUAER_AI_DESK_DATA_DIR", dir.path());
         }
         let mut mgr = PluginManager::new(dir.path(), MarketChannel::Official, None);
         mgr.install_from_market("demo.hello", None, true, false, None)
@@ -358,7 +358,7 @@ fn silent_update_check_uses_cached_catalog_without_refreshing_remote() {
         fs::write(&remote_path, serde_json::to_string_pretty(&remote).unwrap()).unwrap();
         unsafe {
             std::env::set_var(
-                "PI_DESKTOP_PLUGIN_MARKET_URL",
+                "DUAER_AI_DESK_PLUGIN_MARKET_URL",
                 format!("file://{}", remote_path.to_string_lossy()),
             );
         }
@@ -376,20 +376,20 @@ fn silent_update_check_uses_cached_catalog_without_refreshing_remote() {
         );
 
         unsafe {
-            std::env::remove_var("PI_DESKTOP_DATA_DIR");
-            std::env::remove_var("PI_DESKTOP_PLUGIN_MARKET_URL");
+            std::env::remove_var("DUAER_AI_DESK_DATA_DIR");
+            std::env::remove_var("DUAER_AI_DESK_PLUGIN_MARKET_URL");
         }
     });
 }
 
 #[test]
 fn package_path_traversal_rejected() {
-    // PI_DESKTOP_DATA_DIR is process-wide; hold the same lock the market
+    // DUAER_AI_DESK_DATA_DIR is process-wide; hold the same lock the market
     // tests use so two tests cannot point it at each other's directory.
     let _env = lock_market_env();
     let dir = tempdir().unwrap();
     unsafe {
-        std::env::set_var("PI_DESKTOP_DATA_DIR", dir.path());
+        std::env::set_var("DUAER_AI_DESK_DATA_DIR", dir.path());
     }
     let bad = make_zip(&[("../evil.js", b"alert(1)")]);
     let pkg = dir.path().join("bad.piplug");
@@ -411,7 +411,7 @@ fn package_path_traversal_rejected() {
         .to_string();
     assert!(err.contains("path traversal") || err.contains("PLUGIN_INVALID"));
     unsafe {
-        std::env::remove_var("PI_DESKTOP_DATA_DIR");
+        std::env::remove_var("DUAER_AI_DESK_DATA_DIR");
     }
 }
 
@@ -420,7 +420,7 @@ fn high_risk_permissions_roundtrip_on_notes_plugin() {
     with_local_market(|| {
         let dir = tempdir().unwrap();
         unsafe {
-            std::env::set_var("PI_DESKTOP_DATA_DIR", dir.path());
+            std::env::set_var("DUAER_AI_DESK_DATA_DIR", dir.path());
         }
         // Clean up any existing packages to ensure fresh generation
         let packages_dir = dir.path().join("plugins/market/packages");
@@ -453,7 +453,7 @@ fn resolve_relative_package_urls_against_catalog() {
     );
     assert_eq!(
         resolved,
-        "https://raw.githubusercontent.com/AIUO-Net/pi-desktop-plugins/main/packages/demo.hello-0.2.0.piplug"
+        "https://raw.githubusercontent.com/AIUO-Net/duaer-ai-desk-plugins/main/packages/demo.hello-0.2.0.piplug"
     );
 }
 
@@ -467,8 +467,8 @@ fn refresh_catalog_from_the_github_backup_when_network_available() {
     }
     let dir = tempdir().unwrap();
     unsafe {
-        std::env::set_var("PI_DESKTOP_DATA_DIR", dir.path());
-        std::env::set_var("PI_DESKTOP_PLUGIN_MARKET_URL", url);
+        std::env::set_var("DUAER_AI_DESK_DATA_DIR", dir.path());
+        std::env::set_var("DUAER_AI_DESK_PLUGIN_MARKET_URL", url);
     }
     let mgr = PluginManager::new(dir.path(), MarketChannel::Official, None);
     let Ok(meta) = mgr.refresh_market(true) else {
@@ -481,7 +481,7 @@ fn refresh_catalog_from_the_github_backup_when_network_available() {
     assert!(meta["sourceUrl"]
         .as_str()
         .unwrap_or("")
-        .contains("pi-desktop-plugins"));
+        .contains("duaer-ai-desk-plugins"));
     // Which plugins the repository publishes is the publisher's business; that
     // the catalog is readable and reaches the search path is the client's.
     let search = mgr.market_search(None, None).unwrap();
@@ -490,8 +490,8 @@ fn refresh_catalog_from_the_github_backup_when_network_available() {
         "a published catalog lists at least one installable plugin"
     );
     unsafe {
-        std::env::remove_var("PI_DESKTOP_DATA_DIR");
-        std::env::remove_var("PI_DESKTOP_PLUGIN_MARKET_URL");
+        std::env::remove_var("DUAER_AI_DESK_DATA_DIR");
+        std::env::remove_var("DUAER_AI_DESK_PLUGIN_MARKET_URL");
     }
 }
 
@@ -604,7 +604,7 @@ fn cached_catalog_is_scoped_to_the_source_that_fetched_it() {
     with_local_market(|| {
         let dir = tempdir().unwrap();
         unsafe {
-            std::env::set_var("PI_DESKTOP_DATA_DIR", dir.path());
+            std::env::set_var("DUAER_AI_DESK_DATA_DIR", dir.path());
         }
         let mgr = PluginManager::new(dir.path(), MarketChannel::Official, None);
         // A bundled offline snapshot records no source and stays usable
@@ -627,10 +627,10 @@ fn cached_catalog_is_scoped_to_the_source_that_fetched_it() {
 #[test]
 fn switching_source_ignores_the_previous_providers_snapshot() {
     with_local_market(|| {
-        let local_source = std::env::var("PI_DESKTOP_PLUGIN_MARKET_URL").unwrap();
+        let local_source = std::env::var("DUAER_AI_DESK_PLUGIN_MARKET_URL").unwrap();
         let dir = tempdir().unwrap();
         unsafe {
-            std::env::set_var("PI_DESKTOP_DATA_DIR", dir.path());
+            std::env::set_var("DUAER_AI_DESK_DATA_DIR", dir.path());
         }
         let mgr = PluginManager::new(dir.path(), MarketChannel::Official, None);
 
@@ -701,7 +701,7 @@ fn read_manifest_err(root: &Path) -> String {
 
 #[test]
 fn accepts_and_summarizes_new_contributions() {
-    // PI_DESKTOP_DATA_DIR is process-wide; hold the same lock the market
+    // DUAER_AI_DESK_DATA_DIR is process-wide; hold the same lock the market
     // tests use so two tests cannot point it at each other's directory.
     let _env = lock_market_env();
     let dir = tempdir().unwrap();
@@ -764,7 +764,7 @@ fn accepts_and_summarizes_new_contributions() {
 
     let data = tempdir().unwrap();
     unsafe {
-        std::env::set_var("PI_DESKTOP_DATA_DIR", data.path());
+        std::env::set_var("DUAER_AI_DESK_DATA_DIR", data.path());
     }
     let mut mgr = PluginManager::new(data.path(), MarketChannel::Official, None);
     let summary = mgr.load_dev(root.to_str().unwrap()).unwrap();
@@ -773,7 +773,7 @@ fn accepts_and_summarizes_new_contributions() {
     assert_eq!(summary.settings.len(), 1);
     assert_eq!(summary.settings[0].scope, "plugin");
     unsafe {
-        std::env::remove_var("PI_DESKTOP_DATA_DIR");
+        std::env::remove_var("DUAER_AI_DESK_DATA_DIR");
     }
 }
 
@@ -1353,12 +1353,12 @@ fn services_and_bus_declarations_are_checked() {
 /// things that rewrite a plugin record: a restart and a reinstall.
 #[test]
 fn a_project_scope_survives_a_reload_and_a_reinstall() {
-    // PI_DESKTOP_DATA_DIR is process-wide; hold the same lock the market
+    // DUAER_AI_DESK_DATA_DIR is process-wide; hold the same lock the market
     // tests use so two tests cannot point it at each other's directory.
     let _env = lock_market_env();
     let dir = tempdir().unwrap();
     unsafe {
-        std::env::set_var("PI_DESKTOP_DATA_DIR", dir.path());
+        std::env::set_var("DUAER_AI_DESK_DATA_DIR", dir.path());
     }
 
     let source = dir.path().join("src");
@@ -1429,7 +1429,7 @@ fn a_project_scope_survives_a_reload_and_a_reinstall() {
     assert_eq!(again.plugin.scope.projects, vec!["/work/api".to_string()]);
 
     unsafe {
-        std::env::remove_var("PI_DESKTOP_DATA_DIR");
+        std::env::remove_var("DUAER_AI_DESK_DATA_DIR");
     }
 }
 
@@ -1595,13 +1595,13 @@ fn backup_channels_each_resolve_their_own_packages() {
         PluginManager::resolve_package_url(GITHUB_BACKUP_CHANNEL_CATALOG_URL, None, relative);
     assert_eq!(
         github,
-        "https://raw.githubusercontent.com/AIUO-Net/pi-desktop-plugins/main/packages/acme.todo-1.0.0.piplug"
+        "https://raw.githubusercontent.com/AIUO-Net/duaer-ai-desk-plugins/main/packages/acme.todo-1.0.0.piplug"
     );
 
     let mirror = PluginManager::resolve_package_url(MIRROR_MARKET_CATALOG_URL, None, relative);
     assert_eq!(
         mirror,
-        "https://cnb.cool/aixk/pi-desktop-plugins/-/git/raw/main/packages/acme.todo-1.0.0.piplug"
+        "https://cnb.cool/aixk/duaer-ai-desk-plugins/-/git/raw/main/packages/acme.todo-1.0.0.piplug"
     );
 
     // Neither resolution leaves the source the user picked, and both hosts
@@ -1654,7 +1654,7 @@ fn a_version_requiring_a_newer_host_is_not_installable() {
         let mgr = offline_manager(dir.path());
         let mut entry = v2_entry();
         entry.versions.retain(|v| !v.yanked);
-        entry.versions[0].min_pi_desktop = Some("999.0.0".into());
+        entry.versions[0].min_duaer_ai_desk = Some("999.0.0".into());
 
         assert!(!mgr.to_market_summary(&entry).installable);
         let catalog = v2_catalog(entry.clone());
@@ -1666,7 +1666,7 @@ fn a_version_requiring_a_newer_host_is_not_installable() {
 
         // A range expression is not a version bound this host can evaluate,
         // and an unreadable bound must not make a plugin uninstallable.
-        entry.versions[0].min_pi_desktop = Some(">=0.2.0".into());
+        entry.versions[0].min_duaer_ai_desk = Some(">=0.2.0".into());
         assert!(mgr.to_market_summary(&entry).installable);
     });
 }
@@ -1693,7 +1693,7 @@ fn verified_trust_is_honoured_only_from_the_official_source() {
     // test's snapshot self-contained avoids exercising package materialization.
     // Safety: test-only process env mutation, serialized by the market lock.
     unsafe {
-        std::env::set_var("PI_DESKTOP_PLUGIN_MARKET_URL", OFFICIAL_CHANNEL_CATALOG_URL);
+        std::env::set_var("DUAER_AI_DESK_PLUGIN_MARKET_URL", OFFICIAL_CHANNEL_CATALOG_URL);
     }
     let official = offline_manager(dir.path());
     assert_eq!(official.resolve_trust(&v2_entry()), "verified");
@@ -1702,7 +1702,7 @@ fn verified_trust_is_honoured_only_from_the_official_source() {
     // promote itself past community.
     unsafe {
         std::env::set_var(
-            "PI_DESKTOP_PLUGIN_MARKET_URL",
+            "DUAER_AI_DESK_PLUGIN_MARKET_URL",
             "https://plugins.company.local/catalog.json",
         );
     }
@@ -1719,7 +1719,7 @@ fn verified_trust_is_honoured_only_from_the_official_source() {
     assert_eq!(custom.resolve_trust(&v1), "community");
 
     unsafe {
-        std::env::remove_var("PI_DESKTOP_PLUGIN_MARKET_URL");
+        std::env::remove_var("DUAER_AI_DESK_PLUGIN_MARKET_URL");
     }
 }
 
@@ -2115,7 +2115,7 @@ fn an_install_reports_progress_and_honours_a_cancel() {
         // or test changes the process-wide default directory.
         let other = tempdir().unwrap();
         unsafe {
-            std::env::set_var("PI_DESKTOP_DATA_DIR", other.path());
+            std::env::set_var("DUAER_AI_DESK_DATA_DIR", other.path());
         }
         let mut mgr = PluginManager::new(dir.path(), MarketChannel::Official, None);
         let catalog: MarketCatalogFile =

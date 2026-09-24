@@ -70,7 +70,7 @@ function runWatchdog(args, { env = {}, cwd = repoRoot } = {}) {
 }
 
 async function makeTempDir(t) {
-  const root = await mkdtemp(join(tmpdir(), "pi-desktop-signing-watchdog-"));
+  const root = await mkdtemp(join(tmpdir(), "duaer-ai-desk-signing-watchdog-"));
   t.after(() => rm(root, { recursive: true, force: true }));
   return root;
 }
@@ -101,7 +101,7 @@ test("forwards child output with a [sign] prefix and reports a clean exit", asyn
     "--",
     "bash",
     "-c",
-    'echo "Walking... /tmp/PI-Desktop.app/Contents"; echo "notice: nothing to see"; echo "Signing... /tmp/PI-Desktop.app/Contents/MacOS/PI-Desktop"',
+    'echo "Walking... /tmp/DuaerAiDesk.app/Contents"; echo "notice: nothing to see"; echo "Signing... /tmp/DuaerAiDesk.app/Contents/MacOS/DuaerAiDesk"',
   ]);
 
   assert.equal(status, 0);
@@ -389,8 +389,8 @@ test("appends a markdown summary to GITHUB_STEP_SUMMARY", async (t) => {
 
 test("recognizes signing phases from the builder output in order", async () => {
   const script = [
-    'console.log("Walking... /tmp/PI-Desktop.app/Contents");',
-    'console.log("Signing... /tmp/PI-Desktop.app/Contents/MacOS/PI-Desktop");',
+    'console.log("Walking... /tmp/DuaerAiDesk.app/Contents");',
+    'console.log("Signing... /tmp/DuaerAiDesk.app/Contents/MacOS/DuaerAiDesk");',
     'console.log("notarizing using notarytool");',
   ].join("\n");
 
@@ -408,5 +408,5 @@ test("recognizes signing phases from the builder output in order", async () => {
     .split("\n")
     .filter((line) => line.startsWith("[sign] phase:"))
     .map((line) => line.slice("[sign] phase: ".length));
-  assert.deepEqual(phases, ["walking", "signing:PI-Desktop", "notarizing"]);
+  assert.deepEqual(phases, ["walking", "signing:DuaerAiDesk", "notarizing"]);
 });

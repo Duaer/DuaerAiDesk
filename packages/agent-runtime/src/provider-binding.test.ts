@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
-import { DEEPSEEK_REASONING_REPLAY_PLACEHOLDER } from "@pi-desktop/shared";
-import type { ModelAuth } from "@earendil-works/pi-ai";
-import { convertMessages } from "@earendil-works/pi-ai/api/openai-completions";
+import { DEEPSEEK_REASONING_REPLAY_PLACEHOLDER } from "@duaer-ai-desk/shared";
+import type { ModelAuth } from "@duaer-ai-desk/upstream-ai";
+import { convertMessages } from "@duaer-ai-desk/upstream-ai/api/openai-completions";
 import { modelConfigWithBinding } from "./model-capabilities.js";
 import type { ModelConfig } from "./thinking-level.js";
 import {

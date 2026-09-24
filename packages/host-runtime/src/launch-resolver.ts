@@ -15,12 +15,13 @@ import {
   type SessionThinkingLevel,
   type UserSkillRecord,
   type UserSubagentRecord,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import {
   capabilitiesFromModelConfig,
   clampThinkingLevel,
   genericModelConfig,
   loadInstructionChain,
+  judgmentModelFromSettings,
   loadSubagentDefinitions,
   modelConfigWithBinding,
   optionalProviderHeaders,
@@ -28,7 +29,7 @@ import {
   visionFromModelConfig,
   type RuntimeProviderConfig,
   type UserSubagentDocument,
-} from "@pi-desktop/agent-runtime";
+} from "@duaer-ai-desk/agent-runtime";
 
 import type { HostRpc } from "./host-ports.js";
 
@@ -172,6 +173,20 @@ export function createHeadlessLaunchResolver(options: HeadlessLaunchResolverOpti
     }
   }
 
+  async function builtinSubagentModels(): Promise<
+    Record<string, { model?: string; fallbackModels?: string[] }>
+  > {
+    try {
+      const result = await requireHost().call<{
+        models?: Record<string, { model?: string; fallbackModels?: string[] }>;
+      }>("agents.builtinModels");
+      return result.models ?? {};
+    } catch (error) {
+      if (!isHostUnavailable(error)) log("warn", "builtin subagent models failed", { error: String(error) });
+      return {};
+    }
+  }
+
   async function resolveEffectiveCommandShell(): Promise<CommandShellCatalog> {
     const catalog = await requireHost().call<CommandShellCatalog>("commandShells.list");
     if (!isCommandShellCatalog(catalog)) {
@@ -307,6 +322,8 @@ export function createHeadlessLaunchResolver(options: HeadlessLaunchResolverOpti
     const subagentCatalog = await loadSubagentDefinitions(projectPath, {
       userDocuments: await activeUserSubagentDocuments(projectPath),
       disabledBuiltins: await disabledBuiltinSubagents(),
+      builtinModels: await builtinSubagentModels(),
+      judgmentModel: judgmentModelFromSettings(settings),
     });
     const subagentBindings = await resolveSubagentProviders({
       definitions: subagentCatalog.definitions,

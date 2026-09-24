@@ -239,7 +239,7 @@ malformed.
 | `PLUGIN_PERMISSION_DENIED` | no | plugin lacks the declared and granted permission the call needs |
 | `PLUGIN_INTEGRITY` | no | package checksum or signature did not match the catalog entry |
 | `PLUGIN_NETWORK` | yes | marketplace download or catalog fetch failed |
-| `PLUGIN_HOST_TOO_OLD` | no | the package's `engines.piDesktop` range excludes this host |
+| `PLUGIN_HOST_TOO_OLD` | no | the package's `engines.duaerAiDesk` range excludes this host |
 | `PLUGIN_MARKET_INVALID` | no | the marketplace catalog is malformed or missing required release fields |
 | `PLUGIN_MARKET_UNTRUSTED_HOST` | no | the catalog or package URL is outside the trusted marketplace hosts |
 | `PLUGIN_MARKET_YANKED` | no | the requested release was withdrawn from the catalog |
@@ -286,7 +286,7 @@ the bounded window in sibling result fields
 
 ### 3.8 Remote control (RACP-WS / SSH bootstrap)
 
-Emitted by the desktop's remote-host client and the `pi-host` server when a
+Emitted by the desktop's remote-host client and the `duaer-ai-desk-host` server when a
 session lives on a paired remote machine driven over `RACP-WS`
 (see [19-remote-agent-control-protocol](19-remote-agent-control-protocol.md),
 [../05-security/02-remote-control-security](../05-security/02-remote-control-security.md),
@@ -296,8 +296,8 @@ codes surface through the same error object as any other call.
 | code | retriable | meaning |
 |---|---|---|
 | `HOST_DISCONNECTED` | yes | the remote host connection dropped; in-flight calls are rejected and the client reconnects and resubscribes by cursor |
-| `HOST_BOOTSTRAP_FAILED` | no | provisioning the remote `pi-host` over SSH failed (download, checksum mismatch, or `install.sh`); `details.reason` names the stage |
-| `HOST_VERSION_MISMATCH` | no | the remote `pi-host` version does not match the desktop; the desktop refuses to drive an incompatible host |
+| `HOST_BOOTSTRAP_FAILED` | no | provisioning the remote `duaer-ai-desk-host` over SSH failed (download, checksum mismatch, or `install.sh`); `details.reason` names the stage |
+| `HOST_VERSION_MISMATCH` | no | the remote `duaer-ai-desk-host` version does not match the desktop; the desktop refuses to drive an incompatible host |
 | `REMOTE_AUTH_FAILED` | no | the device or pairing token was rejected on the RACP-WS upgrade |
 | `REMOTE_CONNECTION_FAILED` | yes | the RACP-WS transport could not connect (non-loopback URL, refused socket) |
 | `REMOTE_FORWARD_FAILED` | yes | the SSH loopback port forward could not be established |

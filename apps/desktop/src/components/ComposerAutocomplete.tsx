@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import type { ComposerCommand } from "@pi-desktop/shared";
+import type { ComposerCommand } from "@duaer-ai-desk/shared";
 import type { AutocompleteItem, useComposerAutocomplete } from "../hooks/use-composer-autocomplete";
 import {
   IconBookOpen,

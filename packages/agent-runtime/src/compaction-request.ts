@@ -17,7 +17,7 @@ import type {
   Model,
   Models,
   ModelsSimpleStreamOptions,
-} from "@earendil-works/pi-ai";
+} from "@duaer-ai-desk/upstream-ai";
 import {
   openCodeEndpointFromProvider,
   withOpenCodeSessionHeaders,

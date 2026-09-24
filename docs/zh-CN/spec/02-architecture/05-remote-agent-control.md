@@ -27,7 +27,7 @@ D375 固定了拓扑的交付顺序：首个远程部署是桌面本身作为远
   secret 都在运行 Host 的机器上，桌面只展示和控制。
 - 用户本地化是结构性的：控制链路中没有任何项目方运营的服务，所有凭据由用户
   自己的 Host 签发，出站连接只有用户的 SSH 主机、用户配置的消息渠道与模型
-  provider，以及只读的 GitHub Releases `pi-host` 下载（D385）。
+  provider，以及只读的 GitHub Releases `duaer-ai-desk-host` 下载（D385）。
 - 本地 stdio NDJSON JSON-RPC、Rust host-core 和 loopback MCP 保持不变。
 
 ## 2. 参考实现
@@ -45,7 +45,7 @@ Gateway 的模式，服务端经用户自己的 SSH 会话引导，客户端通�
 | 桌面 RACP 客户端适配层（Electron Main） | 通过现有 `lib/api.ts` 表面把远端 Host 呈现给 renderer；负责 SSH 引导、配对和端口转发 | 第二份 transcript 存储；在本地执行远端工具 |
 | Agent Host | 拥有会话、回合、每会话回合队列、事件游标、附件、工具执行和生命周期 | 浏览器展示状态 |
 | 无头 Agent Host 模块（`packages/agent-host`） | 会话/回合准入、回合队列、审批代理、内存事件日志、快照构建；向桌面 IPC、本地 MCP、RACP 和集成暴露同一套 API | Electron、renderer 或传输依赖；第二套权限或持久化实现 |
-| `pi-host` 无头包 | 在远端机器上以桌面同版本运行模块、Node pi sidecar 和 Rust host-core，只绑定 loopback，由引导脚本从 GitHub Releases 下载 | 桌面 UI、插件面板、其他 Host 的 secret |
+| `duaer-ai-desk-host` 无头包 | 在远端机器上以桌面同版本运行模块、Node pi sidecar 和 Rust host-core，只绑定 loopback，由引导脚本从 GitHub Releases 下载 | 桌面 UI、插件面板、其他 Host 的 secret |
 | 消息集成适配层 | 在 Host 进程内订阅 Host 范围事件，把脱敏摘要转发到出站渠道；把固定指令词汇映射到回合与审批操作 | 自己的权限策略、入站监听器、原始 transcript 内容 |
 | 自托管 Gateway（不排期） | 以 Host 签发的设备凭据准入、路由、Host link、限流、审计、上传字节的瞬态缓冲、（保留）推送脱敏摘要 | provider secret、完整 transcript、host-core 访问、上传窗口之外的附件字节 |
 | Node pi sidecar | 运行 pi Agent 和 provider stream | 远程认证、工作区策略、secret storage |
@@ -56,7 +56,7 @@ Gateway 的模式，服务端经用户自己的 SSH 会话引导，客户端通�
 ### 4.1 当前本地桌面
 
 ```text
-PI-Desktop
+DuaerAiDesk
 ├── Electron Main
 │   ├── Renderer
 │   ├── Node pi sidecar
@@ -67,8 +67,8 @@ PI-Desktop
 ### 4.2 SSH 隧道上的远端 Host（首个远程拓扑）
 
 ```text
-PI-Desktop (Remote Client)              Remote machine
-├── Renderer ── lib/api.ts ─┐           ┌── pi-host (headless Agent Host)
+DuaerAiDesk (Remote Client)              Remote machine
+├── Renderer ── lib/api.ts ─┐           ┌── duaer-ai-desk-host (headless Agent Host)
 ├── Electron Main           │ RACP-WS   │   ├── packages/agent-host
 │   └── RACP client adapter ┼─ over SSH ┼──▶│   ├── Node pi sidecar
 └── local sessions          │ forward   │   │   └── Rust host-core (loopback)
@@ -77,7 +77,7 @@ PI-Desktop (Remote Client)              Remote machine
 ```
 
 引导只走用户自己的 SSH 会话，不走 RACP：桌面用现有 SSH 配置登录，上传一段引导脚本，由它从
-GitHub Releases 下载与桌面同版本的 `pi-host` 包并校验公布的 SHA-256，启动它并绑定 loopback，经 SSH 通道拿到一次性
+GitHub Releases 下载与桌面同版本的 `duaer-ai-desk-host` 包并校验公布的 SHA-256，启动它并绑定 loopback，经 SSH 通道拿到一次性
 配对 token，转发本地端口后以 header profile 连接 `RACP-WS`，用配对 token 换取
 设备 token 存入桌面安全存储；Host 把该桌面设备记为 `owner`。远端 Host 的
 provider 配置由引导步骤经 SSH 通道写入，是 Host 本地配置，绝不经过 RACP。
@@ -173,7 +173,7 @@ Host   -> turn terminal event, next queued turn starts
 首个实现交付无头 `packages/agent-host` 模块，Electron Main 承载它，现有 IPC
 handler 成为它的适配层；随之落地 host-core 的 `permissions.pending` 读取和用
 host-core 持久化的 Host 队列替换 renderer 内存队列（需单独 ADR 与 schema 升级，
-D375）。SSH 隧道里程碑再加两件东西而不改线上契约：`pi-host` 包，以及位于
+D375）。SSH 隧道里程碑再加两件东西而不改线上契约：`duaer-ai-desk-host` 包，以及位于
 `lib/api.ts` 之下的桌面 RACP 客户端适配层；同一里程碑还包含 `tools/advertise` /
 `tool/execute` 中继与 `terminal/*` 操作。消息集成是
 模块在 Host 进程内的又一个调用方，不需要任何传输。

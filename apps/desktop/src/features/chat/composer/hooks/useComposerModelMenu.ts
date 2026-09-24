@@ -3,13 +3,13 @@ import type {
   Mode,
   ProviderPublic,
   SessionThinkingLevel,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import {
   initialThinkingLevelForBinding,
   imageGenerationBindings,
   isImageGenerationModel,
   modelIdsMatch,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import { useAppStore } from "../../../../stores/app-store";
 import {
   composerModelMatchesQuery,

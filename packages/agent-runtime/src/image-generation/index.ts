@@ -2,7 +2,7 @@ import {
   IMAGE_GENERATION_TIMEOUT_MS,
   imageGenerationItems,
   type GeneratedImageResult,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import {
   boundedBytes,
   downloadGeneratedImage,

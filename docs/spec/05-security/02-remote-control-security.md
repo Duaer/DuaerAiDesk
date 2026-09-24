@@ -136,7 +136,7 @@ itself authorization for a session, and a route context for one
 
 ### 3.4 SSH bootstrap pairing (first remote topology)
 
-The desktop bootstraps a `pi-host` on a remote machine over the user's own
+The desktop bootstraps a `duaer-ai-desk-host` on a remote machine over the user's own
 SSH session (`02-architecture/05-remote-agent-control.md` §5.2). The trust
 argument is that an SSH login already proves shell access to that machine;
 pairing only binds a desktop device to the Host it started.
@@ -149,7 +149,7 @@ pairing only binds a desktop device to the Host it started.
   device as `owner` of that Host.
 - The Host binds loopback only and accepts a device token only from a
   loopback peer; a non-loopback bind requires TLS and the same device token.
-- The bootstrap script, uploaded over SSH, downloads the `pi-host` bundle for
+- The bootstrap script, uploaded over SSH, downloads the `duaer-ai-desk-host` bundle for
   the remote platform at the desktop's version from GitHub Releases, verifies
   the SHA-256 published with the release, and installs it under the user's
   home; the desktop never uploads executable bytes itself. A machine without
@@ -261,7 +261,7 @@ session grant made remotely is the same by-tool-name grant as a local one
 
 - Public HTTP, SSE, and WebSocket endpoints MUST use TLS 1.2 or newer; TLS
   1.3 is preferred. A reserved gRPC binding inherits the same rule.
-- A `pi-host` bound to loopback and reached through an SSH port forward MAY
+- A `duaer-ai-desk-host` bound to loopback and reached through an SSH port forward MAY
   accept plain `ws://` when both the bind address and the peer address are
   loopback and a valid device token is presented; the SSH channel provides
   confidentiality, matching the loopback rule of ADR 0203. Any non-loopback
@@ -363,7 +363,7 @@ the tool without interrupting the turn. Provider secrets never cross RACP in
 either direction; the remote Host's providers are configured over the SSH
 bootstrap channel (§3.4).
 
-A session terminal is a shell on the Host machine running as the `pi-host`
+A session terminal is a shell on the Host machine running as the `duaer-ai-desk-host`
 user with the session root as its working directory. Only the SSH-paired
 owner device or a principal holding the explicit `terminal` scope may open
 one; Gateway-routed principals need that scope from policy. Terminal output
@@ -487,7 +487,7 @@ separate, explicitly specified credential-management capability is added.
 15. A relayed server-initiated approval request is answered exactly once, and
     the answer reaches only the Host that raised it. Applies when the Gateway
     milestone is scheduled.
-16. A `pi-host` bound to loopback accepts only loopback peers with a valid
+16. A `duaer-ai-desk-host` bound to loopback accepts only loopback peers with a valid
     device token; a non-loopback bind without TLS fails to start.
 17. A pairing token is single-use, arrives only over the SSH channel, and
     cannot be exchanged twice or from a non-loopback peer.
@@ -513,14 +513,14 @@ Gateway attachment relay rules, the single-tenant-first clause, and gates
 13–15.
 
 D375 (2026-09-10) added the SSH bootstrap pairing (§3.4), the loopback rule
-for `pi-host` behind an SSH port forward, the ceiling exemption for
+for `duaer-ai-desk-host` behind an SSH port forward, the ceiling exemption for
 SSH-paired owner devices, the remote tool-catalog and provider-configuration
 rules, gates 16–18, and marked the Gateway and cookie-profile clauses as
 belonging to unscheduled milestones.
 
 The D375 design-gate answers, recorded the same day, fixed the identity
 source to the PI account service, the GitHub Releases download for
-`pi-host`, the relay and terminal rules with gates 19–20, the 30-minute
+`duaer-ai-desk-host`, the relay and terminal rules with gates 19–20, the 30-minute
 remote approval lifetime, and the `applyCeilingToPairedDevices` policy.
 
 D385 (2026-09-10) withdrew the first-party identity source: remote control

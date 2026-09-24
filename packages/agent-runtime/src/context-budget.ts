@@ -12,11 +12,11 @@
  * cycle with `runtime.ts`.
  */
 
-import type { Api, Model } from "@earendil-works/pi-ai";
+import type { Api, Model } from "@duaer-ai-desk/upstream-ai";
 import {
   estimateContextTokens,
   type AgentMessage,
-} from "@earendil-works/pi-agent-core";
+} from "@duaer-ai-desk/upstream-agent-core";
 import {
   DEFAULT_CONTEXT_WINDOW,
   DEFAULT_MAX_TOKENS,

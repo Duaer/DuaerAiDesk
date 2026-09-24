@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import type { GlobalPermissionMode, ProjectRecord, ScheduledTask } from "@pi-desktop/shared";
+import type { GlobalPermissionMode, ProjectRecord, ScheduledTask } from "@duaer-ai-desk/shared";
 import { Button, Field, Input, Textarea } from "../../components/ui";
 import { SettingsMenuSelect } from "../../components/settings/SettingsMenuSelect";
 import { ScheduledWeekdaySelect } from "./ScheduledWeekdaySelect";

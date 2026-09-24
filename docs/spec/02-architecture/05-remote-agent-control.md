@@ -2,12 +2,12 @@
 
 - Status: Target specification; post-MVP
 - Decision: D373 / ADR 0205, amended by D374 and D375
-- Scope: Remote observation and control of a PI-Desktop Agent Host
+- Scope: Remote observation and control of a DuaerAiDesk Agent Host
 - Source of truth: `03-runtime/19-remote-agent-control-protocol.md`
 
 ## 1. Scope and status
 
-This document specifies the target architecture for controlling a PI-Desktop
+This document specifies the target architecture for controlling a DuaerAiDesk
 Agent from another client. It does not enable a network listener in the
 current desktop release and does not change the frozen MVP boundary in
 `00-baseline.md` or ADR 0004.
@@ -71,7 +71,7 @@ demand signal or product decision schedules them.
     control path. Every credential is issued by the user's own Host, and the
     only outbound connections are to the user's SSH hosts, the messaging
     channels the user configured, the model providers the user configured,
-    and the read-only GitHub Releases download of `pi-host` (D385).
+    and the read-only GitHub Releases download of `duaer-ai-desk-host` (D385).
 
 ## 3. Reference implementations and design inputs
 
@@ -97,7 +97,7 @@ The SSH-tunnel topology follows the VS Code Remote-SSH and JetBrains Gateway
 model: the server side is bootstrapped over the user's own SSH session and
 the client reaches it through a forwarded loopback port.
 
-PI-Desktop does not revive the withdrawn subagent A2A/Peer channel. ADR 0165
+DuaerAiDesk does not revive the withdrawn subagent A2A/Peer channel. ADR 0165
 continues to govern `Task` subagent coordination. The separate official
 Session Orchestrator plugin may use the host-owned, local-only collaboration
 ledger defined by ADR 0239; that reviewed path is not a remote Gateway or A2A
@@ -111,14 +111,14 @@ transport and does not change the remote-control target.
 | Desktop RACP client adapter (Electron Main) | Present a remote Host to the renderer through the existing `lib/api.ts` surface; own SSH bootstrap, pairing, and port forwarding | A second transcript store; local execution of remote tools |
 | Agent Host | Own sessions, turns, the per-session turn queue, event cursors, attachment records, tool execution, and lifecycle | Browser presentation state |
 | Headless Agent Host module (`packages/agent-host`) | Own session/turn admission, the turn queue, the approval broker, the in-memory event log, and the snapshot builder; expose one typed API to desktop IPC, local MCP, RACP, and integrations | Electron, renderer, or transport dependencies; a second permission or persistence implementation |
-| `pi-host` headless bundle | Run the module, the Node pi sidecar, and Rust host-core on a remote machine, bound to loopback, at the same version as the desktop, downloaded from GitHub Releases by the bootstrap script | A desktop UI, plugin panels, another Host's secrets |
+| `duaer-ai-desk-host` headless bundle | Run the module, the Node pi sidecar, and Rust host-core on a remote machine, bound to loopback, at the same version as the desktop, downloaded from GitHub Releases by the bootstrap script | A desktop UI, plugin panels, another Host's secrets |
 | Messaging integration adapter | Subscribe to host-scope events in the Host process and relay redacted summaries to outbound channels; map a fixed command vocabulary to turn and approval operations | Its own permission policy, an inbound listener, raw transcript content |
 | Self-hosted Gateway (unscheduled) | Admit Host-issued device credentials, authorize routing, maintain Host links, rate-limit, audit, buffer attachment uploads transiently, and (reserved) push redacted summaries | Provider secrets, durable transcript truth, arbitrary host-core access, attachment bytes beyond the upload window |
 | Node pi sidecar | Run the pi Agent loop and provider streams | Remote authentication, workspace policy, secret storage |
 | Rust host-core | Own SQLite, tools, workspace boundaries, permissions and the pending permission table, secrets, and durable local records | Public network listeners |
 
 In the first phase the logical Agent Host is Electron Main hosting the
-headless module beside its supervised sidecars. The `pi-host` bundle runs the
+headless module beside its supervised sidecars. The `duaer-ai-desk-host` bundle runs the
 same module and supervision on a remote machine. The external contract is the
 same in both deployments.
 
@@ -129,7 +129,7 @@ same in both deployments.
 This topology is unchanged:
 
 ```text
-PI-Desktop
+DuaerAiDesk
 ├── Electron Main
 │   ├── Renderer
 │   ├── Node pi sidecar
@@ -143,8 +143,8 @@ Gateway and cannot be configured to bind a LAN or public interface.
 ### 5.2 Remote Host over an SSH tunnel (first remote topology)
 
 ```text
-PI-Desktop (Remote Client)                    Remote machine
-├── Renderer ── lib/api.ts ─┐                 ┌── pi-host (headless Agent Host)
+DuaerAiDesk (Remote Client)                    Remote machine
+├── Renderer ── lib/api.ts ─┐                 ┌── duaer-ai-desk-host (headless Agent Host)
 ├── Electron Main           │ RACP-WS over    │   ├── packages/agent-host
 │   ├── RACP client adapter ┼─ SSH port ──────┼──▶│   ├── Node pi sidecar
 │   └── local sessions      │ forward         │   │   └── Rust host-core (loopback)
@@ -159,12 +159,12 @@ Bootstrap runs over the user's own SSH session, never over RACP:
    the `ssh` client through an askpass helper, never as an argument, and is
    stored encrypted in the desktop's secure storage so the host can reconnect
    after a restart.
-2. It uploads a small bootstrap script that downloads the `pi-host` bundle
+2. It uploads a small bootstrap script that downloads the `duaer-ai-desk-host` bundle
    for the remote platform at the desktop's version from GitHub Releases,
    verifies the published SHA-256, and installs it under the user's home. A
    machine without outbound access to GitHub cannot be bootstrapped in the
    first version.
-3. It starts `pi-host` bound to loopback and receives a single-use pairing
+3. It starts `duaer-ai-desk-host` bound to loopback and receives a single-use pairing
    token over the SSH channel.
 4. It forwards a local port to the Host's loopback port and connects
    `RACP-WS` with the header profile, exchanging the pairing token for a
@@ -444,7 +444,7 @@ ADR and schema bump (D375), before more than one client can control a
 session.
 
 The SSH-tunnel milestone adds two pieces without changing the wire contract:
-the `pi-host` bundle, which packages the module with the Node sidecar and the
+the `duaer-ai-desk-host` bundle, which packages the module with the Node sidecar and the
 platform's host-core binary, and the desktop RACP client adapter, which sits
 under `lib/api.ts` so the renderer needs no transport knowledge. The same
 milestone carries the `tools/advertise` / `tool/execute` relay and the
@@ -452,7 +452,7 @@ milestone carries the `tools/advertise` / `tool/execute` relay and the
 messaging integration is a further caller of the module inside the Host
 process and needs no transport at all.
 
-The migration is complete when the local desktop, a `pi-host` bundle, and,
+The migration is complete when the local desktop, a `duaer-ai-desk-host` bundle, and,
 once scheduled, a Gateway route expose the same session/turn/event behavior.
 
 ## 12. Acceptance criteria
@@ -499,11 +499,11 @@ ceiling, and the remote approval lifetime policy.
 D375 (2026-09-10) re-sequenced the topologies around recorded demand: the
 SSH-tunnel remote Host with the desktop as Remote Client ships first, the
 outbound messaging integration second, and the Gateway and browser
-topologies stay specified but unscheduled. It added the `pi-host` bundle,
+topologies stay specified but unscheduled. It added the `duaer-ai-desk-host` bundle,
 the desktop RACP client adapter, the SSH bootstrap and loopback rule, the
 remote session ownership split, and the ceiling exemption for SSH-paired
 owner devices. Its design-gate answers, recorded the same day, put the
-reverse tool relay and the terminal in R2, download `pi-host` from GitHub
+reverse tool relay and the terminal in R2, download `duaer-ai-desk-host` from GitHub
 Releases, persist the turn queue in host-core, default the remote approval
 lifetime to 30 minutes, make the paired-device exemption a Host policy, and
 fix the Gateway identity source to the PI account service.

@@ -6,13 +6,13 @@ import type {
   NetworkPolicySettings,
   NetworkProxyMode,
   NetworkProxySettings,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import {
   DEFAULT_NETWORK_PROXY_BYPASS,
   isRelaxedNetworkPolicy,
   parseProxyUrl,
   validateNetworkProxy,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import { api } from "../../lib/api";
 import { Button, Input, cx } from "../ui";
 import { SettingsRow } from "../../features/settings/primitives";

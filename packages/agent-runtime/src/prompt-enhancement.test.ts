@@ -2,11 +2,11 @@ import { describe, expect, it } from "vitest";
 import {
   createAssistantMessageEventStream,
   type AssistantMessage,
-} from "@earendil-works/pi-ai";
+} from "@duaer-ai-desk/upstream-ai";
 import {
   PROMPT_ENHANCEMENT_DEFAULT_SYSTEM_PROMPT,
   PROMPT_ENHANCEMENT_DEFAULT_USER_TEMPLATE,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import {
   enhancePromptDraft,
   promptEnhancementContext,

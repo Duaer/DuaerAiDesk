@@ -18,7 +18,7 @@
 
 import { randomUUID } from "node:crypto";
 
-import { InMemoryModelsStore } from "@earendil-works/pi-ai";
+import { InMemoryModelsStore } from "@duaer-ai-desk/upstream-ai";
 import type {
   Api,
   AuthEvent,
@@ -30,9 +30,9 @@ import type {
   ModelAuth,
   MutableModels,
   Provider,
-} from "@earendil-works/pi-ai";
-import { registerBunOAuthFlows } from "@earendil-works/pi-ai/bun-oauth";
-import { builtinModels } from "@earendil-works/pi-ai/providers/all";
+} from "@duaer-ai-desk/upstream-ai";
+import { registerBunOAuthFlows } from "@duaer-ai-desk/upstream-ai/bun-oauth";
+import { builtinModels } from "@duaer-ai-desk/upstream-ai/providers/all";
 import {
   capabilitiesFromModelConfig,
   genericModelConfig,
@@ -40,7 +40,7 @@ import {
   runWithProviderHeaders,
   type ModelConfig,
   type VendorModelBinding,
-} from "@pi-desktop/agent-runtime";
+} from "@duaer-ai-desk/agent-runtime";
 import {
   isConversationModelId,
   parseVendorModelIds,
@@ -58,7 +58,7 @@ import {
   type OAuthVendor,
   type ModelBinding,
   type ThinkingLevel,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 
 export { OAUTH_AUTH_KIND };
 

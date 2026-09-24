@@ -6,7 +6,7 @@ import {
   LocalRequestError,
   normalizeContext,
   reduceAssistantMessageFrames,
-} from "@earendil-works/pi-ai";
+} from "@duaer-ai-desk/upstream-ai";
 import type {
   AssistantMessage,
   AssistantMessageEvent,
@@ -14,16 +14,16 @@ import type {
   HostedSearchContent,
   Message,
   Model,
-} from "@earendil-works/pi-ai";
+} from "@duaer-ai-desk/upstream-ai";
 import {
   estimateContextTokens,
   estimateMessageTokens,
   getLastAssistantUsageInfo,
-} from "@earendil-works/pi-ai/utils/estimate";
-import { streamSimple as streamMistral } from "@earendil-works/pi-ai/api/mistral-conversations";
+} from "@duaer-ai-desk/upstream-ai/utils/estimate";
+import { streamSimple as streamMistral } from "@duaer-ai-desk/upstream-ai/api/mistral-conversations";
 
 const require = createRequire(import.meta.url);
-const { applyFrame } = await import(pathToFileURL(require.resolve("@earendil-works/pi-agent-core/package.json").replace(/package\.json$/, "dist/harness/pico3/kinds/frames.js")).href);
+const { applyFrame } = await import(pathToFileURL(require.resolve("@duaer-ai-desk/upstream-agent-core/package.json").replace(/package\.json$/, "dist/harness/pico3/kinds/frames.js")).href);
 
 function assistant(content: AssistantMessage["content"], timestamp = 2, tokens = 0): AssistantMessage {
   return {

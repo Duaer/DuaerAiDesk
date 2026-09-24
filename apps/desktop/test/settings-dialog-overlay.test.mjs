@@ -44,14 +44,14 @@ test("settings overlays mount on a viewport-fixed host outside the app shell", a
   const styles = await loadStyles();
   assert.match(styles, /\n\.overlay \{\n  position: fixed;\n  inset: 0;/);
 
-  const host = styles.match(/#pi-desktop-overlays \{[\s\S]*?\n\}/);
+  const host = styles.match(/#duaer-ai-desk-overlays \{[\s\S]*?\n\}/);
   assert.ok(host, "missing overlay host rule");
   assert.match(host[0], /position:\s*fixed/);
   assert.match(host[0], /inset:\s*0/);
 
   const ui = await read("../src/components/ui.tsx");
   assert.match(ui, /export function portalOverlay/);
-  assert.match(ui, /pi-desktop-overlays/);
+  assert.match(ui, /duaer-ai-desk-overlays/);
   assert.match(ui, /document\.documentElement\.appendChild/);
   assert.doesNotMatch(ui, /createPortal\(node, document\.body\)/);
 

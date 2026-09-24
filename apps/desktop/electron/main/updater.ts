@@ -23,7 +23,7 @@ import {
   IPC,
   type UpdateMode,
   type UpdateState,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import type { Logger } from "./logger";
 import { parseAllowedExternalUrl } from "./safe-open-external";
 import {
@@ -33,7 +33,7 @@ import {
 
 const { autoUpdater } = electronUpdaterPkg;
 
-export const RELEASES_URL = "https://github.com/vastsa/PI-Desktop/releases/latest";
+export const RELEASES_URL = "https://github.com/Duaer/DuaerAiDesk/releases/latest";
 
 const AUTO_CHECK_INITIAL_DELAY_MS = 15_000;
 const AUTO_CHECK_INTERVAL_MS = 6 * 60 * 60 * 1000;

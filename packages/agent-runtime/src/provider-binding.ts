@@ -16,18 +16,18 @@ import {
   type ModelAuth,
   type Models,
   type ProviderStreams,
-} from "@earendil-works/pi-ai";
+} from "@duaer-ai-desk/upstream-ai";
 import {
   buildCopilotDynamicHeaders,
   hasCopilotVisionInput,
-} from "@earendil-works/pi-ai/api/github-copilot-headers";
-import { openAICompletionsApi } from "@earendil-works/pi-ai/api/openai-completions.lazy";
-import { openAIResponsesApi } from "@earendil-works/pi-ai/api/openai-responses.lazy";
-import { openAICodexResponsesApi } from "@earendil-works/pi-ai/api/openai-codex-responses.lazy";
-import { anthropicMessagesApi } from "@earendil-works/pi-ai/api/anthropic-messages.lazy";
-import { googleGenerativeAIApi } from "@earendil-works/pi-ai/api/google-generative-ai.lazy";
-import { piMessagesApi } from "@earendil-works/pi-ai/api/pi-messages.lazy";
-import { GITHUB_COPILOT_MODELS } from "@earendil-works/pi-ai/providers/github-copilot.models";
+} from "@duaer-ai-desk/upstream-ai/api/github-copilot-headers";
+import { openAICompletionsApi } from "@duaer-ai-desk/upstream-ai/api/openai-completions.lazy";
+import { openAIResponsesApi } from "@duaer-ai-desk/upstream-ai/api/openai-responses.lazy";
+import { openAICodexResponsesApi } from "@duaer-ai-desk/upstream-ai/api/openai-codex-responses.lazy";
+import { anthropicMessagesApi } from "@duaer-ai-desk/upstream-ai/api/anthropic-messages.lazy";
+import { googleGenerativeAIApi } from "@duaer-ai-desk/upstream-ai/api/google-generative-ai.lazy";
+import { piMessagesApi } from "@duaer-ai-desk/upstream-ai/api/pi-messages.lazy";
+import { GITHUB_COPILOT_MODELS } from "@duaer-ai-desk/upstream-ai/providers/github-copilot.models";
 import {
   OPENCODE_GO_API_STYLE,
   OPENCODE_GO_BASE_URL,
@@ -35,7 +35,7 @@ import {
   deepseekRequestCompat,
   zhipuRequestCompat,
   type ThinkingLevel,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import { genericModelConfig } from "./model-capabilities.js";
 import type { ModelConfig } from "./thinking-level.js";
 
@@ -147,7 +147,7 @@ export function apiBindingForStyle(apiStyle?: string): ApiBinding {
 /** The key pi-ai signs requests with; `none` auth still needs a placeholder. */
 export function providerRequestKey(provider: RuntimeProviderConfig): string {
   return (
-    provider.apiKey || (provider.authKind === "none" ? "pi-desktop-no-auth" : "")
+    provider.apiKey || (provider.authKind === "none" ? "duaer-ai-desk-no-auth" : "")
   );
 }
 
@@ -302,7 +302,7 @@ export function createExtensionAgentModels(input: {
       auth: {
         apiKey: {
           name: `${input.providerName} plugin credential`,
-          resolve: async () => ({ auth: { apiKey: "pi-desktop-plugin-agent" } }),
+          resolve: async () => ({ auth: { apiKey: "duaer-ai-desk-plugin-agent" } }),
         },
       },
       api: input.stream,

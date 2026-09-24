@@ -23,7 +23,7 @@ Settings is a **full-window page** that replaces the app sidebar + main chrome (
   titlebar remain opaque. Only a nested settings content enter wrapper plays a
   route animation; the scrolling inner pane, rail, and backing never fade or
   translate. That entrance is opacity-only. Settings dialogs and sheets portal
-  to a viewport-fixed `#pi-desktop-overlays` host on the document element and
+  to a viewport-fixed `#duaer-ai-desk-overlays` host on the document element and
   cover the full window, including the rail.
 - Returning to the app restores the prior sidebar collapsed/expanded state
   without a sidebar entrance animation or a width ramp. Real toggle and
@@ -55,16 +55,17 @@ Settings is a **full-window page** that replaces the app sidebar + main chrome (
   8. **Subagents / 子智能体** — Lucide `Bot` (built-in and personal parallel agents)
   9. **Import / 导入** — Lucide `Download` (bring sessions and model configuration in from other tools)
   10. **Projects / 项目** — Lucide `Archive` (durable project index)
-  11. **Cloud sync / 云同步** — Lucide `CloudDownload` (encrypted portable configuration backup and bidirectional sync; developer mode only)
-  12. **Remote Hosts / 远程主机** — Lucide `Globe` (SSH bootstrap and pairing inventory; developer mode only)
-  13. **Info / 信息** — Lucide `Info` (versions, logs, updates, developer)
+  11. **Deploy / 部署** — Lucide `KeyRound` (GitHub Pages uses the machine `gh` login; Cloudflare, Alibaba Cloud, and AWS keys stay on this machine, are not shown again after saving, and are never written into a repo)
+  12. **Cloud sync / 云同步** — Lucide `CloudDownload` (encrypted portable configuration backup and bidirectional sync; developer mode only)
+  13. **Remote Hosts / 远程主机** — Lucide `Globe` (SSH bootstrap and pairing inventory; developer mode only)
+  14. **Info / 信息** — Lucide `Info` (versions, logs, updates, developer)
   Icons are decorative (`aria-hidden` via the SVG default) and stay monochrome
   with the rail label; do not reuse refresh/rotate glyphs here.
 - The directory remains a flat searchable list in the same exact order. For
   scanability, the destinations are shown in four titled visual clusters:
   `Preferences` / `偏好` (General, AI, Shortcuts), `Agent` / `智能体`
   (Instructions, Models, Skills, MCP, Subagents), `Workspace` / `工作区`
-  (Import, Projects), and `System` / `系统` (Cloud sync, Remote Hosts, Info;
+  (Import, Projects, Deploy), and `System` / `系统` (Cloud sync, Remote Hosts, Info;
   Cloud sync and Remote Hosts are developer-only). Headings are
   muted, non-interactive labels and use whitespace for separation; no divider
   lines are rendered. These are visual landmarks only, not a second navigation
@@ -475,16 +476,20 @@ system while preserving their different data ownership:
   search field with a clear affordance, the selected-project picker, and the
   page's primary actions right-aligned. Subagents omits the filter and the
   picker because it is global-only, keeping only search and its actions.
-  The panel still uses two in-panel groups: **Built-in** (the five shipped
-  definitions `explorer`, `code-reviewer`, `test-runner`, `fixer`, and
-  `ui-designer`) and **Global** (`~/.agents/subagents`, user-owned). An enabled
+  The panel still uses two in-panel groups: **Built-in** (the shipped
+  definitions `explorer`, `code-reviewer`, `test-runner`, `fixer`,
+  `ui-designer`, `coder`, and `judge`) and **Global** (`~/.agents/subagents`, user-owned).
+  `judge` is offered to Task only after a judgment model is set, and that
+  edit sheet lists only that model. An enabled
   user document of the same name shadows that builtin in the Task catalog, so
   the Built-in row is omitted while the user row remains. A disabled user
   document of the same name leaves the builtin in the catalog (and on the
-  Built-in list) because Task uses the shipped definition again. Built-in rows
-  carry a source badge, **Copy as mine** (opens the create sheet pre-filled from
-  that definition, with the matching template chip selected), and the same
-  enablement switch a user row has (D202 activation, ADR 0270): turning one off
+  Built-in list) because Task uses the shipped definition again.   Built-in rows
+  carry a source badge, an edit action that changes only the model pin (and its
+  fallbacks) in app-local state, **Copy as mine** (opens the create sheet
+  pre-filled from that definition, with the matching template chip selected),
+  and the same enablement switch a user row has (D202 activation, ADR 0270):
+  turning one off
   writes app-local state rather than a document, the row stays listed and dimmed
   so the switch is still the way back on, and the next catalog load stops
   offering it to `Task`. Reveal and delete remain absent because a builtin is
@@ -572,7 +577,7 @@ system while preserving their different data ownership:
   pre-fills the same fields the runtime's `BUILTIN_SUBAGENT_DOCUMENTS` ship
   with. Above the name field the sheet shows a "Start from template" row of
   compact name chips (Explorer, Code reviewer, Test runner, Fixer, UI
-  designer, plus a blank option). Chips show the localized name only; the
+  designer, Duaer Coder, plus a blank option). Chips show the localized name only; the
   selected chip's one-line caption sits once under the row. Hyphenated preset
   ids (`code-reviewer`, `test-runner`, `ui-designer`) resolve through an
   explicit catalog map (`presetReviewerName` / `presetTestRunnerName` /
@@ -595,9 +600,11 @@ system while preserving their different data ownership:
   is a picker over the configured providers' models; the picker groups entries
   by provider and every option comes from the configured catalog, so there is
   no hand-typed pin entry (issue #60). With no providers configured it shows
-  an empty state whose action opens Models. A builtin keeps its Built-in row,
-  which is switched but never edited; the picker is for new and user-owned
-  subagents only.
+  an empty state whose action opens Models. A builtin keeps its Built-in row.
+  Edit opens the model picker only; the pin is stored beside builtin
+  enablement and applied on the next catalog load, including a switched-off
+  row. Copy as mine still creates a user document. The full editor remains
+  for new and user-owned subagents.
   The create/edit sheet stays compact at desktop sizes: form controls are
   local filled wells with restrained padding, the prompt editor is the only
   intentionally tall control, and Advanced remains a compact disclosure. Hover
@@ -605,7 +612,7 @@ system while preserving their different data ownership:
   form state is announced from the shared error region.
 
 ### Instructions (`instructions` tab)
-- Edit the global instruction Markdown used by every PI-Desktop Agent session.
+- Edit the global instruction Markdown used by every DuaerAiDesk Agent session.
 - Show the resolved instruction-file path and save through the host-backed
   instruction API; project instructions remain managed from the active project
   menu and are resolved after the global layer.
@@ -712,7 +719,7 @@ system while preserving their different data ownership:
 ### Info
 - app/host/protocol versions + open logs
 - **Report a problem** row: one action opens the GitHub bug issue form in
-  the system browser. Electron Main owns the URL (`pi-desktop/app/openFeedback`),
+  the system browser. Electron Main owns the URL (`duaer-ai-desk/app/openFeedback`),
   prefills app version, OS, and environment from Main-owned version info, and
   never accepts a renderer-supplied destination (D313 / ADR 0157)
 - Updates row with the current delivery state and one applicable action:

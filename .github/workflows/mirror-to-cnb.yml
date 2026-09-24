@@ -1,11 +1,11 @@
 # Trigger the CNB (cnb.cool) mirror pipeline after a GitHub Release
 # is published or edited. GitHub Release remains the canonical artifact
 # source; CNB copies the same tag so Chinese users can pull from
-# https://cnb.cool/aixk/Pi-Desktop.
+# https://cnb.cool/aixk/DuaerAiDesk.
 #
-# Prerequisite (already configured on vastsa/PI-Desktop):
+# Prerequisite (already configured on Duaer/DuaerAiDesk):
 # repository secret CNB_MIRROR_TOKEN, with permission to start builds
-# on aixk/Pi-Desktop. The CNB pipeline listens for event
+# on aixk/DuaerAiDesk. The CNB pipeline listens for event
 # `api_trigger_mirror` and reads `MIRROR_TAGS`.
 
 name: Mirror to CNB
@@ -30,11 +30,11 @@ concurrency:
 jobs:
   trigger:
     name: Trigger CNB mirror pipeline
-    if: github.repository == 'vastsa/PI-Desktop'
+    if: github.repository == 'Duaer/DuaerAiDesk'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     env:
-      CNB_BUILD_URL: https://api.cnb.cool/aixk/Pi-Desktop/-/build/start
+      CNB_BUILD_URL: https://api.cnb.cool/aixk/DuaerAiDesk/-/build/start
     steps:
       - name: Resolve release tag
         id: tag

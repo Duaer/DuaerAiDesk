@@ -90,6 +90,9 @@ pub(crate) fn validate_application_references(st: &AppState, payload: &Value) ->
     if let Some(binding) = payload.get("imageGeneration") {
         require_provider_reference(st, binding, "imageGeneration")?;
     }
+    if let Some(binding) = payload.get("judgmentModel") {
+        require_provider_reference(st, binding, "judgmentModel")?;
+    }
     if let Some(bindings) = payload
         .get("imageGenerationModels")
         .and_then(Value::as_array)

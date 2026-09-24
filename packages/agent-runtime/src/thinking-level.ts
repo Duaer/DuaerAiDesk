@@ -8,7 +8,7 @@ import type {
   ModelReasoningOption,
   SessionThinkingLevel,
   ThinkingLevel,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 
 export type ThinkingCapabilitySet = {
   supportsReasoning: boolean;

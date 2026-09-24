@@ -96,9 +96,9 @@ test("chip sentinels stay unique inside the private-use range", () => {
 });
 
 test("paste IPC is a typed renderer-to-main bridge", () => {
-  assert.match(protocol, /composerPasteFiles: "pi-desktop\/composer\/pasteFiles"/);
-  assert.match(protocol, /clipboardRecordPaste: "pi-desktop\/clipboard\/recordPaste"/);
-  assert.match(protocol, /composerImportFiles: "pi-desktop\/composer\/importFiles"/);
+  assert.match(protocol, /composerPasteFiles: "duaer-ai-desk\/composer\/pasteFiles"/);
+  assert.match(protocol, /clipboardRecordPaste: "duaer-ai-desk\/clipboard\/recordPaste"/);
+  assert.match(protocol, /composerImportFiles: "duaer-ai-desk\/composer\/importFiles"/);
   assert.match(api, /pasteFiles: \(sessionId: string, files: ComposerPasteFile\[\]\)/);
   assert.match(api, /pickFiles: \(\) =>[\s\S]*token: string \| null/);
   assert.match(api, /importFiles: \(sessionId: string, token: string\)/);

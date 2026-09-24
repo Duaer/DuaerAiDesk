@@ -14,7 +14,7 @@ import { TooltipButton } from "./ui";
  */
 export function WindowControls() {
   const { t } = useTranslation();
-  const platform = window.piDesktop?.platform ?? "darwin";
+  const platform = window.duaerAiDesk?.platform ?? "darwin";
   const [maximized, setMaximized] = useState(false);
 
   useEffect(() => {

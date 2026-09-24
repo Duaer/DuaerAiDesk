@@ -39,34 +39,34 @@ Principles:
 ## 3. Channel Conventions
 
 ```text
-invoke: pi-desktop/<domain>/<action>
-event: pi-desktop/<domain>/event/<name>
+invoke: duaer-ai-desk/<domain>/<action>
+event: duaer-ai-desk/<domain>/event/<name>
 ```
 
 Examples:
 
-- `pi-desktop/agent/prompt`
-- `pi-desktop/agent/steer`
-- `pi-desktop/agent/stop`
-- `pi-desktop/agent/abort`
-- `pi-desktop/agent/event/message`
-- `pi-desktop/agent/askTool/resolve`
-- `pi-desktop/session/list`
-- `pi-desktop/session/summarizeTitle`
-- `pi-desktop/project/open`
-- `pi-desktop/project/pickFolders`
-- `pi-desktop/project/clone`
-- `pi-desktop/project/cloneCheckout`
-- `pi-desktop/project/openFolder`
-- `pi-desktop/project-group/list`
-- `pi-desktop/project-group/create`
-- `pi-desktop/project-group/rename`
-- `pi-desktop/project-group/update`
-- `pi-desktop/project-group/memory/get` / `save`
-- `pi-desktop/project-group/instructions/get` / `save`
-- `pi-desktop/session/getScratchPath`
-- `pi-desktop/session/openScratchPath`
-- `pi-desktop/session/collaboration`
+- `duaer-ai-desk/agent/prompt`
+- `duaer-ai-desk/agent/steer`
+- `duaer-ai-desk/agent/stop`
+- `duaer-ai-desk/agent/abort`
+- `duaer-ai-desk/agent/event/message`
+- `duaer-ai-desk/agent/askTool/resolve`
+- `duaer-ai-desk/session/list`
+- `duaer-ai-desk/session/summarizeTitle`
+- `duaer-ai-desk/project/open`
+- `duaer-ai-desk/project/pickFolders`
+- `duaer-ai-desk/project/clone`
+- `duaer-ai-desk/project/cloneCheckout`
+- `duaer-ai-desk/project/openFolder`
+- `duaer-ai-desk/project-group/list`
+- `duaer-ai-desk/project-group/create`
+- `duaer-ai-desk/project-group/rename`
+- `duaer-ai-desk/project-group/update`
+- `duaer-ai-desk/project-group/memory/get` / `save`
+- `duaer-ai-desk/project-group/instructions/get` / `save`
+- `duaer-ai-desk/session/getScratchPath`
+- `duaer-ai-desk/session/openScratchPath`
+- `duaer-ai-desk/session/collaboration`
 
 ## 3.1 Logical project groups
 
@@ -162,7 +162,7 @@ Prompt execution resolves `mode`, `providerId`, `modelId`, and `thinkingLevel`
 from the durable session record and snapshots the effective command shell ID and
 dialect for Bash.
 The renderer changes those values through
-`pi-desktop/session/configure` while the session is idle:
+`duaer-ai-desk/session/configure` while the session is idle:
 
 ```ts
 type ThinkingLevel =
@@ -208,9 +208,9 @@ Invalid attachment paths fail with `PATH_OUTSIDE_WORKSPACE`.
 
 Regenerate history (D109) also uses session channels:
 
-- `pi-desktop/session/saveRevision`
-- `pi-desktop/session/listRevisions`
-- `pi-desktop/session/activateRevision`
+- `duaer-ai-desk/session/saveRevision`
+- `duaer-ai-desk/session/listRevisions`
+- `duaer-ai-desk/session/activateRevision`
 
 Root user turns may include `revisionRootId`, `revisionCount`, and
 `activeRevision`. Activating a revision replaces the live tail with
@@ -223,7 +223,7 @@ persistence on one capability-aware contract.
 
 ### 5.1a Steer an active turn
 
-`pi-desktop/agent/steer` accepts `AgentSteerRequest`:
+`duaer-ai-desk/agent/steer` accepts `AgentSteerRequest`:
 
 ```ts
 type AgentSteerRequest = {
@@ -277,7 +277,7 @@ type AgentStopResponse = {
 };
 ```
 
-`pi-desktop/agent/stop` requests a graceful stop for the active runtime. The
+`duaer-ai-desk/agent/stop` requests a graceful stop for the active runtime. The
 sidecar evaluates the one-shot request after the current assistant response and
 completed tool batch, at the same boundary where it would otherwise start the
 next model request. The current durable turn then emits `agent_end` and is
@@ -318,7 +318,7 @@ type AgentCompactRequest = { sessionId: string };
 type AgentCompactResponse = { accepted: boolean };
 ```
 
-`pi-desktop/agent/compact` creates a model-context checkpoint for an idle
+`duaer-ai-desk/agent/compact` creates a model-context checkpoint for an idle
 session. It is available even when automatic context protection is disabled.
 Missing provider/session configuration fails through the normal `AppError`
 envelope; an active turn or compaction returns `AGENT_BUSY`.
@@ -465,12 +465,12 @@ type PlanResolutionResult = {
 
 Preload methods:
 
-- `pi-desktop/plans/pending({ sessionId? }) -> PlansPendingResult`
-- `pi-desktop/plans/resolve(PlanResolveRequest) -> PlanResolutionResult`
+- `duaer-ai-desk/plans/pending({ sessionId? }) -> PlansPendingResult`
+- `duaer-ai-desk/plans/resolve(PlanResolveRequest) -> PlanResolutionResult`
 
 Electron forwards each host `plans.changed` notification unchanged to the
 renderer through the stable shared `IPC.event.plansChanged` channel
-(`pi-desktop/plans/event/changed`). This is the Plan/Goal change event surface;
+(`duaer-ai-desk/plans/event/changed`). This is the Plan/Goal change event surface;
 the
 renderer does not receive contract approval transitions as AgentEvent variants.
 `plans.pending` returns only currently pending approval rows. Terminal
@@ -521,10 +521,10 @@ type AgentStatus = {
 ### 5.6 Turn queue (D375 / D386)
 
 The Host owns the per-session prompt queue; the renderer mirrors it. A
-Send-while-running pushes through `pi-desktop/agent/queue/push` and the
+Send-while-running pushes through `duaer-ai-desk/agent/queue/push` and the
 headless Agent Host module admits, orders, and drains the durable entries
 (`turn_queue`, schema v18). Every change is fanned out as
-`pi-desktop/agent/event/queueChanged`.
+`duaer-ai-desk/agent/event/queueChanged`.
 
 ```ts
 type AgentQueuePushRequest = {
@@ -544,12 +544,12 @@ type QueuedTurnSummary = {
   createdAt: string;
 };
 
-// pi-desktop/agent/queue/push       -> QueuedTurnSummary
-// pi-desktop/agent/queue/list       -> { entries: QueuedTurnSummary[] }
-// pi-desktop/agent/queue/remove     -> { ok: true }   (turnId)
-// pi-desktop/agent/queue/prioritize -> { ok: true }   (turnId; "send now")
-// pi-desktop/agent/queue/reorder    -> { moved: boolean } (turnId, direction)
-// pi-desktop/agent/event/queueChanged -> { sessionId, entries }
+// duaer-ai-desk/agent/queue/push       -> QueuedTurnSummary
+// duaer-ai-desk/agent/queue/list       -> { entries: QueuedTurnSummary[] }
+// duaer-ai-desk/agent/queue/remove     -> { ok: true }   (turnId)
+// duaer-ai-desk/agent/queue/prioritize -> { ok: true }   (turnId; "send now")
+// duaer-ai-desk/agent/queue/reorder    -> { moved: boolean } (turnId, direction)
+// duaer-ai-desk/agent/event/queueChanged -> { sessionId, entries }
 ```
 
 `push` returns `AGENT_BUSY` with `queueFull` once a session holds eight
@@ -570,7 +570,7 @@ unattended.
 The promoted block is delivered as adjacent messages rather than as separate
 turns: the first promoted entry starts the turn at the boundary and every later
 promoted entry is injected into that same turn through the steering channel
-(`pi-desktop/agent/steer` with the running turn's id), so the transcript shows
+(`duaer-ai-desk/agent/steer` with the running turn's id), so the transcript shows
 the user rows one after another and the model answers once. An injected entry
 leaves the queue and its own turn is canceled because it never runs on its own.
 An entry the runtime refuses to accept stays queued and leaves at the next
@@ -587,7 +587,7 @@ was holding.
 The renderer has one read-only Electron channel for the sidebar hover card:
 
 ```ts
-// pi-desktop/session/collaboration({ sessionId }) -> SessionCollaborationSummary
+// duaer-ai-desk/session/collaboration({ sessionId }) -> SessionCollaborationSummary
 type SessionCollaborationSummary = {
   sessionId: string;
   title: string;
@@ -767,13 +767,13 @@ The second failure emits the terminal normalized `STREAM_FAILED` error.
 Durable inbox requests are allowlisted preload invokes that Electron forwards
 to the singular host RPC domain without renderer access to SQLite:
 
-- `pi-desktop/notification/list({ unreadOnly?, limit? })`
-- `pi-desktop/notification/markRead({ id })`
-- `pi-desktop/notification/markAllRead()`
-- `pi-desktop/notification/clear()`
+- `duaer-ai-desk/notification/list({ unreadOnly?, limit? })`
+- `duaer-ai-desk/notification/markRead({ id })`
+- `duaer-ai-desk/notification/markAllRead()`
+- `duaer-ai-desk/notification/clear()`
 
 The renderer invokes
-`pi-desktop/notification/setViewingSession({ sessionId })` whenever the chat
+`duaer-ai-desk/notification/setViewingSession({ sessionId })` whenever the chat
 page's active session changes; `sessionId: null` clears the viewing context on
 non-chat pages. A renderer-originated `agent/prompt` also carries a matching
 `viewingSessionId` snapshot, which Electron installs before asynchronous turn
@@ -781,7 +781,7 @@ setup so a fast completion cannot beat the viewing-context update. Electron
 combines this hint with Main-owned window visibility/focus at the terminal event
 boundary. Missing, null, or mismatched context fails safe to notification. It
 also invokes
-`pi-desktop/notification/showNative({ id, sessionId, kind, title, body })` after
+`duaer-ai-desk/notification/showNative({ id, sessionId, kind, title, body })` after
 localizing a new record, where `kind` is `"task" | "interactive"`. This
 Electron-only request never crosses into the host RPC domain.
 
@@ -820,17 +820,17 @@ type SessionsChangedEvent = {
 
 Main sends two events:
 
-- `pi-desktop/notification/event/changed` after `session.endTurn` returns a
+- `duaer-ai-desk/notification/event/changed` after `session.endTurn` returns a
   newly inserted record. Renderer merges the record into its bounded local list
   and recalculates the exact unread count. A terminal result already visible in
   the focused current chat, repeated terminal updates, and aborted turns emit
   nothing.
-- `pi-desktop/notification/event/activated` after the user clicks Electron's
+- `duaer-ai-desk/notification/event/activated` after the user clicks Electron's
   native system notification. Renderer follows its existing session-selection
   path, including project activation for a project-bound session.
 
 Plugin-owned session mutations additionally emit
-`pi-desktop/session/event/changed` after a successful write. The renderer
+`duaer-ai-desk/session/event/changed` after a successful write. The renderer
 handles this host-owned event by calling its existing `refreshSessions()` path;
 plugins never send a sidebar event and a skipped import does not emit one.
 
@@ -857,10 +857,10 @@ and a shown notification restores/shows and focuses the window before emitting
 `activated`. No permission, scheduled-reminder, or plugin source enters the
 task notification contract. Native delivery is best-effort; the durable
 inbox remains authoritative when the OS suppresses a banner. On Windows,
-Electron Main registers `net.aiuo.pi-desktop` as the process AppUserModelID
+Electron Main registers `net.aiuo.duaer-ai-desk` as the process AppUserModelID
 before readiness and before any window is created. The ID matches the NSIS
 package identity so notification attribution, notification settings, taskbar
-grouping, and installed shortcuts resolve to `PI-Desktop`, never the stock
+grouping, and installed shortcuts resolve to `DuaerAiDesk`, never the stock
 Electron host.
 
 The viewing-session hint is advisory and fail-safe: missing, stale, hidden, or
@@ -954,9 +954,9 @@ durable `thinkingLevel`.
 
 The global plugin launcher uses Electron-only allowlisted channels:
 
-- `pi-desktop/pluginLauncher/toggle` shows or hides the centered utility window
-- `pi-desktop/pluginLauncher/dismiss` hides it only when invoked by that window
-- `pi-desktop/pluginLauncher/event/shown` resets its query, reloads installed
+- `duaer-ai-desk/pluginLauncher/toggle` shows or hides the centered utility window
+- `duaer-ai-desk/pluginLauncher/dismiss` hides it only when invoked by that window
+- `duaer-ai-desk/pluginLauncher/event/shown` resets its query, reloads installed
   plugins, and restores input focus after every invocation
 
 The launcher reuses `plugin/list` and `plugin/openPanel`; it adds no host-core
@@ -973,7 +973,7 @@ remain unchanged.
 The Settings font picker (ADR 0083) reads installed system font families
 through one Electron-only allowlisted channel:
 
-- `pi-desktop/app/systemFonts` returns `string[]` of installed system font
+- `duaer-ai-desk/app/systemFonts` returns `string[]` of installed system font
   family names (platform tooling in Electron main — `system_profiler` on
   macOS as the fallback only, with `osascript` JXA bridging the fast CoreText
   query `CTFontManagerCopyAvailableFontFamilyNames` as the primary path,
@@ -1093,7 +1093,7 @@ expiry, `plan_approvals` execution fields, shell catalog/identity fields, and
 streamed stdout/stderr events. A v7 or older host, and any incompatible v8
 peer, must fail the handshake so a desktop cannot display Plan while silently
 losing the artifact, queue, shell, or policy boundary.
-`pi-desktop/agent/compact` and `session.appendCompaction` remain part of the v9
+`duaer-ai-desk/agent/compact` and `session.appendCompaction` remain part of the v9
 contract. The Goal contract is additive inside v9 (**D198**): `kind` is optional
 on the wire and absent means `plan`, so a peer that predates Goal keeps working
 and simply never negotiates one.
@@ -1122,7 +1122,7 @@ plus `subagentUsage` into `session.endTurn.usage`.
 
 ### stats
 
-- `pi-desktop/stats/getTokenUsageHistory({ startDate?, endDate?, bucket? }) -> TokenUsageHistoryResult`
+- `duaer-ai-desk/stats/getTokenUsageHistory({ startDate?, endDate?, bucket? }) -> TokenUsageHistoryResult`
 
 `bucket` is `day` | `week` | `month`. Omitted dates use the host default window
 (53 weeks / 52 weeks / 24 months) in the host's local calendar. `week` keys use
@@ -1153,7 +1153,7 @@ Non-sensitive config that can be returned to the UI:
   `https`, `socks5`, and `socks5h` URLs, including userinfo. Main applies
   Chromium `session.setProxy` (credentialed URLs through a loopback SOCKS5
   relay; issue #490) and Node env immediately; the agent sidecar is
-  reconfigured without a process restart. `pi-desktop/network/testProxy`
+  reconfigured without a process restart. `duaer-ai-desk/network/testProxy`
   runs one bounded Chromium fetch through the supplied config and does not
   persist it.
 
@@ -1194,8 +1194,8 @@ type CommandShellCatalog = {
 
 Preload methods:
 
-- `pi-desktop/commandShell/list() -> CommandShellCatalog`
-- `pi-desktop/settings/set({ defaultCommandShell }) -> { ok: true }`
+- `duaer-ai-desk/commandShell/list() -> CommandShellCatalog`
+- `duaer-ai-desk/settings/set({ defaultCommandShell }) -> { ok: true }`
 
 Settings shell writes accept only an available ID for the current platform and
 reject unknown, unavailable, or wrong-platform IDs. A genuine effective shell
@@ -1222,14 +1222,14 @@ Signing in with a vendor subscription is an Electron-main conversation, so it
 uses IPC only — the host protocol version is unchanged. Five invoke channels
 plus one event channel:
 
-- `pi-desktop/providers/oauth/vendors() -> { vendors: OAuthVendor[] }`
-- `pi-desktop/providers/oauth/start({ vendorId }) -> { loginId }`
-- `pi-desktop/providers/oauth/respond({ loginId, promptId, value? })` — an
+- `duaer-ai-desk/providers/oauth/vendors() -> { vendors: OAuthVendor[] }`
+- `duaer-ai-desk/providers/oauth/start({ vendorId }) -> { loginId }`
+- `duaer-ai-desk/providers/oauth/respond({ loginId, promptId, value? })` — an
   absent `value` cancels that prompt, which aborts the flow
-- `pi-desktop/providers/oauth/cancel({ loginId }) -> { ok: boolean }`
-- `pi-desktop/providers/oauth/delete({ providerId }) -> { ok: true }` deletes
+- `duaer-ai-desk/providers/oauth/cancel({ loginId }) -> { ok: boolean }`
+- `duaer-ai-desk/providers/oauth/delete({ providerId }) -> { ok: true }` deletes
   one OAuth account's provider row and its scoped credential
-- `pi-desktop/providers/oauth/event` streams `OAuthLoginEvent`
+- `duaer-ai-desk/providers/oauth/event` streams `OAuthLoginEvent`
 
 ```ts
 type OAuthLoginEvent = { loginId: string; vendorId: string } & (
@@ -1455,12 +1455,12 @@ so the user can review and batch-import into this app's MCP list. ChatGPT
 desktop is listed as a placeholder because it has no public configuration path
 yet.
 
-- `pi-desktop/mcp/importScan` — `{ projectPath? }` →
+- `duaer-ai-desk/mcp/importScan` — `{ projectPath? }` →
   `{ candidates: ExternalMcpCandidate[], sources: ExternalMcpSourceReport[] }`.
   Missing files, ENOENT and parse errors surface on `sources[].error`; one bad
   source never fails the scan. Per-source de-duplication keeps the cross-source
   copies so the user can pick which install to import.
-- `pi-desktop/mcp/importRun` — `{ items: ExternalMcpImportItem[] }` →
+- `duaer-ai-desk/mcp/importRun` — `{ items: ExternalMcpImportItem[] }` →
   `{ imported, skipped, failed }`. Main calls `mcp.upsert` once per item,
   omitting `disabled` from the server payload and following up with
   `mcp.setEnabled({ enabled: false })` when the source marked the server
@@ -1514,17 +1514,17 @@ state is pruned during the next scan.
 
 Desktop-only channels scan skill folders written by other agent tools on this
 machine — `~/.claude/skills/`, `<project>/.claude/skills/`, and the app's own
-`~/.agents/skills/` (or `PI_DESKTOP_AGENTS_DIR/skills/`) plus its project
+`~/.agents/skills/` (or `DUAER_AI_DESK_AGENTS_DIR/skills/`) plus its project
 equivalent — so the user can review candidates and batch-import them. Both the
 single-file (`<id>.md`) and Anthropic-style directory (`<name>/SKILL.md`)
 shapes are detected.
 
-- `pi-desktop/skill/importScan` — `{ projectPath? }` →
+- `duaer-ai-desk/skill/importScan` — `{ projectPath? }` →
   `{ candidates: ExternalSkillCandidate[], sources: ExternalSkillSourceReport[] }`.
   Missing directories and read errors surface on `sources[].error`; one failing
   source never aborts the scan. Candidates from `~/.agents/skills/` carry an
   "already in current registry" warning so the UI can filter or highlight them.
-- `pi-desktop/skill/importRun` — `{ level, projectPath?, mode?, items }` →
+- `duaer-ai-desk/skill/importRun` — `{ level, projectPath?, mode?, items }` →
   `{ imported, skipped, failed }`. Main calls `skills.import` once per item,
   passing `path = shape==="dir" ? rootDir : sourcePath` and forwarding `mode`
   and per-item `id`/`name`/`description`. A conflict lands in `skipped` and
@@ -1533,7 +1533,7 @@ shapes are detected.
 
 Desktop-only skill market channels (not host RPC) live on Electron IPC:
 
-- `pi-desktop/skill/market/search` — `{ query, sources[] }` →
+- `duaer-ai-desk/skill/market/search` — `{ query, sources[] }` →
   `{ entries, failedSources, failureKinds, failureDetails }`. Main aggregates
   builtin-safe catalog JSON and GitHub repo SKILL.md scans. Source URLs must pass
   the public-HTTPS policy (ADR 0243). One failing source is dropped; the rest
@@ -1557,7 +1557,7 @@ Desktop-only skill market channels (not host RPC) live on Electron IPC:
   and an unanswered resolver as `NETWORK_RESOLVE_FAILED` (spec 08 §3.1); the
   install sheet classifies a failed preview on those codes together with the
   structured `reason`.
-- `pi-desktop/skill/market/fetch` — `{ entry }` → `{ name?, description?, body, resources? }`.
+- `duaer-ai-desk/skill/market/fetch` — `{ entry }` → `{ name?, description?, body, resources? }`.
   Main fetches the document over the same policy, splits frontmatter, and may
   attach sibling `.md` files from a jsDelivr listing. The renderer installs
   through existing `skills.create`. That policy is the main-process
@@ -1568,7 +1568,7 @@ Desktop-only skill market channels (not host RPC) live on Electron IPC:
 
 Desktop-only MCP market channels (not host RPC) live on Electron IPC:
 
-- `pi-desktop/mcp/market/search` — `{ query?, sources[], more? }` →
+- `duaer-ai-desk/mcp/market/search` — `{ query?, sources[], more? }` →
   `{ entries, failedSources, exhausted }`. Main validates source URLs and asks
   the Electron session for the route on every hop. Fully proxied hops use the
   session transport; direct and unknown hops pin the resolved public address by
@@ -1580,11 +1580,11 @@ Desktop-only MCP market channels (not host RPC) live on Electron IPC:
 
 Browser-based OAuth 2.1 authentication for HTTP MCP servers is handled in the Electron main process via non-blocking IPC invocations and an event stream:
 
-- `pi-desktop/mcp/oauth/start({ id, level?, projectPath? }) -> { ok: true, loginId }`
+- `duaer-ai-desk/mcp/oauth/start({ id, level?, projectPath? }) -> { ok: true, loginId }`
   Initiates OAuth metadata discovery and PKCE authorization code flow. Returns immediately; user browser navigation and callback exchange proceed asynchronously in the background.
-- `pi-desktop/mcp/oauth/cancel({ loginId?, id? }) -> { ok: boolean }`
+- `duaer-ai-desk/mcp/oauth/cancel({ loginId?, id? }) -> { ok: boolean }`
   Aborts an in-flight authorization attempt, tears down the local loopback HTTP server, and cancels pending timers.
-- `pi-desktop/mcp/oauth/event` streams `McpOAuthLoginEvent` to the renderer:
+- `duaer-ai-desk/mcp/oauth/event` streams `McpOAuthLoginEvent` to the renderer:
 
 ```ts
 type McpOAuthLoginEvent = {
@@ -1902,14 +1902,14 @@ reservation, and background artifacts cannot change visible window geometry.
 
 ### Tray session shortcuts (ADR tray-session-shortcuts)
 
-- `pi-desktop/tray/setSessionPreferences({ sessionMeta, archivedProjectPaths, sort })`
+- `duaer-ai-desk/tray/setSessionPreferences({ sessionMeta, archivedProjectPaths, sort })`
   returns `{ ok: true }`. `sessionMeta` maps IDs to optional boolean `pinned`
   and `archived` flags plus a non-negative safe integer `order`. `sort` is
   `recent`, `created`, `oldest`, `name`, or `manual`; the renderer mirrors the
   sidebar's effective sort. Main validates the payload, strips unrelated
   metadata, and rejects senders other than the current main window. The setter
   is excluded from the local MCP catalog and persists nothing.
-- Main emits `pi-desktop/tray/event/sessionActivated { sessionId: string | null }`
+- Main emits `duaer-ai-desk/tray/event/sessionActivated { sessionId: string | null }`
   after restoring/focusing the window, waiting for post-bootstrap
   `menu/rendererReady`, and checking that the session still exists and is not
   archived. Renderer enters normal session selection, including cross-project
@@ -2094,7 +2094,7 @@ app/openFeedback() -> { ok: true }
 ```
 
 Electron Main builds a fixed GitHub bug-form URL
-(`https://github.com/vastsa/PI-Desktop/issues/new?template=bug_report.yml`)
+(`https://github.com/Duaer/DuaerAiDesk/issues/new?template=bug_report.yml`)
 and opens it with `shell.openExternal`. Query fields `app-version`, `os`, and
 `environment` are filled from Main-owned version info. The renderer cannot
 supply a URL. Construction that leaves that origin or template is rejected.
@@ -2103,13 +2103,13 @@ protocol version.
 
 ## 13d. Local MCP control API (D370)
 
-PI-Desktop can expose a local automation surface for an external Agent without
+DuaerAiDesk can expose a local automation surface for an external Agent without
 changing the renderer preload contract or host RPC protocol. The server is
 disabled by default and starts only when the Electron process receives:
 
 ```text
-PI_DESKTOP_MCP_CONTROL=1
-PI_DESKTOP_MCP_PORT=37123       # optional; defaults to 37123
+DUAER_AI_DESK_MCP_CONTROL=1
+DUAER_AI_DESK_MCP_PORT=37123       # optional; defaults to 37123
 ```
 
 Electron Main binds `127.0.0.1` only and serves Streamable HTTP MCP at
@@ -2133,7 +2133,7 @@ connection record to `mcp-control.json`:
 ```json
 {
   "active": true,
-  "serverName": "pi-desktop",
+  "serverName": "duaer-ai-desk",
   "protocol": "streamable-http",
   "url": "http://127.0.0.1:37123/mcp",
   "token": "<redacted>",
@@ -2144,7 +2144,7 @@ connection record to `mcp-control.json`:
 
 Both files are written with mode `0600` where the platform supports POSIX
 permissions. Every request must include `Authorization: Bearer <token>` (the
-`X-Pi-Desktop-Token` header is retained for simple local clients). Requests to
+`X-DuaerAiDesk-Token` header is retained for simple local clients). Requests to
 other paths, requests without the token, and methods other than
 POST/DELETE/OPTIONS are rejected. The server is stopped before Electron waits
 for host shutdown and the manifest is marked inactive.
@@ -2170,7 +2170,7 @@ The named tools cover the common Agent workflow:
 - `pi_plans_pending`, `pi_plans_resolve`
 - `pi_workspace_diff`, `pi_fs_list`, `pi_fs_read`
 
-`pi_control_describe` returns the reviewed operation catalog. `pi_desktop_invoke`
+`pi_control_describe` returns the reviewed operation catalog. `duaer_ai_desk_invoke`
 accepts an operation id and positional IPC arguments:
 
 ```json
@@ -2197,11 +2197,11 @@ The six `session/collaboration/*` operations are first-party-plugin-only: they
 require an authenticated plugin tool invocation context, so they appear in
 `pi.desktop.listOperations` and are callable through `pi.desktop.invoke`, but
 they are excluded from the MCP-visible catalog (`tools/list`,
-`pi_control_describe`, and the `pi_desktop_invoke` operation enum) and an MCP
+`pi_control_describe`, and the `duaer_ai_desk_invoke` operation enum) and an MCP
 caller cannot invoke them.
 
 After successful **mutating** external calls, Electron Main may emit the existing
-`pi-desktop/session/event/changed` event with additive fields:
+`duaer-ai-desk/session/event/changed` event with additive fields:
 
 ```ts
 {
@@ -2232,7 +2232,7 @@ startup failure is logged and does not prevent the desktop from launching.
 
 ## Native Pi session routing (ADR 0254)
 
-`pi-desktop/session/list` returns both Desktop and native summaries. Each summary
+`duaer-ai-desk/session/list` returns both Desktop and native summaries. Each summary
 may carry `source: "desktop" | "pi-native"`, capability flags, and a stable
 `readOnlyReason`; clients normalize omitted source to `desktop` for backward
 compatibility. `session/get`, `session/open`, `session/fork`, `agent/prompt`,
@@ -2271,7 +2271,7 @@ not intermediate retry/compaction loop ends. Native abort never invokes
 
 ### Provider ordering
 
-`pi-desktop/providers/reorder({ id, targetId, placement: "before" | "after" })`
+`duaer-ai-desk/providers/reorder({ id, targetId, placement: "before" | "after" })`
 returns `{ ok: true }` and forwards to host `providers.reorder`. The sandboxed
 preload permits this channel through the shared IPC registry. Invalid placement
 or missing providers returns `INVALID_PARAMS`; configuration and defaults are
@@ -2284,18 +2284,18 @@ all are forwarded to the Host-owned `configSync.*` RPC methods:
 
 | IPC channel | Host method | contract |
 |---|---|---|
-| `pi-desktop/configSync/getState` | `configSync.getState` | redacted status, category selections, preview counts, and pending approval summaries |
-| `pi-desktop/configSync/test` | `configSync.test` | WebDAV capability probe using a temporary object; no configuration is persisted |
-| `pi-desktop/configSync/configure` | `configSync.configure` | validates the endpoint, stores encrypted local sync metadata, and enables the vault |
-| `pi-desktop/configSync/syncNow` | `configSync.syncNow` | runs one Host-owned reconciliation cycle |
-| `pi-desktop/configSync/pause` | `configSync.pause` | pauses or resumes this device only |
-| `pi-desktop/configSync/unlock` | `configSync.unlock` | unlocks the local vault for the current process/device |
-| `pi-desktop/configSync/approve` / `reject` | `configSync.approve` / `configSync.reject` | records a digest-bound local activation decision |
-| `pi-desktop/configSync/mapProject` | `configSync.mapProject` | binds one opaque project/group identity to one or more explicitly selected local folders, preserving primary-root order |
-| `pi-desktop/configSync/listHistory` | `configSync.listHistory` | lists redacted reachable revision metadata only |
-| `pi-desktop/configSync/restore` | `configSync.restore` | creates a new propagated revision from an explicitly acknowledged historical revision and stages local approvals/recovery |
-| `pi-desktop/configSync/changePassword` | `configSync.changePassword` | CAS-rewraps the vault key header without returning keys or secret values |
-| `pi-desktop/configSync/disconnect` | `configSync.disconnect` | removes local sync metadata and keys; it does not delete remote vault data |
+| `duaer-ai-desk/configSync/getState` | `configSync.getState` | redacted status, category selections, preview counts, and pending approval summaries |
+| `duaer-ai-desk/configSync/test` | `configSync.test` | WebDAV capability probe using a temporary object; no configuration is persisted |
+| `duaer-ai-desk/configSync/configure` | `configSync.configure` | validates the endpoint, stores encrypted local sync metadata, and enables the vault |
+| `duaer-ai-desk/configSync/syncNow` | `configSync.syncNow` | runs one Host-owned reconciliation cycle |
+| `duaer-ai-desk/configSync/pause` | `configSync.pause` | pauses or resumes this device only |
+| `duaer-ai-desk/configSync/unlock` | `configSync.unlock` | unlocks the local vault for the current process/device |
+| `duaer-ai-desk/configSync/approve` / `reject` | `configSync.approve` / `configSync.reject` | records a digest-bound local activation decision |
+| `duaer-ai-desk/configSync/mapProject` | `configSync.mapProject` | binds one opaque project/group identity to one or more explicitly selected local folders, preserving primary-root order |
+| `duaer-ai-desk/configSync/listHistory` | `configSync.listHistory` | lists redacted reachable revision metadata only |
+| `duaer-ai-desk/configSync/restore` | `configSync.restore` | creates a new propagated revision from an explicitly acknowledged historical revision and stages local approvals/recovery |
+| `duaer-ai-desk/configSync/changePassword` | `configSync.changePassword` | CAS-rewraps the vault key header without returning keys or secret values |
+| `duaer-ai-desk/configSync/disconnect` | `configSync.disconnect` | removes local sync metadata and keys; it does not delete remote vault data |
 
 Input passwords are accepted only for the operation that needs them. No raw
 secret, vault key, decrypted resource, or remote archive crosses back to the

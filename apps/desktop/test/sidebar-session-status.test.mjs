@@ -109,6 +109,6 @@ test("renders semantic, shape-distinct sidebar status indicators", () => {
   );
   assert.match(
     main,
-    /PI_DESKTOP_CAPTURE_STATUS_ONLY[\s\S]*prefers-reduced-motion[\s\S]*SIDEBAR_STATUS_PROBE[\s\S]*pi-sidebar-status-/,
+    /DUAER_AI_DESK_CAPTURE_STATUS_ONLY[\s\S]*prefers-reduced-motion[\s\S]*SIDEBAR_STATUS_PROBE[\s\S]*pi-sidebar-status-/,
   );
 });

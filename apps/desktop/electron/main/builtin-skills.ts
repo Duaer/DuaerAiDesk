@@ -1,10 +1,10 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { parseSkillFrontmatter } from "@pi-desktop/plugin-sdk";
-import type { PluginSkillDef } from "@pi-desktop/agent-runtime";
+import { parseSkillFrontmatter } from "@duaer-ai-desk/plugin-sdk";
+import type { PluginSkillDef } from "@duaer-ai-desk/agent-runtime";
 
 /**
- * Skills PI-Desktop ships itself.
+ * Skills DuaerAiDesk ships itself.
  *
  * These ride the same catalog-plus-`Skill`-tool path as plugin-contributed
  * skills (D174), so a first-party skill and a third-party one are
@@ -14,8 +14,8 @@ import type { PluginSkillDef } from "@pi-desktop/agent-runtime";
 
 /** Bundled skill teaching the plugin-development loop. */
 export const PLUGIN_DEV_SKILL_FILE = "plugin-development.md";
-export const PLUGIN_DEV_SKILL_ID = "pi-desktop/plugin-development";
-export const IMAGE_GENERATION_SKILL_ID = "pi-desktop/imagegen";
+export const PLUGIN_DEV_SKILL_ID = "duaer-ai-desk/plugin-development";
+export const IMAGE_GENERATION_SKILL_ID = "duaer-ai-desk/imagegen";
 const IMAGE_GENERATION_SKILL_FILE = "image-generation.md";
 
 /** electron-builder copies `resources/skills` to `<resources>/skills`. */

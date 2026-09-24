@@ -8,7 +8,7 @@ import {
   IPC,
   MAC_TRAFFIC_LIGHT_POSITION,
   type CloseBehavior,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import type { BrowserPane } from "../browser-view";
 import type { HostProcess } from "../host-process";
 import type { Logger } from "../logger";
@@ -178,7 +178,7 @@ export async function createWindow({
     // One frameless look everywhere: macOS keeps inset traffic lights;
     // Windows/Linux hide native chrome entirely — the renderer draws its
     // own Codex-style window controls (see WindowControls.tsx).
-    // The traffic-light position comes from @pi-desktop/shared so the space
+    // The traffic-light position comes from @duaer-ai-desk/shared so the space
     // the renderer reserves for the buttons (styles/tokens.css) is derived
     // from the same numbers that place them.
     ...(process.platform === "darwin"
@@ -209,7 +209,7 @@ export async function createWindow({
       // Preload runs in a sandbox and cannot import Electron's main-only `app`
       // module. Pass the display locale at process creation so it remains
       // available synchronously before the renderer's first paint.
-      additionalArguments: [`--pi-desktop-locale=${app.getLocale()}`],
+      additionalArguments: [`--duaer-ai-desk-locale=${app.getLocale()}`],
     },
   });
   const window = windowState.mainWindow;
@@ -587,7 +587,7 @@ export async function createWindow({
     window.on("maximize", sendMaximized);
     // Native-runner E2E fixture: establish the initial native state before
     // the renderer mounts, then let WindowControls query it through IPC.
-    if (process.env.PI_DESKTOP_START_MAXIMIZED === "1") window.maximize();
+    if (process.env.DUAER_AI_DESK_START_MAXIMIZED === "1") window.maximize();
   }
   window.on("unmaximize", () => {
     if (process.platform !== "darwin") sendMaximized();
@@ -1016,14 +1016,14 @@ export async function createWindow({
     if (!isLiveWindow()) return;
     // Capture runs need the deterministic Codex footprint; normal launches
     // must respect restored user bounds and only fix real shelf states.
-    ensureStableBounds(process.env.PI_DESKTOP_CAPTURE === "1");
+    ensureStableBounds(process.env.DUAER_AI_DESK_CAPTURE === "1");
     window.show();
     window.focus();
     // Burst re-assert only while Stage Manager initially settles / shelves us.
     for (const ms of [100, 250, 500, 1000, 2000, 3500, 5000, 8000, 12000]) {
       setTimeout(() => ensureStableBounds(false), ms);
     }
-    if (process.env.PI_DESKTOP_CAPTURE === "1") {
+    if (process.env.DUAER_AI_DESK_CAPTURE === "1") {
       setTimeout(() => {
         void (async () => {
           try {
@@ -1041,17 +1041,17 @@ export async function createWindow({
             };
             const setPage = async (page: string) => {
               await windowState.mainWindow!.webContents.executeJavaScript(
-                `window.__PI_DESKTOP__?.setPage?.(${JSON.stringify(page)})`,
+                `window.__DUAER_AI_DESK__?.setPage?.(${JSON.stringify(page)})`,
               );
             };
             const setSettingsTab = async (tab: string) => {
               await windowState.mainWindow!.webContents.executeJavaScript(
-                `window.__PI_DESKTOP__?.setSettingsTab?.(${JSON.stringify(tab)})`,
+                `window.__DUAER_AI_DESK__?.setSettingsTab?.(${JSON.stringify(tab)})`,
               );
             };
             const setTheme = async (theme: "light" | "dark") => {
               await windowState.mainWindow!.webContents.executeJavaScript(
-                `window.__PI_DESKTOP__?.setThemeAttr?.(${JSON.stringify(theme)})`,
+                `window.__DUAER_AI_DESK__?.setThemeAttr?.(${JSON.stringify(theme)})`,
               );
             };
             // Wait until React leaves the starting gate.
@@ -1069,8 +1069,8 @@ export async function createWindow({
               await new Promise((r) => setTimeout(r, 250));
             }
             await windowState.mainWindow!.webContents.executeJavaScript(`
-              window.__PI_DESKTOP__?.setThemeAttr?.("light");
-              window.__PI_DESKTOP__?.setPage?.("chat");
+              window.__DUAER_AI_DESK__?.setThemeAttr?.("light");
+              window.__DUAER_AI_DESK__?.setPage?.("chat");
               // ensure expanded sidebar if rail-only
               if (document.querySelector(".sidebar-rail") && !document.querySelector(".sidebar")) {
                 document.dispatchEvent(new KeyboardEvent("keydown", { key: "b", metaKey: true, bubbles: true }));
@@ -1079,7 +1079,7 @@ export async function createWindow({
             await new Promise((r) => setTimeout(r, 400));
             try {
               await windowState.mainWindow!.webContents.executeJavaScript(
-                `window.__PI_CAPTURE__ = 1; void window.__PI_DESKTOP__?.ensureVisualFixtures?.()`,
+                `window.__PI_CAPTURE__ = 1; void window.__DUAER_AI_DESK__?.ensureVisualFixtures?.()`,
               );
             } catch {
               // fixtures optional
@@ -1087,8 +1087,8 @@ export async function createWindow({
             // Focused sidebar-status capture: one row per D135 state, in both
             // themes. The status-only mode exits before the broader visual
             // suite and is intended for narrow UI verification.
-            if (process.env.PI_DESKTOP_CAPTURE_STATUS_ONLY === "1") {
-              if (process.env.PI_DESKTOP_CAPTURE_REDUCED_MOTION === "1") {
+            if (process.env.DUAER_AI_DESK_CAPTURE_STATUS_ONLY === "1") {
+              if (process.env.DUAER_AI_DESK_CAPTURE_REDUCED_MOTION === "1") {
                 windowState.mainWindow!.webContents.debugger.attach("1.3");
                 await windowState.mainWindow!.webContents.debugger.sendCommand(
                   "Emulation.setEmulatedMedia",
@@ -1100,11 +1100,11 @@ export async function createWindow({
                 );
               }
               await windowState.mainWindow!.webContents.executeJavaScript(
-                `window.__PI_DESKTOP__?.ensureVisualFixtures?.()`,
+                `window.__DUAER_AI_DESK__?.ensureVisualFixtures?.()`,
               );
               await new Promise((r) => setTimeout(r, 300));
               const statusFixture = await windowState.mainWindow!.webContents.executeJavaScript(
-                `window.__PI_DESKTOP__?.seedSidebarStatuses?.()`,
+                `window.__DUAER_AI_DESK__?.seedSidebarStatuses?.()`,
               );
               const probeStatuses = async (theme: "light" | "dark") => {
                 await setTheme(theme);
@@ -1157,7 +1157,7 @@ export async function createWindow({
                   apiStyle: "chat_completions",
                 });
                 await windowState.mainWindow!.webContents.executeJavaScript(
-                  `void window.__PI_DESKTOP__?.refreshProviders?.()`,
+                  `void window.__DUAER_AI_DESK__?.refreshProviders?.()`,
                 );
                 await new Promise((r) => setTimeout(r, 300));
               }
@@ -1212,7 +1212,7 @@ export async function createWindow({
             // and its tool list are on screen (D224). Photograph it in both
             // themes before the artifact scenes create tabs.
             await windowState.mainWindow!.webContents.executeJavaScript(
-              `window.__PI_DESKTOP__?.openWorkPanel()`,
+              `window.__DUAER_AI_DESK__?.openWorkPanel()`,
             );
             await new Promise((r) => setTimeout(r, 500));
             await shot("pi-panel-empty");
@@ -1223,13 +1223,13 @@ export async function createWindow({
             await new Promise((r) => setTimeout(r, 300));
             const openPanelArtifact = (kind: string, resource?: string) =>
               windowState.mainWindow!.webContents.executeJavaScript(
-                `window.__PI_DESKTOP__?.openWorkPanelArtifact(${JSON.stringify(kind)}, ${JSON.stringify(resource)})`,
+                `window.__DUAER_AI_DESK__?.openWorkPanelArtifact(${JSON.stringify(kind)}, ${JSON.stringify(resource)})`,
               );
             await openPanelArtifact("review");
             // The Review tab reads the session transcript, so without a change
             // fixture every review scene would shoot the empty state.
             await windowState.mainWindow!.webContents.executeJavaScript(
-              `void window.__PI_DESKTOP__?.seedReviewChanges?.(4)`,
+              `void window.__DUAER_AI_DESK__?.seedReviewChanges?.(4)`,
             );
             await new Promise((r) => setTimeout(r, 500));
             await shot("pi-panel-review");
@@ -1258,23 +1258,23 @@ export async function createWindow({
             await new Promise((r) => setTimeout(r, 450));
             await shot("pi-review-rows");
             await windowState.mainWindow!.webContents.executeJavaScript(
-              `window.__PI_DESKTOP__?.setThemeAttr("dark")`,
+              `window.__DUAER_AI_DESK__?.setThemeAttr("dark")`,
             );
             await new Promise((r) => setTimeout(r, 350));
             await shot("pi-review-rows-dark");
             await windowState.mainWindow!.webContents.executeJavaScript(
-              `window.__PI_DESKTOP__?.setThemeAttr("light")`,
+              `window.__DUAER_AI_DESK__?.setThemeAttr("light")`,
             );
             await new Promise((r) => setTimeout(r, 250));
             await windowState.mainWindow!.webContents.executeJavaScript(
-              `void window.__PI_DESKTOP__?.seedReviewChanges?.(0)`,
+              `void window.__DUAER_AI_DESK__?.seedReviewChanges?.(0)`,
             );
             await new Promise((r) => setTimeout(r, 250));
             // A run row keeps its command in the head and only its output in the
             // body (D226). Seed one row per state, open the activity groups, and
             // hover the open row so its copy control and caret are on screen.
             await windowState.mainWindow!.webContents.executeJavaScript(
-              `void window.__PI_DESKTOP__?.seedRunRows?.(3)`,
+              `void window.__DUAER_AI_DESK__?.seedRunRows?.(3)`,
             );
             await new Promise((r) => setTimeout(r, 400));
             await windowState.mainWindow!.webContents.executeJavaScript(`
@@ -1303,22 +1303,22 @@ export async function createWindow({
             await new Promise((r) => setTimeout(r, 450));
             await shot("pi-run-rows");
             await windowState.mainWindow!.webContents.executeJavaScript(
-              `window.__PI_DESKTOP__?.setThemeAttr("dark")`,
+              `window.__DUAER_AI_DESK__?.setThemeAttr("dark")`,
             );
             await new Promise((r) => setTimeout(r, 350));
             await shot("pi-run-rows-dark");
             await windowState.mainWindow!.webContents.executeJavaScript(
-              `window.__PI_DESKTOP__?.setThemeAttr("light")`,
+              `window.__DUAER_AI_DESK__?.setThemeAttr("light")`,
             );
             await new Promise((r) => setTimeout(r, 250));
             await windowState.mainWindow!.webContents.executeJavaScript(
-              `void window.__PI_DESKTOP__?.seedRunRows?.(0)`,
+              `void window.__DUAER_AI_DESK__?.seedRunRows?.(0)`,
             );
             await new Promise((r) => setTimeout(r, 250));
             // Every delegation is a card, a lone one included: seed one `Task`
             // and a two-`Task` fan-out so the scene shows the two read alike.
             await windowState.mainWindow!.webContents.executeJavaScript(
-              `void window.__PI_DESKTOP__?.seedDelegationRows?.(3)`,
+              `void window.__DUAER_AI_DESK__?.seedDelegationRows?.(3)`,
             );
             await new Promise((r) => setTimeout(r, 400));
             await windowState.mainWindow!.webContents.executeJavaScript(`
@@ -1336,16 +1336,16 @@ export async function createWindow({
             await new Promise((r) => setTimeout(r, 450));
             await shot("pi-delegation-cards");
             await windowState.mainWindow!.webContents.executeJavaScript(
-              `window.__PI_DESKTOP__?.setThemeAttr("dark")`,
+              `window.__DUAER_AI_DESK__?.setThemeAttr("dark")`,
             );
             await new Promise((r) => setTimeout(r, 350));
             await shot("pi-delegation-cards-dark");
             await windowState.mainWindow!.webContents.executeJavaScript(
-              `window.__PI_DESKTOP__?.setThemeAttr("light")`,
+              `window.__DUAER_AI_DESK__?.setThemeAttr("light")`,
             );
             await new Promise((r) => setTimeout(r, 250));
             await windowState.mainWindow!.webContents.executeJavaScript(
-              `void window.__PI_DESKTOP__?.seedDelegationRows?.(0)`,
+              `void window.__DUAER_AI_DESK__?.seedDelegationRows?.(0)`,
             );
             await new Promise((r) => setTimeout(r, 250));
             await openPanelArtifact("browser");
@@ -1370,7 +1370,7 @@ export async function createWindow({
               }
             };
             await windowState.mainWindow!.webContents.executeJavaScript(
-              `window.__PI_DESKTOP__?.openNewWorkPanelTab?.()`,
+              `window.__DUAER_AI_DESK__?.openNewWorkPanelTab?.()`,
             );
             await new Promise((r) => setTimeout(r, 350));
             await shot("pi-panel-new");
@@ -1439,7 +1439,7 @@ export async function createWindow({
             // tests a clipped surface, so it is not suitable for this header
             // geometry check.
             await windowState.mainWindow!.webContents.executeJavaScript(
-              `window.__PI_DESKTOP__?.setWorkPanelWidth?.(244)`,
+              `window.__DUAER_AI_DESK__?.setWorkPanelWidth?.(244)`,
             );
             await new Promise((r) => setTimeout(r, 250));
             captureViewportOverride = true;
@@ -1459,7 +1459,7 @@ export async function createWindow({
             }
             await new Promise((r) => setTimeout(r, 250));
             await windowState.mainWindow!.webContents.executeJavaScript(
-              `window.__PI_DESKTOP__?.collapseWorkPanel()`,
+              `window.__DUAER_AI_DESK__?.collapseWorkPanel()`,
             );
             await new Promise((r) => setTimeout(r, 300));
             // Open composer + menu for chrome parity proof.
@@ -1511,7 +1511,7 @@ export async function createWindow({
             // Conversation minimap: seed a capture-only transcript, magnify
             // mid-rail (Dock effect + preview popover), then restore.
             await windowState.mainWindow!.webContents.executeJavaScript(
-              `void window.__PI_DESKTOP__?.seedTranscript?.()`,
+              `void window.__DUAER_AI_DESK__?.seedTranscript?.()`,
             );
             await new Promise((r) => setTimeout(r, 600));
             await shot("pi-minimap");
@@ -1532,14 +1532,14 @@ export async function createWindow({
             await new Promise((r) => setTimeout(r, 350));
             await shot("pi-minimap-hover");
             await windowState.mainWindow!.webContents.executeJavaScript(
-              `void window.__PI_DESKTOP__?.seedTranscript?.(0)`,
+              `void window.__DUAER_AI_DESK__?.seedTranscript?.(0)`,
             );
             await new Promise((r) => setTimeout(r, 250));
             // Notification inbox: mixed status, long title, read state, 99+ badge,
             // both themes, then the responsive fixed-position popover.
             const openNotificationFixture = async () => {
               await windowState.mainWindow!.webContents.executeJavaScript(`
-                window.__PI_DESKTOP__?.seedNotifications?.(105);
+                window.__DUAER_AI_DESK__?.seedNotifications?.(105);
                 document.querySelector('.notification-trigger')?.dispatchEvent(
                   new MouseEvent('click', { bubbles: true })
                 );
@@ -1548,7 +1548,7 @@ export async function createWindow({
               // fixture after that request settles.
               await new Promise((r) => setTimeout(r, 350));
               await windowState.mainWindow!.webContents.executeJavaScript(
-                `window.__PI_DESKTOP__?.seedNotifications?.(105)`,
+                `window.__DUAER_AI_DESK__?.seedNotifications?.(105)`,
               );
               await new Promise((r) => setTimeout(r, 150));
             };
@@ -1610,7 +1610,7 @@ export async function createWindow({
               await shot("pi-notifications-narrow");
               await windowState.mainWindow!.webContents.executeJavaScript(`
                 document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
-                window.__PI_DESKTOP__?.seedNotifications?.(0);
+                window.__DUAER_AI_DESK__?.seedNotifications?.(0);
               `);
             } finally {
               windowState.mainWindow!.setSize(CODEX_BOUNDS.width, CODEX_BOUNDS.height, false);
@@ -1621,7 +1621,7 @@ export async function createWindow({
               captureViewportOverride = false;
             }
             await new Promise((r) => setTimeout(r, 300));
-            // Destination + theme captures (robust via __PI_DESKTOP__ hooks).
+            // Destination + theme captures (robust via __DUAER_AI_DESK__ hooks).
             await setTheme("dark");
             await setPage("chat");
             await new Promise((r) => setTimeout(r, 250));
@@ -1650,8 +1650,8 @@ export async function createWindow({
             await new Promise((r) => setTimeout(r, 700));
             await shot("pi-scheduled-live");
             await windowState.mainWindow!.webContents.executeJavaScript(
-              `window.__PI_DESKTOP__?.seedPlugins?.(4);
-               window.__PI_DESKTOP__?.seedExtensions?.(3)`,
+              `window.__DUAER_AI_DESK__?.seedPlugins?.(4);
+               window.__DUAER_AI_DESK__?.seedExtensions?.(3)`,
             );
             await setPage("plugins");
             await new Promise((r) => setTimeout(r, 350));
@@ -1659,7 +1659,7 @@ export async function createWindow({
             // replaces the fixture with the real (near-empty) index; seed again
             // once the mount effect has settled.
             await windowState.mainWindow!.webContents.executeJavaScript(
-              `window.__PI_DESKTOP__?.seedPlugins?.(4)`,
+              `window.__DUAER_AI_DESK__?.seedPlugins?.(4)`,
             );
             await new Promise((r) => setTimeout(r, 250));
             await shot("pi-plugins-live");
@@ -1834,9 +1834,9 @@ export async function createWindow({
             `);
             await new Promise((r) => setTimeout(r, 200));
             await windowState.mainWindow!.webContents.executeJavaScript(
-              `window.__PI_DESKTOP__?.seedPlugins?.(0);
-               window.__PI_DESKTOP__?.seedExtensions?.(0);
-               window.__PI_DESKTOP__?.seedPluginThemes?.(2)`,
+              `window.__DUAER_AI_DESK__?.seedPlugins?.(0);
+               window.__DUAER_AI_DESK__?.seedExtensions?.(0);
+               window.__DUAER_AI_DESK__?.seedPluginThemes?.(2)`,
             );
             await setPage("settings");
             // The general tab carries the theme picker, including plugin themes
@@ -1848,7 +1848,7 @@ export async function createWindow({
             await new Promise((r) => setTimeout(r, 350));
             await shot("pi-settings-live");
             await windowState.mainWindow!.webContents.executeJavaScript(
-              `window.__PI_DESKTOP__?.seedPluginThemes?.(0)`,
+              `window.__DUAER_AI_DESK__?.seedPluginThemes?.(0)`,
             );
             // Dropping the seeded plugin themes re-applies the stored theme,
             // which is still dark from the destination pass; the remaining
@@ -1983,9 +1983,9 @@ export async function createWindow({
             // Toast stack proof (ToastHost variants) in both themes.
             const raiseToasts = () =>
               windowState.mainWindow!.webContents.executeJavaScript(`
-                window.__PI_DESKTOP__?.showToast?.("Provider saved", { variant: "success" });
-                window.__PI_DESKTOP__?.showToast?.("Reconnecting to local backend…", { variant: "warning" });
-                window.__PI_DESKTOP__?.showToast?.("Model request failed: 401 Unauthorized", { variant: "error" });
+                window.__DUAER_AI_DESK__?.showToast?.("Provider saved", { variant: "success" });
+                window.__DUAER_AI_DESK__?.showToast?.("Reconnecting to local backend…", { variant: "warning" });
+                window.__DUAER_AI_DESK__?.showToast?.("Model request failed: 401 Unauthorized", { variant: "error" });
               `);
             await raiseToasts();
             await new Promise((r) => setTimeout(r, 400));
@@ -2009,7 +2009,7 @@ export async function createWindow({
 
   if (process.env.ELECTRON_RENDERER_URL) {
     await window.loadURL(process.env.ELECTRON_RENDERER_URL);
-    if (process.env.PI_DESKTOP_DEVTOOLS === "1") {
+    if (process.env.DUAER_AI_DESK_DEVTOOLS === "1") {
       window.webContents.openDevTools({ mode: "detach" });
     }
   } else {

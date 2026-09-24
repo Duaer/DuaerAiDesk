@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { portalToBody } from "../lib/portal-visibility";
 import { useTranslation } from "react-i18next";
-import { ErrorCodes } from "@pi-desktop/shared";
+import { ErrorCodes } from "@duaer-ai-desk/shared";
 import { useAppStore } from "../stores/app-store";
 import { Button, TooltipButton } from "./ui";
 import { IconCircleAlert, IconClose, IconStop, IconTrash } from "./icons";

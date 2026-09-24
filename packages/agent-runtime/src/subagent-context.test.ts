@@ -3,7 +3,7 @@ import {
   createCompactionSummaryMessage,
   type AgentMessage,
   type PrepareNextTurnContext,
-} from "@earendil-works/pi-agent-core";
+} from "@duaer-ai-desk/upstream-agent-core";
 import type {
   Api,
   AssistantMessage,
@@ -12,7 +12,7 @@ import type {
   ToolResultMessage,
   Usage,
   UserMessage,
-} from "@earendil-works/pi-ai";
+} from "@duaer-ai-desk/upstream-ai";
 import {
   buildProviderModel,
   type RuntimeProviderConfig,

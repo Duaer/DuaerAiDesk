@@ -1,6 +1,6 @@
 /**
  * Capture-rig fixtures for the screenshot suite (electron/main, driven by
- * `PI_DESKTOP_CAPTURE=1`). Nothing here ships on the production code path:
+ * `DUAER_AI_DESK_CAPTURE=1`). Nothing here ships on the production code path:
  * `renderer-api.ts` only `import()`s this module the first time a fixture
  * method is called while `window.__PI_CAPTURE__` is set.
  *
@@ -17,7 +17,7 @@ import type {
   SubagentDefinition,
   UserSkillRecord,
   UserSubagentRecord,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import { useAppStore } from "../stores/app-store";
 import { api } from "../lib/api";
 import { browserPluginTab, toolWorkPanelTab } from "../lib/work-panel-tabs";
@@ -121,7 +121,7 @@ export function installCaptureRig(): CaptureRig {
         ["user", "启动报错了，说找不到 host 二进制"],
         [
           "assistant",
-          "这是因为 Rust 侧还没编译。运行 `cargo build -p pi-desktop-host-core`，产物会出现在 `target/debug/` 下，Electron 主进程会自动拾取。",
+          "这是因为 Rust 侧还没编译。运行 `cargo build -p duaer-ai-desk-host-core`，产物会出现在 `target/debug/` 下，Electron 主进程会自动拾取。",
         ],
         ["user", "编译通过了，界面也起来了"],
         [
@@ -136,7 +136,7 @@ export function installCaptureRig(): CaptureRig {
         ["user", "分组标题的字号再小一点"],
         [
           "assistant",
-          "已把分组标题从 `--text-sm` 调整为 `--text-2xs`，同时收紧了上下间距，现在与 PI-Desktop 的密度一致。",
+          "已把分组标题从 `--text-sm` 调整为 `--text-2xs`，同时收紧了上下间距，现在与 DuaerAiDesk 的密度一致。",
         ],
         ["user", "最后跑一遍检查"],
         [
@@ -326,7 +326,7 @@ export function installCaptureRig(): CaptureRig {
           },
         },
         {
-          command: "pnpm --filter @pi-desktop/desktop build",
+          command: "pnpm --filter @duaer-ai-desk/desktop build",
           status: "running" as const,
           details: undefined,
         },
@@ -1026,7 +1026,7 @@ export function installCaptureRig(): CaptureRig {
         const base = (ws.name || ws.path.split(/[\/]/).filter(Boolean).pop() || "").trim();
         if (base.length > 0 && base.length < 12) {
           useAppStore.setState({
-            workspace: { ...ws, name: "PI-Desktop" },
+            workspace: { ...ws, name: "DuaerAiDesk" },
           });
         }
       }

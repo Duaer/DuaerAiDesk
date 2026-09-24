@@ -24,7 +24,7 @@ import {
   type RemoteHostPairResult,
   type RemoteHostRemoveRequest,
   type RemoteHostSummary,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import { app } from "electron";
 import {
   getActiveRemoteHostsBoot,
@@ -69,7 +69,7 @@ function invalid(message: string, field?: string): Error {
  * Derive a routing key from a URL and a label when the renderer did not
  * supply one. The URL's hostname keeps the key readable in logs; the label's
  * ASCII-safe slug disambiguates two hosts on the same machine (e.g., a WSL
- * and a native install of `pi-host` on `localhost`).
+ * and a native install of `duaer-ai-desk-host` on `localhost`).
  */
 function synthesizeHostKey(url: string, label: string): string {
   let hostname = "host";

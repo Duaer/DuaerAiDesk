@@ -121,7 +121,7 @@ pub type PluginI18nMap = std::collections::BTreeMap<String, PluginDisplayI18n>;
 
 /// Which entry of a [`PluginI18nMap`] a shell locale reads.
 ///
-/// Mirrors `resolvePluginLocalizedString` in `@pi-desktop/plugin-sdk`: every
+/// Mirrors `resolvePluginLocalizedString` in `@duaer-ai-desk/plugin-sdk`: every
 /// Chinese shell locale reads `zh-CN`, everything else reads `en`. Plugins are
 /// not required to translate themselves into every shipped shell locale, so
 /// `zh-TW` deliberately reads English rather than half a `zh-CN` guess
@@ -323,7 +323,7 @@ pub struct MarketVersion {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub changelog: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub min_pi_desktop: Option<String>,
+    pub min_duaer_ai_desk: Option<String>,
     /// Package metadata is optional while a publisher is preparing a release.
     /// Such a version can be displayed and used for update discovery, but it
     /// cannot be installed until its checksum and URL are published.

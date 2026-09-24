@@ -23,9 +23,9 @@ const REQUIRED_CASE_IDS = [
 ];
 const LIVE_CASE_ID = "E2E-106-live-agent";
 const LIVE_ENV_AVAILABLE = [
-  "PI_DESKTOP_TEST_API_KEY",
-  "PI_DESKTOP_TEST_BASE_URL",
-  "PI_DESKTOP_TEST_MODEL",
+  "DUAER_AI_DESK_TEST_API_KEY",
+  "DUAER_AI_DESK_TEST_BASE_URL",
+  "DUAER_AI_DESK_TEST_MODEL",
 ].every((name) => Boolean(process.env[name]?.trim()));
 const CASE_IDS = LIVE_ENV_AVAILABLE
   ? [...REQUIRED_CASE_IDS, LIVE_CASE_ID]
@@ -367,7 +367,7 @@ async function fetchJsonList(port) {
 function addElectronOutput(state, streamName, chunk) {
   const text = String(chunk);
   state.electronOutput += `[${streamName}] ${text}`;
-  if (process.env.DEBUG_PI_DESKTOP_E2E === "1") process.stderr.write(text);
+  if (process.env.DEBUG_DUAER_AI_DESK_E2E === "1") process.stderr.write(text);
 }
 
 function attachElectronOutput(child, state) {
@@ -388,11 +388,11 @@ function startElectron(state) {
       cwd: appDir,
       env: {
         ...process.env,
-        PI_DESKTOP_DATA_DIR: state.dataDir,
-        PI_DESKTOP_HOST_BIN: state.hostBinary,
-        PI_DESKTOP_PLAN_UI_PROBE: "1",
+        DUAER_AI_DESK_DATA_DIR: state.dataDir,
+        DUAER_AI_DESK_HOST_BIN: state.hostBinary,
+        DUAER_AI_DESK_PLAN_UI_PROBE: "1",
         ELECTRON_RENDERER_URL: "",
-        PI_DESKTOP_START_MAXIMIZED: "0",
+        DUAER_AI_DESK_START_MAXIMIZED: "0",
       },
       stdio: ["ignore", "pipe", "pipe"],
       windowsHide: false,
@@ -441,7 +441,7 @@ async function connectMain(state) {
   await waitFor(
     async () => {
       const available = await state.mainCdp.evaluateMain(
-        "typeof globalThis.__PI_DESKTOP_PLAN_UI_PROBE === 'function'",
+        "typeof globalThis.__DUAER_AI_DESK_PLAN_UI_PROBE === 'function'",
         "Electron Main",
       );
       return available === true;
@@ -460,7 +460,7 @@ async function connectRenderer(state) {
           (target) =>
             target.type === "page" &&
             target.webSocketDebuggerUrl &&
-            (target.url.startsWith("file:") || target.title === "PI-Desktop"),
+            (target.url.startsWith("file:") || target.title === "DuaerAiDesk"),
         );
       } catch {
         return null;
@@ -754,8 +754,8 @@ async function selectSession(state, sessionId) {
       row.querySelector("button.thread-item-main")?.click();
       return { method: "dom", found: true };
     }
-    if (typeof window.__PI_DESKTOP__?.selectSession === "function") {
-      await window.__PI_DESKTOP__.selectSession(wanted);
+    if (typeof window.__DUAER_AI_DESK__?.selectSession === "function") {
+      await window.__DUAER_AI_DESK__.selectSession(wanted);
       return { method: "renderer-session-api", found: false };
     }
     return {
@@ -826,7 +826,7 @@ async function clickApprovalMenuAndCheckAsk(state) {
 
 async function getPreloadResult(state, channelName, args = []) {
   const result = await state.cdp.evaluate(`(async () => {
-    const bridge = window.piDesktop;
+    const bridge = window.duaerAiDesk;
     if (!bridge?.invoke || !bridge.channels?.invoke?.${channelName}) {
       throw new Error("required preload channel is unavailable: ${channelName}");
     }
@@ -844,7 +844,7 @@ async function setLanguage(state, language) {
   let lastResult = null;
   for (let attempt = 0; attempt < 12; attempt += 1) {
     const result = await state.cdp.evaluate(`(async () => {
-      const bridge = window.piDesktop;
+      const bridge = window.duaerAiDesk;
       const getChannel = bridge?.channels?.invoke?.settingsGet;
       const setChannel = bridge?.channels?.invoke?.settingsSet;
       if (!bridge?.invoke || !getChannel || !setChannel) {
@@ -960,7 +960,7 @@ async function runPlanProbe(state, request) {
   assert(state.mainCdp && !state.mainCdp.closed, "Electron Main inspector is unavailable");
   const response = await state.mainCdp.evaluateMain(
     `(async () => {
-      const probe = globalThis.__PI_DESKTOP_PLAN_UI_PROBE;
+      const probe = globalThis.__DUAER_AI_DESK_PLAN_UI_PROBE;
       if (typeof probe !== "function") throw new Error("Plan UI probe is unavailable");
       return probe(${JSON.stringify(request)});
     })()`,
@@ -1607,7 +1607,7 @@ async function runAcceptance(state) {
 
   if (!LIVE_ENV_AVAILABLE) {
     console.log(
-      `SKIP ${LIVE_CASE_ID} - set PI_DESKTOP_TEST_API_KEY, PI_DESKTOP_TEST_BASE_URL, and PI_DESKTOP_TEST_MODEL for the optional live acceptance case`,
+      `SKIP ${LIVE_CASE_ID} - set DUAER_AI_DESK_TEST_API_KEY, DUAER_AI_DESK_TEST_BASE_URL, and DUAER_AI_DESK_TEST_MODEL for the optional live acceptance case`,
     );
   } else {
     try {
@@ -1680,7 +1680,7 @@ async function main() {
     mkdir(state.profileDir, { recursive: true }),
     mkdir(state.workspace, { recursive: true }),
   ]);
-  const callerArtifactDir = process.env.PI_DESKTOP_E2E_ARTIFACT_DIR?.trim();
+  const callerArtifactDir = process.env.DUAER_AI_DESK_E2E_ARTIFACT_DIR?.trim();
   state.artifactDir = callerArtifactDir
     ? resolve(callerArtifactDir)
     : join(state.tempRoot, "artifacts");

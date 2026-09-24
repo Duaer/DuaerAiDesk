@@ -4,8 +4,8 @@ import {
   serializeConversation,
   type AgentMessage,
   type CompactionPreparation,
-} from "@earendil-works/pi-agent-core";
-import type { RetryPolicy, Usage } from "@earendil-works/pi-ai";
+} from "@duaer-ai-desk/upstream-agent-core";
+import type { RetryPolicy, Usage } from "@duaer-ai-desk/upstream-ai";
 import { truncateMessageText } from "./agent-messages.js";
 import { DEFAULT_MAX_TOKENS } from "./provider-binding.js";
 

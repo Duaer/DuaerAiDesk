@@ -68,7 +68,7 @@ export function StartupRecovery({
     const report = buildStartupDiagnostics({
       phase,
       elapsedMs: waitedMs(),
-      platform: window.piDesktop?.platform ?? "unknown",
+      platform: window.duaerAiDesk?.platform ?? "unknown",
       locale: i18n.resolvedLanguage ?? i18n.language ?? null,
       appVersion: state.version?.version ?? (await appVersionFromMain()),
       error: state.error ?? null,

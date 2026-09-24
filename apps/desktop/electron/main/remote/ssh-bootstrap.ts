@@ -1,5 +1,5 @@
 /**
- * SSH bootstrap: install and pair a `pi-host` on a machine the user already
+ * SSH bootstrap: install and pair a `duaer-ai-desk-host` on a machine the user already
  * reaches over SSH (spec `02-architecture/05-remote-agent-control.md` §5.2,
  * security `05-security/02-remote-control-security.md` §3.4).
  *
@@ -23,12 +23,12 @@ import {
   ErrorCodes,
   type RemoteHostBootstrapRequest,
   type RemoteHostSshMetadata,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import {
   buildBootstrapScript,
   parseBootstrapOutput,
   redactBootstrapOutput,
-} from "./pi-host-bootstrap-script.js";
+} from "./duaer-ai-desk-host-bootstrap-script.js";
 import {
   isPublishedTarget,
   parseChecksumFile,
@@ -38,7 +38,7 @@ import {
   resolveTarget,
   targetKey,
   versionsMatch,
-} from "./pi-host-release.js";
+} from "./duaer-ai-desk-host-release.js";
 import {
   assertSshArgument,
   createSystemSshTransport,
@@ -124,15 +124,15 @@ function fail(message: string, errorCode: string, data?: Record<string, unknown>
 }
 
 const REMOTE_STEP_MESSAGES: Record<string, string> = {
-  "missing-node": "the remote machine has no Node.js; pi-host needs Node.js 22 or newer",
-  "node-too-old": "the remote Node.js is too old; pi-host needs Node.js 22 or newer",
-  "download-failed": "the remote machine could not download the pi-host bundle from GitHub",
-  "checksum-mismatch": "the downloaded pi-host bundle did not match the published SHA-256",
+  "missing-node": "the remote machine has no Node.js; duaer-ai-desk-host needs Node.js 22 or newer",
+  "node-too-old": "the remote Node.js is too old; duaer-ai-desk-host needs Node.js 22 or newer",
+  "download-failed": "the remote machine could not download the duaer-ai-desk-host bundle from GitHub",
+  "checksum-mismatch": "the downloaded duaer-ai-desk-host bundle did not match the published SHA-256",
   "missing-tar": "the remote machine has no tar",
-  "install-failed": "the remote pi-host install.sh failed",
-  "ready-timeout": "the remote pi-host started but did not become ready in time",
-  "host-exited": "the remote pi-host process exited before it became ready",
-  "host-start-failed": "the remote pi-host process failed to start",
+  "install-failed": "the remote duaer-ai-desk-host install.sh failed",
+  "ready-timeout": "the remote duaer-ai-desk-host started but did not become ready in time",
+  "host-exited": "the remote duaer-ai-desk-host process exited before it became ready",
+  "host-start-failed": "the remote duaer-ai-desk-host process failed to start",
 };
 
 function remoteStepMessage(step: string): string {
@@ -213,7 +213,7 @@ function validateTarget(request: RemoteHostBootstrapRequest): SshTarget {
 }
 
 /**
- * The port `pi-host` binds on the remote machine. Absent or `0` means "pick a
+ * The port `duaer-ai-desk-host` binds on the remote machine. Absent or `0` means "pick a
  * free one and report it", which is what the bootstrap normally wants; a
  * pinned port is range-checked here so it cannot reach the script as an
  * argument like `--port -5`.
@@ -276,7 +276,7 @@ export function createSshBootstrap(deps: SshBootstrapDeps): SshBootstrap {
         }
         if (!isPublishedTarget(remoteTarget)) {
           throw fail(
-            `no pi-host bundle is published for ${targetKey(remoteTarget)}`,
+            `no duaer-ai-desk-host bundle is published for ${targetKey(remoteTarget)}`,
             ErrorCodes.HOST_BOOTSTRAP_FAILED,
             { target: targetKey(remoteTarget) },
           );

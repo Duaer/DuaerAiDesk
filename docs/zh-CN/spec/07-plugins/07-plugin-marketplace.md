@@ -33,8 +33,8 @@
 
 ### B阶段✅
 - Browse/search + 下载安装是针对官方提供商实施的
-- 官方提供商是专用的 GitHub 存储库 `vastsa/pi-desktop-plugins`
-- 默认目录 URL：`https://raw.githubusercontent.com/vastsa/pi-desktop-plugins/main/catalog.json`
+- 官方提供商是专用的 GitHub 存储库 `vastsa/duaer-ai-desk-plugins`
+- 默认目录 URL：`https://raw.githubusercontent.com/vastsa/duaer-ai-desk-plugins/main/catalog.json`
 - 包 URL 可以是绝对 `https://` / `http://` / `file://`，或根据目录 URL 解析的相对路径
 - HTTPS 获取在 host-core 中使用 `curl`
 
@@ -45,13 +45,13 @@
 | # | 渠道 | `pluginMarketSource` | 目录地址 | 包地址解析 |
 | --- | --- | --- | --- | --- |
 | 1 | 官方渠道 | `"official"`（默认） | `https://plugins.aiuo.net/catalog.json` | 平台 resolve（见下） |
-| 2 | 海外备份 | `"github"` | `https://raw.githubusercontent.com/AIUO-Net/pi-desktop-plugins/main/catalog.json` | 相对 URL + 目录 |
-| 3 | 国内备份 | `"mirror"` | `https://cnb.cool/aixk/pi-desktop-plugins/-/git/raw/main/catalog.json` | 相对 URL + 目录 |
+| 2 | 海外备份 | `"github"` | `https://raw.githubusercontent.com/AIUO-Net/duaer-ai-desk-plugins/main/catalog.json` | 相对 URL + 目录 |
+| 3 | 国内备份 | `"mirror"` | `https://cnb.cool/aixk/duaer-ai-desk-plugins/-/git/raw/main/catalog.json` | 相对 URL + 目录 |
 | 4 | 自定义 | `"custom"` | `pluginMarketCustomUrl` | 相对 URL + 目录 |
 
 来源标签按应用语言本地化：简体中文为官方渠道、海外备份、国内备份、自定义。未设置与
 无法识别的取值都归到官方渠道，`mirror` 仍然表示 CNB，因此不需要迁移任何已持久化的
-设置。环境变量 `PI_DESKTOP_PLUGIN_MARKET_URL` 仍高于所有渠道，开发构建和测试可以指向
+设置。环境变量 `DUAER_AI_DESK_PLUGIN_MARKET_URL` 仍高于所有渠道，开发构建和测试可以指向
 本地目录而不改动持久化设置。
 
 官方渠道就是插件中心：它的目录是中心发布的 `catalog.json`，从中安装的包通过平台的
@@ -72,7 +72,7 @@ URL 绝不跨提供方，切换来源也不会改变正在校验的摘要。海�
 官方渠道的 resolve 请求携带 `deviceId`。host-core 从操作系统暴露的机器标识派生：
 Windows 的 `HKLM\SOFTWARE\Microsoft\Cryptography\MachineGuid`、macOS 的平台 UUID，
 或 Linux 的 `/etc/machine-id`（回退 `/var/lib/dbus/machine-id` 与
-`/sys/class/dmi/id/product_uuid`）。上报的是 `sha256("pi-desktop.device.v1:" + 机器码)`
+`/sys/class/dmi/id/product_uuid`）。上报的是 `sha256("duaer-ai-desk.device.v1:" + 机器码)`
 的 64 位小写十六进制，因此机器码原文不出本机，该摘要也与应用计算的其他哈希做了域
 分隔。读不到机器标识时，host-core 生成一个随机 64 位十六进制 ID，持久化在应用数据
 目录（`plugins/market/device.json`），之后一直复用。该值每个进程只读取一次，跨重启
@@ -209,7 +209,7 @@ interface MarketProvider {
           "shasum": "<sha256 hex>",
           "sizeBytes": 40960,
           "permissions": ["fs.read"],
-          "minPiDesktop": "0.8.0",
+          "minDuaerAiDesk": "0.8.0",
           "yanked": false,
           "yankedReason": null,
           "provenance": {
@@ -244,7 +244,7 @@ v2 的客户端规则：
   的取值一律显示为 `unknown`。见 [15-plugin-center.md](15-plugin-center.md) 第 11 节。
 - `yanked: true` 的版本从安装和更新选择中移除，但保留在版本历史里并附带原因；
   已安装该版本的插件会被标记为需要注意。
-- `minPiDesktop` 高于当前应用版本时，在下载前就拒绝安装。
+- `minDuaerAiDesk` 高于当前应用版本时，在下载前就拒绝安装。
 - `provenance` 随已安装插件一起保存并在详情面板展示，因此可以追溯到具体仓库和
   commit。
 - `signature` 校验规则见 [08-plugin-signing-updates.md](08-plugin-signing-updates.md)，
@@ -276,7 +276,7 @@ type MarketPluginDetail = MarketPluginSummary & {
  version: string
  publishedAt: string
  changelog?: string
- minPiDesktop?: string
+ minDuaerAiDesk?: string
  }>
  screenshots?: string[]
  homepage?: string
@@ -297,7 +297,7 @@ host 必然拒绝的下载。批量更新会跳过这类版本，而不是让整
 
 ```bash
 pnpm check:marketplace -- \
-  --url https://raw.githubusercontent.com/vastsa/pi-desktop-plugins/main/catalog.json \
+  --url https://raw.githubusercontent.com/vastsa/duaer-ai-desk-plugins/main/catalog.json \
   --plugin <plugin-id>
 ```
 
@@ -473,7 +473,7 @@ UI 必须使信任级别可见。
  {
  "id": "corp",
  "url": "https://plugins.company.local",
- "tokenEnv": "PI_DESKTOP_MARKET_TOKEN"
+ "tokenEnv": "DUAER_AI_DESK_MARKET_TOKEN"
  }
  ]
 }
@@ -525,7 +525,7 @@ UI 必须使信任级别可见。
 
 ### 当前源（目录 v1）
 
-存储库：[vastsa/pi-desktop-plugins](https://github.com/vastsa/pi-desktop-plugins)
+存储库：[vastsa/duaer-ai-desk-plugins](https://github.com/vastsa/duaer-ai-desk-plugins)
 
 ```text
 catalog.json
@@ -541,7 +541,7 @@ scripts/rebuild_catalog.py
 2.`python3 scripts/pack_plugin.py plugins/<id>`
 3.`python3 scripts/rebuild_catalog.py`
 4. 提交 + 推送至 `main`
-5. PI-Desktop 通过 `market.refresh`/市场 UI 刷新
+5. DuaerAiDesk 通过 `market.refresh`/市场 UI 刷新
 
 目前由维护者就地编辑源码、打包、手工重建目录。下面要变的正是这一点，而地址不变。
 
@@ -562,7 +562,7 @@ API 不可用，浏览、安装和更新依然可用。
 使用 env 覆盖目录 URL：
 
 ```text
-PI_DESKTOP_PLUGIN_MARKET_URL=https://raw.githubusercontent.com/<owner>/<repo>/<ref>/catalog.json
+DUAER_AI_DESK_PLUGIN_MARKET_URL=https://raw.githubusercontent.com/<owner>/<repo>/<ref>/catalog.json
 ```
 
 
@@ -586,5 +586,5 @@ PI_DESKTOP_PLUGIN_MARKET_URL=https://raw.githubusercontent.com/<owner>/<repo>/<r
 
 贡献文档位于官方仓库：
 
-- https://github.com/vastsa/pi-desktop-plugins/blob/main/CONTRIBUTING.md
+- https://github.com/vastsa/duaer-ai-desk-plugins/blob/main/CONTRIBUTING.md
 - 实用模板：`plugins/demo.workspace-summary`

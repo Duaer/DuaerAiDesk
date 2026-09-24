@@ -8,7 +8,7 @@ every installation has a file view out of the box (ADR 0241).
 
 | Field | Value |
 | --- | --- |
-| Repository | https://github.com/Tioit-Wang/pi-desktop-plugin-file-manager |
+| Repository | https://github.com/Tioit-Wang/duaer-ai-desk-plugin-file-manager |
 | Tag | `v0.5.2` |
 | Commit | `d36ebe9f7fb82ee71e87670b0a65403660b18a00` |
 | License | MIT (see `LICENSE`; upstream ships no license file) |

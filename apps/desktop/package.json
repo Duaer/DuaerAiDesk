@@ -1,10 +1,10 @@
 {
-  "name": "@pi-desktop/desktop",
+  "name": "@duaer-ai-desk/desktop",
   "version": "0.15.6",
-  "desktopName": "pi-desktop.desktop",
+  "desktopName": "duaer-ai-desk.desktop",
   "private": true,
-  "description": "PI-Desktop Electron application",
-  "homepage": "https://github.com/vastsa/PI-Desktop",
+  "description": "DuaerAiDesk Electron application",
+  "homepage": "https://github.com/Duaer/DuaerAiDesk",
   "author": {
     "name": "vastsa",
     "email": "hhxk666@gmail.com"
@@ -12,7 +12,7 @@
   "main": "./out/main/index.js",
   "type": "module",
   "scripts": {
-    "build:deps": "pnpm --filter '@pi-desktop/desktop^...' build",
+    "build:deps": "pnpm --filter '@duaer-ai-desk/desktop^...' build",
     "predev": "pnpm run build:deps && cargo build --manifest-path ../../Cargo.toml -p host-core",
     "dev": "node ../../scripts/dev-electron.mjs",
     "build": "electron-vite build",
@@ -34,15 +34,14 @@
     "electron-updater": "^6.8.9"
   },
   "devDependencies": {
-    "@earendil-works/pi-ai": "0.87.1",
-    "@pi-desktop/agent-host": "workspace:*",
-    "@pi-desktop/agent-runtime": "workspace:*",
-    "@pi-desktop/host-runtime": "workspace:*",
-    "@pi-desktop/i18n": "workspace:*",
-    "@pi-desktop/plugin-devkit": "workspace:*",
-    "@pi-desktop/plugin-sdk": "workspace:*",
-    "@pi-desktop/racp": "workspace:*",
-    "@pi-desktop/shared": "workspace:*",
+    "@duaer-ai-desk/agent-host": "workspace:*",
+    "@duaer-ai-desk/agent-runtime": "workspace:*",
+    "@duaer-ai-desk/host-runtime": "workspace:*",
+    "@duaer-ai-desk/i18n": "workspace:*",
+    "@duaer-ai-desk/plugin-devkit": "workspace:*",
+    "@duaer-ai-desk/plugin-sdk": "workspace:*",
+    "@duaer-ai-desk/racp": "workspace:*",
+    "@duaer-ai-desk/shared": "workspace:*",
     "@tailwindcss/vite": "^4.3.3",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
@@ -73,11 +72,12 @@
     "unified": "^11.0.5",
     "vite": "^7.3.6",
     "ws": "8.21.1",
-    "zustand": "^5.0.15"
+    "zustand": "^5.0.15",
+    "@duaer-ai-desk/upstream-ai": "npm:@earendil-works/pi-ai@0.87.1"
   },
   "build": {
-    "appId": "net.aiuo.pi-desktop",
-    "productName": "PI-Desktop",
+    "appId": "net.aiuo.duaer-ai-desk",
+    "productName": "DuaerAiDesk",
     "directories": {
       "output": "release"
     },
@@ -85,7 +85,7 @@
       {
         "provider": "github",
         "owner": "vastsa",
-        "repo": "PI-Desktop"
+        "repo": "DuaerAiDesk"
       }
     ],
     "extraMetadata": {
@@ -136,7 +136,7 @@
       }
     ],
     "mac": {
-      "artifactName": "PI-Desktop-${version}-${arch}-mac.${ext}",
+      "artifactName": "DuaerAiDesk-${version}-${arch}-mac.${ext}",
       "target": [
         {
           "target": "dmg"
@@ -152,8 +152,8 @@
       "entitlements": "build/entitlements.mac.plist",
       "entitlementsInherit": "build/entitlements.mac.plist",
       "extendInfo": {
-        "NSLocalNetworkUsageDescription": "PI-Desktop needs local network access so agents can reach OpenAI-compatible providers, Ollama, and other AI endpoints running on your LAN. / PI-Desktop 需要本地网络访问权限，以便助手请求同一局域网中的 OpenAI 兼容服务、Ollama 等本地 AI 端点。",
-        "NSMicrophoneUsageDescription": "PI-Desktop plugins may use the microphone after you grant them audio access. / 在你授权后，PI-Desktop 插件可以使用麦克风。",
+        "NSLocalNetworkUsageDescription": "DuaerAiDesk needs local network access so agents can reach OpenAI-compatible providers, Ollama, and other AI endpoints running on your LAN. / DuaerAiDesk 需要本地网络访问权限，以便助手请求同一局域网中的 OpenAI 兼容服务、Ollama 等本地 AI 端点。",
+        "NSMicrophoneUsageDescription": "DuaerAiDesk plugins may use the microphone after you grant them audio access. / 在你授权后，DuaerAiDesk 插件可以使用麦克风。",
         "NSBonjourServices": [
           "_http._tcp",
           "_https._tcp"
@@ -161,8 +161,8 @@
       },
       "extraResources": [
         {
-          "from": "../../target/release/pi-desktop-host-core",
-          "to": "bin/pi-desktop-host-core"
+          "from": "../../target/release/duaer-ai-desk-host-core",
+          "to": "bin/duaer-ai-desk-host-core"
         },
         {
           "from": "build/tray-icon-mac.png",
@@ -170,12 +170,12 @@
         }
       ],
       "extraDistFiles": [
-        "PI-Desktop-macOS-open.command",
-        "PI-Desktop-macOS-opening-help.txt"
+        "DuaerAiDesk-macOS-open.command",
+        "DuaerAiDesk-macOS-opening-help.txt"
       ]
     },
     "dmg": {
-      "artifactName": "PI-Desktop-${version}-${arch}.${ext}",
+      "artifactName": "DuaerAiDesk-${version}-${arch}.${ext}",
       "background": "build/dmg-background.png",
       "icon": "build/icon.icns",
       "window": {
@@ -198,8 +198,8 @@
       ]
     },
     "win": {
-      "executableName": "PI-Desktop",
-      "artifactName": "PI-Desktop-Portable-${version}.${ext}",
+      "executableName": "DuaerAiDesk",
+      "artifactName": "DuaerAiDesk-Portable-${version}.${ext}",
       "target": [
         {
           "target": "nsis",
@@ -217,8 +217,8 @@
       "icon": "build/icon.ico",
       "extraResources": [
         {
-          "from": "../../target/release/pi-desktop-host-core.exe",
-          "to": "bin/pi-desktop-host-core.exe"
+          "from": "../../target/release/duaer-ai-desk-host-core.exe",
+          "to": "bin/duaer-ai-desk-host-core.exe"
         },
         {
           "from": "build/icon.ico",
@@ -229,23 +229,23 @@
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
-      "shortcutName": "PI-Desktop",
-      "artifactName": "PI-Desktop-Setup-${version}.${ext}"
+      "shortcutName": "DuaerAiDesk",
+      "artifactName": "DuaerAiDesk-Setup-${version}.${ext}"
     },
     "deb": {
-      "packageName": "pi-desktop",
-      "artifactName": "pi-desktop_${version}_${arch}.${ext}"
+      "packageName": "duaer-ai-desk",
+      "artifactName": "duaer-ai-desk_${version}_${arch}.${ext}"
     },
     "rpm": {
-      "packageName": "pi-desktop",
-      "artifactName": "pi-desktop-${version}-${arch}.${ext}",
+      "packageName": "duaer-ai-desk",
+      "artifactName": "duaer-ai-desk-${version}-${arch}.${ext}",
       "fpm": [
         "--rpm-rpmbuild-define",
         "_build_id_links none"
       ]
     },
     "linux": {
-      "executableName": "pi-desktop",
+      "executableName": "duaer-ai-desk",
       "syncDesktopName": true,
       "target": [
         {
@@ -271,8 +271,8 @@
       "icon": "build/icon.png",
       "extraResources": [
         {
-          "from": "../../target/release/pi-desktop-host-core",
-          "to": "bin/pi-desktop-host-core"
+          "from": "../../target/release/duaer-ai-desk-host-core",
+          "to": "bin/duaer-ai-desk-host-core"
         }
       ]
     },

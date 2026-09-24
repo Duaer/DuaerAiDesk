@@ -13,8 +13,8 @@
  * a different model, which would drop reasoning_* on the wire.
  */
 
-import type { AgentMessage } from "@earendil-works/pi-agent-core";
-import type { AssistantMessage, Message } from "@earendil-works/pi-ai";
+import type { AgentMessage } from "@duaer-ai-desk/upstream-agent-core";
+import type { AssistantMessage, Message } from "@duaer-ai-desk/upstream-ai";
 
 /** Cap how many pre-compaction thinking turns ride inside the checkpoint. */
 export const MAX_RETAINED_REASONING_TURNS = 3;

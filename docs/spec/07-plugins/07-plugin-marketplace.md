@@ -30,8 +30,8 @@ The host is responsible for:
 
 ### Phase B ✅
 - Browse/search + download install are implemented against the official provider
-- Official provider is the dedicated GitHub repo `vastsa/pi-desktop-plugins`
-- Default catalog URL: `https://raw.githubusercontent.com/vastsa/pi-desktop-plugins/main/catalog.json`
+- Official provider is the dedicated GitHub repo `vastsa/duaer-ai-desk-plugins`
+- Default catalog URL: `https://raw.githubusercontent.com/vastsa/duaer-ai-desk-plugins/main/catalog.json`
 - Package URLs may be absolute `https://` / `http://` / `file://`, or relative paths resolved against the catalog URL
 - HTTPS fetch uses `curl` in host-core
 - curl diagnostics are decoded as UTF-8 first and as the active Windows ANSI
@@ -46,15 +46,15 @@ channels, and the user can switch between them at any time:
 | # | Channel | `pluginMarketSource` | Catalog URL | Package resolution |
 | --- | --- | --- | --- | --- |
 | 1 | Official channel | `"official"` (default) | `https://plugins.aiuo.net/catalog.json` | Platform resolve (below) |
-| 2 | GitHub backup | `"github"` | `https://raw.githubusercontent.com/AIUO-Net/pi-desktop-plugins/main/catalog.json` | Relative URL against the catalog |
-| 3 | CNB backup | `"mirror"` | `https://cnb.cool/aixk/pi-desktop-plugins/-/git/raw/main/catalog.json` | Relative URL against the catalog |
+| 2 | GitHub backup | `"github"` | `https://raw.githubusercontent.com/AIUO-Net/duaer-ai-desk-plugins/main/catalog.json` | Relative URL against the catalog |
+| 3 | CNB backup | `"mirror"` | `https://cnb.cool/aixk/duaer-ai-desk-plugins/-/git/raw/main/catalog.json` | Relative URL against the catalog |
 | 4 | Custom | `"custom"` | `pluginMarketCustomUrl` | Relative URL against the catalog |
 
 The selector labels are localized; the English locale uses exactly these four
 strings: Official channel, GitHub backup, CNB backup, Custom. An unset value
 and an unrecognized value both resolve to the official channel, and `mirror`
 still means CNB, so no persisted setting is migrated. The environment override
-`PI_DESKTOP_PLUGIN_MARKET_URL` stays above every channel so dev builds and
+`DUAER_AI_DESK_PLUGIN_MARKET_URL` stays above every channel so dev builds and
 tests can point at a local catalog without touching persisted settings.
 
 The official channel is the plugin center: its catalog is the generated
@@ -86,7 +86,7 @@ from the machine identity the operating system exposes: the Windows
 `HKLM\SOFTWARE\Microsoft\Cryptography\MachineGuid`, the macOS platform UUID, or
 Linux `/etc/machine-id` (falling back to `/var/lib/dbus/machine-id` and
 `/sys/class/dmi/id/product_uuid`). What is sent is
-`sha256("pi-desktop.device.v1:" + <machine id>)` as 64-character lowercase hex,
+`sha256("duaer-ai-desk.device.v1:" + <machine id>)` as 64-character lowercase hex,
 so the machine code itself never leaves the machine and the digest is
 domain-separated from every other hash the app computes. When no machine
 identity is readable, host-core generates one random 64-hex id and persists it
@@ -258,7 +258,7 @@ if it receives a map there.
           "shasum": "<sha256 hex>",
           "sizeBytes": 40960,
           "permissions": ["fs.read"],
-          "minPiDesktop": "0.8.0",
+          "minDuaerAiDesk": "0.8.0",
           "yanked": false,
           "yankedReason": null,
           "provenance": {
@@ -296,7 +296,7 @@ Client rules for v2:
 - `yanked: true` removes the version from install and update selection. It stays
   visible in version history with its reason, and an installed copy of a yanked
   version is surfaced as needing attention.
-- `minPiDesktop` blocks install when the running app is older, before download.
+- `minDuaerAiDesk` blocks install when the running app is older, before download.
 - `provenance` is stored with the installed plugin and shown in the detail sheet,
   so an installed marketplace plugin can be traced back to a repository and
   commit.
@@ -340,7 +340,7 @@ type MarketPluginDetail = MarketPluginSummary & {
  version: string
  publishedAt: string
  changelog?: string
- minPiDesktop?: string
+ minDuaerAiDesk?: string
  shasum?: string
  url?: string
  sizeBytes?: number
@@ -372,7 +372,7 @@ Before publishing or diagnosing a release, run the repository preflight:
 
 ```bash
 pnpm check:marketplace -- \
-  --url https://raw.githubusercontent.com/vastsa/pi-desktop-plugins/main/catalog.json \
+  --url https://raw.githubusercontent.com/vastsa/duaer-ai-desk-plugins/main/catalog.json \
   --plugin <plugin-id>
 ```
 
@@ -580,7 +580,7 @@ Supports configuration:
  {
  "id": "corp",
  "url": "https://plugins.company.local",
- "tokenEnv": "PI_DESKTOP_MARKET_TOKEN"
+ "tokenEnv": "DUAER_AI_DESK_MARKET_TOKEN"
  }
  ]
 }
@@ -632,7 +632,7 @@ Installs always pass through checksum verification and permission review before 
 
 ### Current source (catalog v1)
 
-Repository: [vastsa/pi-desktop-plugins](https://github.com/vastsa/pi-desktop-plugins)
+Repository: [vastsa/duaer-ai-desk-plugins](https://github.com/vastsa/duaer-ai-desk-plugins)
 
 ```text
 catalog.json
@@ -648,7 +648,7 @@ Maintenance flow:
 2. `python3 scripts/pack_plugin.py plugins/<id>`
 3. `python3 scripts/rebuild_catalog.py`
 4. Commit + push to `main`
-5. PI-Desktop refreshes via `market.refresh` / marketplace UI
+5. DuaerAiDesk refreshes via `market.refresh` / marketplace UI
 
 Today a maintainer edits the source in place, packs it, and regenerates the
 catalog by hand. That is what changes below; the addresses do not.
@@ -678,7 +678,7 @@ header refresh action remains the explicit remote-refresh path.
 Override catalog URL with env:
 
 ```text
-PI_DESKTOP_PLUGIN_MARKET_URL=https://raw.githubusercontent.com/<owner>/<repo>/<ref>/catalog.json
+DUAER_AI_DESK_PLUGIN_MARKET_URL=https://raw.githubusercontent.com/<owner>/<repo>/<ref>/catalog.json
 ```
 
 
@@ -702,5 +702,5 @@ relative to the installed version, so an upgrade cannot silently widen access
 
 Contribution docs live in the official warehouse:
 
-- https://github.com/vastsa/pi-desktop-plugins/blob/main/CONTRIBUTING.md
+- https://github.com/vastsa/duaer-ai-desk-plugins/blob/main/CONTRIBUTING.md
 - Practical template: `plugins/demo.workspace-summary`

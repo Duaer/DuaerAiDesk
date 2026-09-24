@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import type { AgentInstructionFile } from "@pi-desktop/shared";
+import type { AgentInstructionFile } from "@duaer-ai-desk/shared";
 import { api } from "../../lib/api";
 import { useUpdateState } from "../../hooks/use-update-state";
 import { Button } from "../../components/ui";

@@ -1,7 +1,7 @@
 /** Pick which vendor to sign in to; the same vendor can be picked repeatedly. */
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import type { OAuthVendor } from "@pi-desktop/shared";
+import type { OAuthVendor } from "@duaer-ai-desk/shared";
 import { Button, portalOverlay } from "../ui";
 
 export function VendorPickerDialog({

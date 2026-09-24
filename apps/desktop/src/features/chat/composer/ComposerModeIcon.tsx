@@ -1,4 +1,4 @@
-import type { Mode } from "@pi-desktop/shared";
+import type { Mode } from "@duaer-ai-desk/shared";
 import { IconListChecks, IconShield, IconTarget } from "../../../components/icons";
 
 export function ModeIcon({ mode }: { mode: Mode }) {

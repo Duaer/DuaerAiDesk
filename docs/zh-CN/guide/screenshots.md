@@ -1,12 +1,12 @@
 ---
 title: 界面截图
-description: PI-Desktop 的每个界面，全部取自运行中的应用。
+description: DuaerAiDesk 的每个界面，全部取自运行中的应用。
 ---
 
 # 界面截图
 
 下面每一张都来自支撑 [E2E 测试计划](/zh-CN/spec/06-delivery/04-e2e-test-plan)
-的截图装置：应用以 `PI_DESKTOP_CAPTURE=1` 在一个临时数据目录上启动，自行走过每个
+的截图装置：应用以 `DUAER_AI_DESK_CAPTURE=1` 在一个临时数据目录上启动，自行走过每个
 界面并写出 PNG，再由 `scripts/publish-screenshots.py` 转换成本页的图片。因此这些
 截图展示的是实际发布的界面，而不是设计稿——包括全新安装时看到的空态。
 
@@ -17,9 +17,9 @@ description: PI-Desktop 的每个界面，全部取自运行中的应用。
 
 主页是全新安装打开后的第一个界面：标题区、输入框，以及按项目分组会话的侧边栏。
 
-![浅色主题下的 PI-Desktop 主页](../../public/screenshots/app/zh/home-light.webp)
+![浅色主题下的 DuaerAiDesk 主页](../../public/screenshots/app/zh/home-light.webp)
 
-![深色主题下的 PI-Desktop 主页](../../public/screenshots/app/zh/home-dark.webp)
+![深色主题下的 DuaerAiDesk 主页](../../public/screenshots/app/zh/home-dark.webp)
 
 ![深色主题下的对话页](../../public/screenshots/app/zh/dark-home.webp)
 
@@ -149,15 +149,15 @@ MCP 服务、技能和子智能体独立于插件管理，各自可以全局启�
 
 ## 如何重新生成
 
-先构建渲染层，确认 `target/debug/pi-desktop-host-core` 存在，创建
+先构建渲染层，确认 `target/debug/duaer-ai-desk-host-core` 存在，创建
 `/tmp/codex-screens`，然后按语言各跑一遍并发布：
 
 ```bash
-pnpm --filter @pi-desktop/desktop build
+pnpm --filter @duaer-ai-desk/desktop build
 mkdir -p /tmp/codex-screens
 
 # 英文一遍；中文一遍在命令末尾加 --lang=zh-CN。
-cd apps/desktop && PI_DESKTOP_CAPTURE=1 PI_DESKTOP_DATA_DIR=$(mktemp -d) \
+cd apps/desktop && DUAER_AI_DESK_CAPTURE=1 DUAER_AI_DESK_DATA_DIR=$(mktemp -d) \
   ELECTRON_RENDERER_URL= ./node_modules/.bin/electron .
 
 python3 scripts/publish-screenshots.py --source /tmp/codex-screens --locale zh

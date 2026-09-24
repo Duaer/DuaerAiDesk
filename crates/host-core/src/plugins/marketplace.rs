@@ -16,11 +16,11 @@ pub const OFFICIAL_CHANNEL_CATALOG_URL: &str = "https://plugins.aiuo.net/catalog
 /// against whichever host served the catalog and a switch can never cross
 /// providers.
 pub const GITHUB_BACKUP_CHANNEL_CATALOG_URL: &str =
-    "https://raw.githubusercontent.com/AIUO-Net/pi-desktop-plugins/main/catalog.json";
+    "https://raw.githubusercontent.com/AIUO-Net/duaer-ai-desk-plugins/main/catalog.json";
 
 /// Backup channel: the CNB copy, for networks that cannot reach GitHub.
 pub const MIRROR_MARKET_CATALOG_URL: &str =
-    "https://cnb.cool/aixk/pi-desktop-plugins/-/git/raw/main/catalog.json";
+    "https://cnb.cool/aixk/duaer-ai-desk-plugins/-/git/raw/main/catalog.json";
 
 /// The catalog source a user chose.
 ///
@@ -80,7 +80,7 @@ impl MarketChannel {
 /// Dev builds and tests point this at a local catalog so they never touch
 /// persisted settings, and it outranks the channel on purpose.
 pub(crate) fn market_source_env_override() -> Option<String> {
-    std::env::var("PI_DESKTOP_PLUGIN_MARKET_URL")
+    std::env::var("DUAER_AI_DESK_PLUGIN_MARKET_URL")
         .ok()
         .map(|url| url.trim().to_string())
         .filter(|url| !url.is_empty())
@@ -509,9 +509,9 @@ impl PluginManager {
         }
         if !host_supports_version(&selected) {
             bail!(
-                "PLUGIN_HOST_TOO_OLD: version {} requires PI-Desktop {} or newer, this host is {}",
+                "PLUGIN_HOST_TOO_OLD: version {} requires DuaerAiDesk {} or newer, this host is {}",
                 selected.version,
-                selected.min_pi_desktop.as_deref().unwrap_or("newer"),
+                selected.min_duaer_ai_desk.as_deref().unwrap_or("newer"),
                 crate::state::HOST_VERSION
             );
         }
@@ -686,7 +686,7 @@ impl PluginManager {
     /// The three channels are the project's own catalogs; a URL somebody typed
     /// into `custom` may describe its own plugins but cannot assert a tier. The
     /// comparison stays on the effective URL rather than on the setting, so a
-    /// catalog reached through `PI_DESKTOP_PLUGIN_MARKET_URL` counts only when
+    /// catalog reached through `DUAER_AI_DESK_PLUGIN_MARKET_URL` counts only when
     /// it actually names one of them.
     fn is_trusted_channel(&self) -> bool {
         let url = self.market_source_url();
@@ -697,7 +697,7 @@ impl PluginManager {
 }
 
 pub(crate) fn host_supports_version(version: &MarketVersion) -> bool {
-    let Some(required) = version.min_pi_desktop.as_deref().map(str::trim) else {
+    let Some(required) = version.min_duaer_ai_desk.as_deref().map(str::trim) else {
         return true;
     };
     if required.is_empty() || ParsedPluginVersion::parse(required).is_none() {

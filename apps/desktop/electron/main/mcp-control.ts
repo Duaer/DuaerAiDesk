@@ -27,7 +27,7 @@ export type McpControlOperation = {
   /**
    * Operation requires an authenticated first-party plugin context, so it is
    * excluded from the external MCP surface (tools/list, pi_control_describe and
-   * the pi_desktop_invoke enum) while staying callable by plugins.
+   * the duaer_ai_desk_invoke enum) while staying callable by plugins.
    */
   pluginOnly?: boolean;
 };
@@ -106,7 +106,7 @@ type Logger = (level: "info" | "warn" | "error", message: string, data?: unknown
 
 const MCP_PROTOCOL_VERSION = "2025-06-18";
 const MCP_COMPATIBLE_PROTOCOL_VERSIONS = new Set(["2025-06-18", "2025-03-26"]);
-const MCP_SERVER_NAME = "pi-desktop";
+const MCP_SERVER_NAME = "duaer-ai-desk";
 const DEFAULT_HOST = "127.0.0.1";
 const DEFAULT_PORT = 37_123;
 const MAX_REQUEST_BYTES = 2 * 1024 * 1024;
@@ -188,7 +188,7 @@ const spec = (
  * A future IPC channel is not automatically exposed until reviewed here.
  */
 const CONTROL_OPERATION_SPECS: OperationSpec[] = [
-  spec("appGetVersion", "app/getVersion", "Return PI-Desktop and host versions.", "read", []),
+  spec("appGetVersion", "app/getVersion", "Return DuaerAiDesk and host versions.", "read", []),
   spec("appHealth", "app/health", "Return host health.", "read", []),
   spec("appGetOnboarding", "app/getOnboarding", "Read onboarding state.", "read", []),
   spec("appDismissOnboarding", "app/dismissOnboarding", "Dismiss onboarding.", "write", []),
@@ -202,6 +202,7 @@ const CONTROL_OPERATION_SPECS: OperationSpec[] = [
   spec("agentInstructionsSave", "agent/instructions/save", "Write global or project AGENTS.md instructions.", "dangerous", ["input"]),
   spec("agentPrompt", "agent/prompt", "Send a prompt to a session's Agent.", "write", ["request"]),
   spec("promptEnhance", "prompt/enhance", "Enhance a prompt using the configured model.", "write", ["request"]),
+  spec("deliveryReview", "delivery/review", "Review or auto-fix one requirements card with the desktop model.", "write", ["request"]),
   spec("agentCompact", "agent/compact", "Compact an idle session context.", "write", ["request"]),
   spec("agentAbort", "agent/abort", "Abort an active Agent turn.", "write", ["request"]),
   spec("agentStop", "agent/stop", "Request a graceful Agent stop.", "write", ["request"]),
@@ -288,7 +289,7 @@ const coreTool = (
 });
 
 const CORE_TOOL_SPECS = [
-  coreTool("pi_app_info", "Read PI-Desktop and host version information.", objectSchema({}), "app/getVersion", () => []),
+  coreTool("pi_app_info", "Read DuaerAiDesk and host version information.", objectSchema({}), "app/getVersion", () => []),
   coreTool("pi_project_get", "Read the active project workspace.", objectSchema({}), "project/get", () => []),
   coreTool("pi_project_list", "List durable projects.", objectSchema({}), "project/list", () => []),
   coreTool(
@@ -920,7 +921,7 @@ export class McpControlServer {
     const authorization = this.headerValue(request, "authorization");
     const token = authorization?.startsWith("Bearer ")
       ? authorization.slice("Bearer ".length).trim()
-      : this.headerValue(request, "x-pi-desktop-token");
+      : this.headerValue(request, "x-duaer-ai-desk-token");
     return typeof token === "string" && token.length > 0 && tokensEqual(token, this.token);
   }
 
@@ -966,7 +967,7 @@ export class McpControlServer {
     if (request.method === "OPTIONS") {
       result.writeHead(204, {
         Allow: "POST, DELETE, OPTIONS",
-        "Access-Control-Allow-Headers": "Authorization, Content-Type, Mcp-Session-Id, MCP-Protocol-Version, X-Pi-Desktop-Token",
+        "Access-Control-Allow-Headers": "Authorization, Content-Type, Mcp-Session-Id, MCP-Protocol-Version, X-DuaerAiDesk-Token",
         "Access-Control-Allow-Methods": "POST, DELETE, OPTIONS",
       });
       result.end();
@@ -1083,7 +1084,7 @@ export class McpControlServer {
           capabilities: { tools: { listChanged: false } },
           serverInfo: { name: this.serverName, version: this.version },
           instructions:
-            "Local PI-Desktop control plane. Named tools cover project/session/Agent/workspace. Dangerous operations, including session/configure permissionMode, require confirm=true. confirm is an agent acknowledgement, not a desktop user prompt. Poll pi_session_get or pi_agent_status for turn progress; this server does not stream SSE.",
+            "Local DuaerAiDesk control plane. Named tools cover project/session/Agent/workspace. Dangerous operations, including session/configure permissionMode, require confirm=true. confirm is an agent acknowledgement, not a desktop user prompt. Poll pi_session_get or pi_agent_status for turn progress; this server does not stream SSE.",
         }),
         sessionId,
       };
@@ -1142,8 +1143,8 @@ export class McpControlServer {
       } satisfies McpTool];
     });
     const generic: McpTool = {
-      name: "pi_desktop_invoke",
-      description: "Invoke a reviewed PI-Desktop operation. Use pi_control_describe for ids and argument shapes. Dangerous operations require confirm=true. This is an agent acknowledgement, not a user prompt.",
+      name: "duaer_ai_desk_invoke",
+      description: "Invoke a reviewed DuaerAiDesk operation. Use pi_control_describe for ids and argument shapes. Dangerous operations require confirm=true. This is an agent acknowledgement, not a user prompt.",
       inputSchema: objectSchema({
         operation: {
           type: "string",
@@ -1178,7 +1179,7 @@ export class McpControlServer {
     };
     const describe: McpTool = {
       name: "pi_control_describe",
-      description: "Return the reviewed PI-Desktop operation catalog.",
+      description: "Return the reviewed DuaerAiDesk operation catalog.",
       inputSchema: objectSchema({}),
       execute: async () => this.operations.map((operation) => ({
         id: operation.id,

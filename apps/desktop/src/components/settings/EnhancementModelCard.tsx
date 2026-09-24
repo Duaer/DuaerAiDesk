@@ -17,7 +17,7 @@ import {
   modelIdsMatch,
   type AppSettings,
   type ThinkingLevel,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import {
   thinkingLevelForProvider,
   thinkingProviderForModel,

@@ -98,7 +98,7 @@ server.listen(port, "127.0.0.1", () => {
 
 /** Write an executable fixture; its directory goes away when the test ends. */
 async function writeFixture(t, body, name) {
-  const dir = await mkdtemp(join(tmpdir(), "pi-desktop-ssh-fixture-"));
+  const dir = await mkdtemp(join(tmpdir(), "duaer-ai-desk-ssh-fixture-"));
   t.after(() => rm(dir, { recursive: true, force: true }));
   const file = join(dir, name);
   await writeFile(file, body, "utf8");

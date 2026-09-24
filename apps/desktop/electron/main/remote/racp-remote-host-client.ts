@@ -2,7 +2,7 @@
  * RACP-WS-backed {@link RemoteHostClient}: adapts the single-callback
  * `RacpClient.onEvent` seam into the multi-listener `subscribe()` shape
  * `RemoteHostConnection` consumes. This is the only file in
- * `electron/main/remote/` that speaks the `@pi-desktop/racp` protocol
+ * `electron/main/remote/` that speaks the `@duaer-ai-desk/racp` protocol
  * package; everything above it is transport-agnostic.
  *
  * Ownership stays inside Electron Main. The transport factory is injected —
@@ -16,8 +16,8 @@ import {
   wsClientTransport,
   type ClientTransportFactory,
   type RacpClientState,
-} from "@pi-desktop/racp";
-import { ErrorCodes, type RacpEventEnvelope } from "@pi-desktop/shared";
+} from "@duaer-ai-desk/racp";
+import { ErrorCodes, type RacpEventEnvelope } from "@duaer-ai-desk/shared";
 import type { RemoteHostClient } from "./remote-host-connection.js";
 
 export type PairingExchangeOptions = {
@@ -51,7 +51,7 @@ export async function exchangePairingToken(options: PairingExchangeOptions): Pro
       deviceLabel: options.label,
     })) as { deviceToken?: unknown };
     if (typeof result?.deviceToken !== "string" || result.deviceToken.length === 0) {
-      throw Object.assign(new Error("pi-host did not return a device token"), {
+      throw Object.assign(new Error("duaer-ai-desk-host did not return a device token"), {
         errorCode: ErrorCodes.PAIRING_FAILED,
       });
     }

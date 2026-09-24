@@ -1,5 +1,5 @@
 import { readFile } from "node:fs/promises";
-import { MODEL_VENDOR_PREFIXES, catalogModelIdsMatch, stripVariantSuffix } from "@pi-desktop/shared";
+import { MODEL_VENDOR_PREFIXES, catalogModelIdsMatch, stripVariantSuffix } from "@duaer-ai-desk/shared";
 import type {
   ModelCost,
   ModelCostTier,
@@ -12,8 +12,8 @@ import type {
   ModelProviderMetadata,
   ModelReasoningOption,
   ThinkingLevel,
-} from "@pi-desktop/shared";
-import type { ModelConfig } from "@pi-desktop/agent-runtime";
+} from "@duaer-ai-desk/shared";
+import type { ModelConfig } from "@duaer-ai-desk/agent-runtime";
 
 export const MODELS_DEV_API_URL = "https://models.dev/api.json";
 export const MODELS_DEV_TIMEOUT_MS = 10_000;

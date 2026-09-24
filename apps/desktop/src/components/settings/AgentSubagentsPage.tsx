@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import type { SubagentDefinition, UserSubagentRecord } from "@pi-desktop/shared";
+import { JUDGE_SUBAGENT_NAME, type SubagentDefinition, type UserSubagentRecord } from "@duaer-ai-desk/shared";
 import { api } from "../../lib/api";
 import { useAppStore } from "../../stores/app-store";
 import { useHostCollection } from "../../hooks/use-host-collection";
@@ -32,6 +32,7 @@ import {
   fetchSubagentPageData,
   type BuiltinSubagentRow,
 } from "./subagent-settings";
+import { subagentModelPin, withJudgeEmployee } from "./subagent-models";
 import {
   IconBot,
   IconCopy,
@@ -48,6 +49,8 @@ type SubagentEditorState = {
   editing: UserSubagentRecord | null;
   /** Selected template chip; set when Copy as mine pre-fills a builtin. */
   presetId?: string;
+  /** Shipped handle whose model pin this sheet saves. */
+  builtinHandle?: string;
 };
 
 function builtinDisplayName(
@@ -173,9 +176,46 @@ export function AgentSubagentsPage() {
     });
   };
 
+  const openBuiltin = (definition: BuiltinSubagentRow) => {
+    const draft = draftFromDefinition(definition);
+    if (definition.name === JUDGE_SUBAGENT_NAME) {
+      const state = useAppStore.getState();
+      const binding = state.settings?.judgmentModel;
+      const provider = state.providers.find((item) => item.id === binding?.providerId);
+      draft.model = binding && provider ? subagentModelPin(provider, binding.modelId) : "";
+      draft.fallbackModels = [];
+    }
+    setEditor({
+      draft,
+      editing: null,
+      builtinHandle: definition.name,
+    });
+  };
+
   const save = async () => {
     if (!editor) return;
-    const { draft, editing } = editor;
+    const { draft, editing, builtinHandle } = editor;
+    if (builtinHandle) {
+      setSaving(true);
+      try {
+        await api.setBuiltinSubagentModel(builtinHandle, {
+          model: draft.model.trim(),
+          fallbackModels: builtinHandle === JUDGE_SUBAGENT_NAME
+            ? []
+            : draft.fallbackModels.map((pin) => pin.trim()).filter(Boolean),
+        });
+        await load();
+        showToast(t("settings.subagentSaved", { name: builtinDisplayName(builtinHandle, t) }), {
+          variant: "success",
+        });
+        setEditor(null);
+      } catch (error) {
+        showToast(error instanceof Error ? error.message : String(error), { variant: "error" });
+      } finally {
+        setSaving(false);
+      }
+      return;
+    }
     const payload = {
       name: draft.name.trim(),
       description: draft.description.trim(),
@@ -241,9 +281,10 @@ export function AgentSubagentsPage() {
     [search, owned],
   );
 
+  const listedBuiltins = useMemo(() => withJudgeEmployee(builtins), [builtins]);
   const visibleBuiltins = useMemo(
     () =>
-      builtins.filter((definition) =>
+      listedBuiltins.filter((definition) =>
         matchesCapabilitySearch(
           search,
           builtinDisplayName(definition.name, t),
@@ -251,7 +292,7 @@ export function AgentSubagentsPage() {
           definition.description,
         ),
       ),
-    [builtins, search, t],
+    [listedBuiltins, search, t],
   );
 
   const openCreate = () => setEditor({ draft: emptySubagentDraft(), editing: null });
@@ -276,16 +317,27 @@ export function AgentSubagentsPage() {
         }
         description={definition.description || t("settings.noCapabilityDescription")}
         meta={
-          definition.tools?.length ? (
-            <>
-              {definition.tools.map((tool) => (
-                <code key={tool}>{tool}</code>
-              ))}
-            </>
-          ) : undefined
+          <>
+            {definition.model ? (
+              <code>{`${definition.model.providerId}/${definition.model.modelId}`}</code>
+            ) : null}
+            {definition.tools?.map((tool) => (
+              <code key={tool}>{tool}</code>
+            ))}
+          </>
         }
         actions={
           <>
+            <TooltipButton
+              type="button"
+              className="settings-icon-button"
+              ariaLabel={t("extensions.subagents.edit")}
+              tooltip={t("extensions.subagents.edit")}
+              disabled={busy}
+              onClick={() => openBuiltin(definition)}
+            >
+              <IconPencil size={15} />
+            </TooltipButton>
             {canCopy ? (
               <TooltipButton
                 type="button"
@@ -459,6 +511,8 @@ export function AgentSubagentsPage() {
           setDraft={(draft) => setEditor((current) => (current ? { ...current, draft } : current))}
           editing={editor.editing}
           initialPresetId={editor.presetId}
+          modelOnly={Boolean(editor.builtinHandle)}
+          judgmentOnly={editor.builtinHandle === JUDGE_SUBAGENT_NAME}
           saving={saving}
           onClose={() => {
             if (!saving) setEditor(null);

@@ -13,7 +13,7 @@ manifest and resume development.
 
 ## Decision
 
-Add a renderer-to-main `pi-desktop/plugin/reload` invoke channel. Electron main
+Add a renderer-to-main `duaer-ai-desk/plugin/reload` invoke channel. Electron main
 resolves the plugin id through the host registry, loads the registered path with
 the registry's current permissions, and re-arms the development watcher after a
 successful load. The Plugins page exposes the action only for `source: "dev"`

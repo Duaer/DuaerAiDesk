@@ -17,7 +17,7 @@ import {
   type ImageGenerationBinding,
   type ModelBinding,
   type ProviderPublic,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import { useAppStore } from "../../stores/app-store";
 import { api } from "../../lib/api";
 import { providerDisplayName, providerSearchText } from "../../lib/provider-display";
@@ -45,6 +45,7 @@ import {
 import { planImageGenerationDefaults } from "./image-generation-default";
 import { copyProviderConfiguration, type ProviderCopyDraft } from "./provider-copy";
 import { ImageGenerationModelRow } from "./ImageGenerationModelRow";
+import { JudgmentModelRow } from "./JudgmentModelRow";
 import { ProviderSetupDialog } from "./ProviderSetupDialog";
 import { useProviderReorder } from "./useProviderReorder";
 import { VendorAccountsSection } from "./VendorAccountsSection";
@@ -190,6 +191,7 @@ export function ModelConfigPage() {
     saved: ProviderPublic,
     models: ModelBinding[],
     imageModelIds?: string[],
+    judgmentModelId?: string | null,
   ) => {
     const firstModelId = models[0]?.id;
     const replacementChatModelId =
@@ -198,19 +200,27 @@ export function ModelConfigPage() {
         ? firstModelId
         : undefined;
     try {
-      if (imageModelIds !== undefined) {
+      if (imageModelIds !== undefined || judgmentModelId !== undefined) {
         const current = await api.getSettings();
-        const plan = planImageGenerationDefaults(
-          current,
-          saved.id,
-          imageModelIds,
-          [...providers.filter((provider) => provider.id !== saved.id), saved],
-          current.imageGeneration?.providerId === saved.id &&
-            !saved.models.some((model) => modelIdsMatch(model.id, current.imageGeneration?.modelId ?? "")),
-        );
+        const plan = imageModelIds === undefined
+          ? {}
+          : planImageGenerationDefaults(
+            current,
+            saved.id,
+            imageModelIds,
+            [...providers.filter((provider) => provider.id !== saved.id), saved],
+            current.imageGeneration?.providerId === saved.id &&
+              !saved.models.some((model) => modelIdsMatch(model.id, current.imageGeneration?.modelId ?? "")),
+          );
+        const judgment = judgmentModelId === undefined
+          ? current.judgmentModel
+          : judgmentModelId === null
+            ? (current.judgmentModel?.providerId === saved.id ? null : current.judgmentModel)
+            : { providerId: saved.id, modelId: judgmentModelId };
         const nextSettings = {
           ...current,
           ...plan,
+          judgmentModel: judgment,
           ...(replacementChatModelId ? { defaultModelId: replacementChatModelId } : {}),
         };
         await api.setSettings(nextSettings);
@@ -512,6 +522,7 @@ export function ModelConfigPage() {
               onChange={setImageGenerationDefault}
             />
           ) : null}
+          <JudgmentModelRow settings={settings} providers={providers} />
         </div>
       </section>
 
@@ -821,6 +832,11 @@ export function ModelConfigPage() {
                 .filter((binding) => binding.providerId === editingProvider.id)
                 .map((binding) => binding.modelId)
             : undefined}
+          judgmentModelId={
+            editingProvider && settings.judgmentModel?.providerId === editingProvider.id
+              ? settings.judgmentModel.modelId
+              : null
+          }
           onSaved={afterSaved}
         />
       ) : null}

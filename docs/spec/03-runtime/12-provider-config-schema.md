@@ -15,7 +15,7 @@ Tables (canonical DDL in [04-data-storage](04-data-storage.md) §4.3–4.4, §4.
 
 ```json
 {
-  "$id": "pi-desktop.provider.v1",
+  "$id": "duaer-ai-desk.provider.v1",
   "type": "object",
   "required": ["id", "name", "vendorKey", "type", "protocol", "enabled", "authKind"],
   "properties": {
@@ -240,7 +240,7 @@ normal secret-store path.
 
 OpenCode Go (and any `opencode.ai` host) requires a stable
 `x-opencode-session` header on LLM requests. Agent-runtime sends that header
-plus `x-opencode-client: pi-desktop` and `User-Agent: pi-desktop/<APP_VERSION>`
+plus `x-opencode-client: duaer-ai-desk` and `User-Agent: duaer-ai-desk/<APP_VERSION>`
 on session turns, subagent turns, prompt enhancement, and plugin one-shots.
 Caller-supplied headers override the client and User-Agent values; a missing
 or empty session header is always restored from the conversation id.
@@ -248,7 +248,7 @@ or empty session header is always restored from the conversation id.
 `headers` is an optional per-row map stored in `config_json.headers`. Empty,
 omitted, or update `{}` keeps the adapter default (pi-ai's `pi (…)` string,
 Anthropic OAuth's `claude-cli/<version>`, or OpenCode's
-`pi-desktop/<APP_VERSION>`). A non-empty map is last-writer on that row's
+`duaer-ai-desk/<APP_VERSION>`). A non-empty map is last-writer on that row's
 outbound HTTP — session turns, subagents, prompt enhancement, plugin one-shots,
 `/models` discovery (including unsaved form values), connection tests, and
 OAuth token refresh. A fetch wrapper is the last writer so Codex and the

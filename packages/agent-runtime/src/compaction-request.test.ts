@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import type { Api, Model, Models } from "@earendil-works/pi-ai";
+import type { Api, Model, Models } from "@duaer-ai-desk/upstream-ai";
 import {
   OPENCODE_CLIENT_HEADER,
   OPENCODE_CLIENT_VALUE,

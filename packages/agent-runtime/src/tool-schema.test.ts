@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { Type } from "typebox";
-import type { AgentTool } from "@earendil-works/pi-agent-core";
+import type { AgentTool } from "@duaer-ai-desk/upstream-agent-core";
 import { withExplicitRequired } from "./tool-schema.js";
 
 // Guards the provider-facing shape of a tool schema (#864). Tool types go

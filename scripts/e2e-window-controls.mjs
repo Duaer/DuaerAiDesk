@@ -18,7 +18,7 @@ const { appDir } = assertDesktopBuild(root);
 const { electronBinary } = resolveElectronBinary(root);
 const binary = resolveHostBinary();
 const temp = await mkdtemp(join(tmpdir(), "pi-window-controls-"));
-const port = Number(process.env.PI_DESKTOP_CHROME_CDP_PORT || 9347);
+const port = Number(process.env.DUAER_AI_DESK_CHROME_CDP_PORT || 9347);
 const pending = new Map();
 let sequence = 0;
 let socket;
@@ -91,8 +91,8 @@ async function checkControls(label) {
     ? result.length === 0
     : result.length === 3 && result.every(r => r.visible && r.reachable);
   console.log(`${ok ? "PASS" : "FAIL"} ${label}: ${JSON.stringify(result)}`);
-  if ((!ok || label === "panel opened") && process.env.PI_DESKTOP_CHROME_ARTIFACT_DIR) {
-    const dir = resolve(process.env.PI_DESKTOP_CHROME_ARTIFACT_DIR);
+  if ((!ok || label === "panel opened") && process.env.DUAER_AI_DESK_CHROME_ARTIFACT_DIR) {
+    const dir = resolve(process.env.DUAER_AI_DESK_CHROME_ARTIFACT_DIR);
     await mkdir(dir, { recursive: true });
     const shot = await send("Page.captureScreenshot");
     await writeFile(join(dir, ok ? "window-controls-fixed.png" : "window-controls-failure.png"), Buffer.from(shot.data, "base64"));
@@ -111,8 +111,8 @@ try {
   } finally {
     await host.stop();
   }
-  const env = { ...process.env, PI_DESKTOP_DATA_DIR: join(temp, "data"),
-    PI_DESKTOP_HOST_BIN: binary, PI_DESKTOP_START_MAXIMIZED: "0", ELECTRON_RENDERER_URL: "" };
+  const env = { ...process.env, DUAER_AI_DESK_DATA_DIR: join(temp, "data"),
+    DUAER_AI_DESK_HOST_BIN: binary, DUAER_AI_DESK_START_MAXIMIZED: "0", ELECTRON_RENDERER_URL: "" };
   delete env.ELECTRON_RUN_AS_NODE;
   child = spawn(electronBinary, [`--remote-debugging-port=${port}`, `--user-data-dir=${join(temp, "profile")}`, "."],
     { cwd: appDir, env, stdio: ["ignore", "pipe", "pipe"] });
@@ -138,7 +138,7 @@ try {
     else entry.resolve(message.result);
   };
   await waitFor(() => evaluate(`!!document.querySelector('.main-pane') && !document.querySelector('.startup-splash')`), "ready shell");
-  await evaluate(`window.__PI_DESKTOP__.selectSession(${JSON.stringify(sessionId)})`);
+  await evaluate(`window.__DUAER_AI_DESK__.selectSession(${JSON.stringify(sessionId)})`);
   await waitFor(() => evaluate(`document.querySelector('.app-work-panel-toggle')?.disabled === false`), "active session");
   await settle();
   await checkControls("panel closed");
@@ -150,7 +150,7 @@ try {
     for (const platform of ["win32", "linux"]) {
       for (const theme of ["light", "dark"]) {
         await evaluate(`document.documentElement.dataset.platform = ${JSON.stringify(platform)};
-          window.__PI_DESKTOP__.setThemeAttr(${JSON.stringify(theme)})`);
+          window.__DUAER_AI_DESK__.setThemeAttr(${JSON.stringify(theme)})`);
         await settle();
         await checkControls(`${platform}/${theme} CSS with panel open (emulated)`);
       }
@@ -166,28 +166,28 @@ try {
   await checkControls("sidebar toggled with panel maximized");
   await click(".work-panel-maximize");
   await checkControls("panel restored");
-  await evaluate(`window.piDesktop.invoke('pi-desktop/menu/nativeAction', {action:'toggleFullScreen'})`);
-  await waitFor(() => evaluate(`window.piDesktop.invoke('pi-desktop/menu/nativeAction', {action:'restoreMainWindow'}).then(s => s.ok && s.data.fullScreen)`), "native fullscreen");
+  await evaluate(`window.duaerAiDesk.invoke('duaer-ai-desk/menu/nativeAction', {action:'toggleFullScreen'})`);
+  await waitFor(() => evaluate(`window.duaerAiDesk.invoke('duaer-ai-desk/menu/nativeAction', {action:'restoreMainWindow'}).then(s => s.ok && s.data.fullScreen)`), "native fullscreen");
   await settle();
   await checkControls("native fullscreen with panel open");
-  await evaluate(`window.piDesktop.invoke('pi-desktop/menu/nativeAction', {action:'toggleFullScreen'})`);
-  await waitFor(() => evaluate(`window.piDesktop.invoke('pi-desktop/menu/nativeAction', {action:'restoreMainWindow'}).then(s => s.ok && !s.data.fullScreen)`), "leave native fullscreen");
+  await evaluate(`window.duaerAiDesk.invoke('duaer-ai-desk/menu/nativeAction', {action:'toggleFullScreen'})`);
+  await waitFor(() => evaluate(`window.duaerAiDesk.invoke('duaer-ai-desk/menu/nativeAction', {action:'restoreMainWindow'}).then(s => s.ok && !s.data.fullScreen)`), "leave native fullscreen");
   await settle();
   if (process.platform !== "darwin") {
     await click(".window-control-btn:nth-child(2)");
-    await waitFor(() => evaluate(`window.piDesktop.invoke('pi-desktop/window/control', {action:'getState'}).then(s => s.ok && s.data.maximized)`), "native window maximized");
+    await waitFor(() => evaluate(`window.duaerAiDesk.invoke('duaer-ai-desk/window/control', {action:'getState'}).then(s => s.ok && s.data.maximized)`), "native window maximized");
     await checkControls("native window maximized with panel open");
     await click(".window-control-btn:nth-child(2)");
-    await waitFor(() => evaluate(`window.piDesktop.invoke('pi-desktop/window/control', {action:'getState'}).then(s => s.ok && !s.data.maximized)`), "native window restored");
+    await waitFor(() => evaluate(`window.duaerAiDesk.invoke('duaer-ai-desk/window/control', {action:'getState'}).then(s => s.ok && !s.data.maximized)`), "native window restored");
   }
   await click(".app-work-panel-toggle");
   await waitFor(() => evaluate(`!document.querySelector('.work-panel')`), "panel closed again");
   await checkControls("panel closed again");
-  await evaluate(`window.__PI_DESKTOP__.setPage('settings')`);
+  await evaluate(`window.__DUAER_AI_DESK__.setPage('settings')`);
   await waitFor(() => evaluate(`!!document.querySelector('.settings-mode')`), "settings opened");
   await settle();
   await checkControls("settings route");
-  await evaluate(`window.__PI_DESKTOP__.setPage('chat')`);
+  await evaluate(`window.__DUAER_AI_DESK__.setPage('chat')`);
   await settle();
   await click(".app-work-panel-toggle");
   await settle();
@@ -195,13 +195,13 @@ try {
   if (process.platform !== "darwin") {
     await click(".window-control-btn:first-child", false);
     await waitFor(() => evaluate(`document.visibilityState === 'hidden'`), "native minimize");
-    await evaluate(`window.piDesktop.invoke('pi-desktop/menu/nativeAction', {action:'toggleMainWindow'})`);
+    await evaluate(`window.duaerAiDesk.invoke('duaer-ai-desk/menu/nativeAction', {action:'toggleMainWindow'})`);
     await waitFor(() => evaluate(`document.visibilityState === 'visible'`), "native window shown");
     await settle();
     await checkControls("restored after native minimize");
     // Configure only the disposable profile so close-to-tray can be observed
     // without leaving a blocking native confirmation dialog on the test runner.
-    await evaluate(`window.piDesktop.invoke('pi-desktop/window/closeBehavior/set', {behavior:'tray'})`);
+    await evaluate(`window.duaerAiDesk.invoke('duaer-ai-desk/window/closeBehavior/set', {behavior:'tray'})`);
     await click(".window-control-close", false);
     await waitFor(() => evaluate(`document.visibilityState === 'hidden'`), "native close-to-tray");
     console.log("PASS native minimize and close actions");

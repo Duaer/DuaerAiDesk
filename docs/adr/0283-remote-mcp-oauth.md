@@ -12,13 +12,13 @@
 
 Remote HTTP MCP servers (such as Notion, Linear, or custom enterprise servers) often protect endpoints with OAuth 2.1 authorization rather than static tokens. Model Context Protocol specifies authorization discovery via RFC 9728 (OAuth Protected Resource Metadata) and RFC 8414 (Authorization Server Metadata), dynamic registration via RFC 7591, and resource indicators via RFC 8707.
 
-Previous MCP implementations in PI-Desktop supported only static HTTP headers. Users had to manually obtain Bearer tokens or were unable to connect to OAuth-protected servers.
+Previous MCP implementations in DuaerAiDesk supported only static HTTP headers. Users had to manually obtain Bearer tokens or were unable to connect to OAuth-protected servers.
 
 ## Decision
 
 1. **Authentication Architecture**:
-   - OAuth login runs in the Electron main process via `McpOAuthManager`, mirroring the `VendorOAuth` non-blocking pattern (ADR 0098): `mcp/oauth/start` returns `{ ok: true, loginId }` immediately and streams progress, authorization URL, completion, or failure events via `pi-desktop/mcp/oauth/event`.
-   - IPC calls are never blocked during the user's browser interaction. A user or UI cancellation triggers `pi-desktop/mcp/oauth/cancel`, which closes the loopback listener and aborts the login.
+   - OAuth login runs in the Electron main process via `McpOAuthManager`, mirroring the `VendorOAuth` non-blocking pattern (ADR 0098): `mcp/oauth/start` returns `{ ok: true, loginId }` immediately and streams progress, authorization URL, completion, or failure events via `duaer-ai-desk/mcp/oauth/event`.
+   - IPC calls are never blocked during the user's browser interaction. A user or UI cancellation triggers `duaer-ai-desk/mcp/oauth/cancel`, which closes the loopback listener and aborts the login.
 2. **Loopback & Security Boundaries**:
    - The loopback callback server binds strictly to IPv4 loopback `127.0.0.1` on an ephemeral port (`port 0`), and the redirect URI is formatted as `http://127.0.0.1:<port>/callback` per RFC 8252 (preventing IPv6 loopback resolution mismatches).
    - Inbound query parameters (`error`, `error_description`, `code`, `state`) rendered on the loopback HTML completion page are strictly HTML-entity escaped to eliminate reflected XSS.

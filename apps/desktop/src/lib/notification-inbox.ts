@@ -1,4 +1,4 @@
-import type { AppNotification } from "@pi-desktop/shared";
+import type { AppNotification } from "@duaer-ai-desk/shared";
 
 /**
  * The inbox popover surfaces only outcomes that need attention. Successful

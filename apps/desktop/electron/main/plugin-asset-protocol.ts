@@ -1,6 +1,6 @@
 import { protocol } from "electron";
 import { readFileSync } from "node:fs";
-import { THEME_ASSET_SCHEME } from "@pi-desktop/plugin-sdk";
+import { THEME_ASSET_SCHEME } from "@duaer-ai-desk/plugin-sdk";
 
 /**
  * Serve a plugin's declared theme assets over a host-owned scheme.

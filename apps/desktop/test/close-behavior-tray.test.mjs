@@ -122,7 +122,7 @@ test("explicit quit asks for confirmation except probes and update restarts", ()
     shutdownSource.indexOf('app.on("before-quit"'),
   );
   const body = quitHandler.slice(0, quitHandler.indexOf("shutdownPromise ="));
-  assert.match(body, /PI_DESKTOP_BOOT_PROBE/);
+  assert.match(body, /DUAER_AI_DESK_BOOT_PROBE/);
   assert.match(
     body,
     /!state\.quitConfirmed && !isAutomatedMode && !isUpdateRestart/,

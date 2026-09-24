@@ -1,4 +1,4 @@
-# PI-Desktop Baseline Freeze
+# DuaerAiDesk Baseline Freeze
 
 - Baseline Version: `0.4.18`
 - Date: `2026-09-14`
@@ -75,7 +75,7 @@
 > open-licensed (SIL OFL 1.1) families — Geist, Inter, Noto Sans SC, and
 > LXGW WenKai — shipped locally with license texts, and installed system
 > families are enumerated by Electron main through the additive allowlisted
-> channel `pi-desktop/app/systemFonts`. D598 / ADR 0298 later removed the
+> channel `duaer-ai-desk/app/systemFonts`. D598 / ADR 0298 later removed the
 > bundled families: the app ships no font, the picker offers System default
 > plus installed system families, and every stack ends in the system-only CJK
 > fallback tier. No host protocol or storage schema changes.
@@ -110,7 +110,7 @@
 
 ## Frozen Decisions
 
-1. Product name: **PI-Desktop**
+1. Product name: **DuaerAiDesk**
 2. Desktop shell: **Electron**
 3. UI: **React + TypeScript + Vite + Tailwind**
 4. UI language default: **English**
@@ -155,7 +155,7 @@
 35. Model policy: **no closed allowlist; models.dev release catalog, generic unknown IDs, and free-form model IDs**
 36. Provider storage: **Rust SQLite configs + OS secret store references**
 37. Secrets backend: **safeStorage primary + encrypted file fallback**
-38. Workspace ignore: **denylist + defaults + `.pi-desktopignore`**
+38. Workspace ignore: **denylist + defaults + `.duaer-ai-deskignore`**
 39. Tool result limits: **per-tool budgets (128KB / 4000 lines search, 96KB / 4000 lines shell); `truncated` only when a result is cut short**
 40. Settings directory: **Basics / Model configuration / Import / Project archive / Info**;
     the project archive owns durable project discovery, archive, restore, and

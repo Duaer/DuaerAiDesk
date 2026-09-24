@@ -207,7 +207,35 @@ export function createWorkPanelSlice({
   },
   openWorkPanelTab: (tab) => {
     const sessionId = get().activeSessionId;
-    if (!sessionId) return;
+    // Project home shows the delivery column before a session exists. Tab
+    // switches still have to change the visible dock; per-session retention
+    // starts once a session is selected.
+    if (!sessionId) {
+      set((state) => {
+        const next = openWorkPanelTabState(
+          {
+            tabs: state.workPanelTabs,
+            activeTabId: state.activeWorkPanelTabId,
+          },
+          tab,
+        );
+        const fileRequest =
+          tab.kind === "file" && tab.resource
+            ? {
+                path: tab.resource,
+                seq: ++workPanelFileRequestSeq,
+                ...(tab.mimeType ? { mimeType: tab.mimeType } : {}),
+              }
+            : state.workPanelFileRequest;
+        return {
+          workPanelOpen: true,
+          workPanelTabs: next.tabs,
+          activeWorkPanelTabId: next.activeTabId,
+          workPanelFileRequest: fileRequest,
+        };
+      });
+      return;
+    }
     get().openWorkPanelTabForSession(sessionId, tab);
   },
   openNewWorkPanelTab: () => {
@@ -218,7 +246,6 @@ export function createWorkPanelSlice({
   replaceWorkPanelTab: (sourceTabId, tab) => {
     set((state) => {
       const sessionId = state.activeSessionId;
-      if (!sessionId) return {};
       const next = replaceWorkPanelTabState(
         {
           tabs: state.workPanelTabs,
@@ -236,6 +263,14 @@ export function createWorkPanelSlice({
               ...(activeTab.mimeType ? { mimeType: activeTab.mimeType } : {}),
             }
           : state.workPanelFileRequest;
+      if (!sessionId) {
+        return {
+          workPanelOpen: true,
+          workPanelTabs: next.tabs,
+          activeWorkPanelTabId: next.activeTabId,
+          workPanelFileRequest: fileRequest,
+        };
+      }
       const nextContext: WorkPanelContext = {
         open: true,
         tabs: next.tabs,
@@ -257,7 +292,6 @@ export function createWorkPanelSlice({
   activateWorkPanelTab: (tabId) => {
     set((state) => {
       const sessionId = state.activeSessionId;
-      if (!sessionId) return {};
       const next = activateWorkPanelTabState(
         {
           tabs: state.workPanelTabs,
@@ -280,6 +314,12 @@ export function createWorkPanelSlice({
         activeTabId: next.activeTabId,
         fileRequest,
       };
+      if (!sessionId) {
+        return {
+          activeWorkPanelTabId: next.activeTabId,
+          workPanelFileRequest: fileRequest,
+        };
+      }
       return {
         activeWorkPanelTabId: next.activeTabId,
         workPanelFileRequest: fileRequest,
@@ -293,7 +333,6 @@ export function createWorkPanelSlice({
   closeWorkPanelTab: (tabId) => {
     set((state) => {
       const sessionId = state.activeSessionId;
-      if (!sessionId) return {};
       const next = closeWorkPanelTabState(
         {
           tabs: state.workPanelTabs,
@@ -310,6 +349,14 @@ export function createWorkPanelSlice({
               ...(activeTab.mimeType ? { mimeType: activeTab.mimeType } : {}),
             }
           : state.workPanelFileRequest;
+      if (!sessionId) {
+        return {
+          workPanelTabs: next.tabs,
+          activeWorkPanelTabId: next.activeTabId,
+          workPanelOpen: state.workPanelOpen,
+          workPanelFileRequest: fileRequest,
+        };
+      }
       const nextContext: WorkPanelContext = {
         // Closing the final tab leaves the panel open so the user can choose
         // another tool from the new-tab launcher instead of losing the dock.
@@ -333,6 +380,7 @@ export function createWorkPanelSlice({
   collapseWorkPanel: () => {
     const state = get();
     const sessionId = state.activeSessionId;
+    if (state.page === "chat") return;
     if (!sessionId || !state.workPanelOpen) return;
     set({
       workPanelOpen: false,

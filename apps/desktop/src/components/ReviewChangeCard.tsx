@@ -4,7 +4,7 @@ import type {
   ReviewChangeStatus,
   ReviewRollbackStatus,
   UiMessage,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import { reviewChangeFromMessage } from "../lib/workspace-review";
 import { useAppStore } from "../stores/app-store";
 import { cx } from "./ui";

@@ -7,7 +7,7 @@ Two workspaces share one repository: pnpm owns every JavaScript package
 `package.json` scripts fan out to both.
 
 ```text
-PI-Desktop/
+DuaerAiDesk/
 ├── apps/
 │ └── desktop/                # Electron product shell
 │   ├── electron/
@@ -29,7 +29,7 @@ PI-Desktop/
 │   ├── electron.vite.config.ts
 │   └── package.json          # also holds the electron-builder config
 ├── crates/
-│ └── host-core/              # Rust privileged host (binary pi-desktop-host-core)
+│ └── host-core/              # Rust privileged host (binary duaer-ai-desk-host-core)
 │   ├── Cargo.toml
 │   └── src/                  # rpc/, tools/, plus one module per domain
 ├── packages/
@@ -128,12 +128,12 @@ Cross-boundary contracts:
 
 ## 3. Runtime data (not in git)
 
-`PI_DESKTOP_DATA_DIR` overrides the default location: `~/.pi-desktop` for a
-packaged installation, `~/.pi-desktop-dev` for a development build, which is
+`DUAER_AI_DESK_DATA_DIR` overrides the default location: `~/.duaer-ai-desk` for a
+packaged installation, `~/.duaer-ai-desk-dev` for a development build, which is
 how `pnpm dev` runs beside the packaged app (D599).
 
 ```text
-~/.pi-desktop/
+~/.duaer-ai-desk/
  ├── pi.sqlite               # single DB, host-core owned (03-runtime/04, D086)
  ├── sessions/               # per-session transcript files (D119)
  ├── artifacts/              # plan and goal checkpoint artifacts
@@ -160,9 +160,9 @@ how `pnpm dev` runs beside the packaged app (D599).
 
 | Object | Convention |
 |---|---|
-| JS packages | `@pi-desktop/*` |
-| Rust crate | `pi-desktop-host-core` (or `host-core`) |
-| IPC channels | `pi-desktop/<domain>/<action>` |
+| JS packages | `@duaer-ai-desk/*` |
+| Rust crate | `duaer-ai-desk-host-core` (or `host-core`) |
+| IPC channels | `duaer-ai-desk/<domain>/<action>` |
 | i18n keys | `domain.section.key` |
 | Plugin IDs | reverse-domain style |
 | Main-process modules | one file per concern under `electron/main/`; `index.ts` wires them |

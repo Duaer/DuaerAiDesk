@@ -1,7 +1,7 @@
 import { useEffect, useEffectEvent, useRef, useState } from "react";
 import { portalToBody } from "../lib/portal-visibility";
 import { useTranslation } from "react-i18next";
-import type { ProjectGroupRecord, ProjectGroupRoot } from "@pi-desktop/shared";
+import type { ProjectGroupRecord, ProjectGroupRoot } from "@duaer-ai-desk/shared";
 import { api } from "../lib/api";
 import { MAX_PROJECT_NAME_CHARS } from "../lib/sidebar-preferences";
 import { Button, TooltipButton } from "./ui";

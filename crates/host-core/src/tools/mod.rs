@@ -48,7 +48,7 @@ const OUTPUT_NOTIFICATION_MAX_CHUNK_BYTES: usize = 16 * 1024;
 const MAX_OUTPUT_NOTIFICATIONS: usize = 1024;
 const RUNNER_CONFIG_MAX_BYTES: usize = 64 * 1024;
 const RUNNER_SPAWN_BACKOFFS_MS: [u64; 3] = [50, 100, 250];
-const INTERNAL_RUNNER_ERROR_PREFIX: &str = "PI_DESKTOP_RUNNER_ERROR\t";
+const INTERNAL_RUNNER_ERROR_PREFIX: &str = "DUAER_AI_DESK_RUNNER_ERROR\t";
 
 #[cfg(windows)]
 use windows_sys::Win32::Foundation::{CloseHandle, HANDLE};
@@ -3345,7 +3345,7 @@ mod tests {
         std::fs::write(dir.path().join("generated/out.txt"), "needle\n").unwrap();
         std::fs::write(dir.path().join("debug.log"), "needle\n").unwrap();
         std::fs::write(dir.path().join("src.txt"), "needle\n").unwrap();
-        std::fs::write(dir.path().join(".pi-desktopignore"), "generated/\n").unwrap();
+        std::fs::write(dir.path().join(".duaer-ai-deskignore"), "generated/\n").unwrap();
 
         let unscoped = execute_tool(
             Some(dir.path()),
@@ -3363,7 +3363,7 @@ mod tests {
         );
         assert!(
             !shown.contains("generated"),
-            ".pi-desktopignore is honored: {shown}"
+            ".duaer-ai-deskignore is honored: {shown}"
         );
         assert!(
             !shown.contains("debug.log"),

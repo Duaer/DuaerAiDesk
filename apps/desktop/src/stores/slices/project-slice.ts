@@ -2,8 +2,15 @@ import i18n from "i18next";
 import type {
   ProjectWorkspace,
   SessionSummary,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import { api } from "../../lib/api";
+import {
+  noteDeliveryIteration,
+  setDeliveryBackground,
+  setDeliveryExistingProject,
+  workspaceLooksExisting,
+} from "../../lib/delivery-desk.ts";
+import { toolWorkPanelTab } from "../../lib/work-panel-tabs";
 import {
   rememberProject,
   removeRecentProject,
@@ -65,6 +72,47 @@ export type ProjectSliceDependencies = StoreAccess & {
  * folder pick and through a git checkout, so both sources share one project
  * semantic and one activation path.
  */
+async function startProjectKickoff(
+  get: ProjectSliceDependencies["get"],
+  path: string,
+  name: string,
+  description: string,
+): Promise<void> {
+  const key = normalizeProjectPath(path);
+  const backgroundText = description.trim();
+  if (!key || !backgroundText) return;
+  setDeliveryBackground(key, backgroundText);
+  noteDeliveryIteration(key, backgroundText);
+  const hasProduct = await workspaceIsExistingProduct();
+  setDeliveryExistingProject(key, hasProduct);
+  const active = get().sessions.find((session) => session.id === get().activeSessionId);
+  const activeMatches = normalizeProjectPath(active?.projectPath) === key;
+  if (!activeMatches) {
+    const existing = get().sessions.find(
+      (session) => normalizeProjectPath(session.projectPath) === key,
+    );
+    if (existing) await get().selectSession(existing.id);
+    else await get().newSession({ projectPath: path });
+  }
+  if (!get().activeSessionId || get().messages.length > 0) return;
+  get().openWorkPanelTab(toolWorkPanelTab("requirements"));
+  const background = i18n.t("project.kickoffBackground", { description: backgroundText });
+  const kickoffKey = hasProduct ? "project.kickoffExisting" : "project.kickoff";
+  await get().sendPrompt(i18n.t(kickoffKey, { name, background }));
+}
+
+async function workspaceIsExistingProduct(): Promise<boolean> {
+  try {
+    const index = await api.fsIndex();
+    const files = index.entries
+      .filter((entry) => entry.kind === "file")
+      .map((entry) => entry.path);
+    return workspaceLooksExisting(files);
+  } catch {
+    return false;
+  }
+}
+
 async function createNamedProjectGroup(
   {
     get,
@@ -75,7 +123,8 @@ async function createNamedProjectGroup(
     name,
     folders,
     primaryPath,
-  }: { name: string; folders: string[]; primaryPath?: string },
+    description,
+  }: { name: string; folders: string[]; primaryPath?: string; description: string },
 ): Promise<void> {
   const normalizedName = name.trim();
   if (!normalizedName) {
@@ -116,6 +165,7 @@ async function createNamedProjectGroup(
   const onboarding = await api.getOnboarding();
   if (!runtime.navigationIntentIsCurrent(intent)) return;
   set({ createProjectDialogOpen: false, onboarding, page: "chat" });
+  await startProjectKickoff(get, groupPrimary, normalizedName, description);
 }
 
 /**
@@ -377,18 +427,18 @@ export function createProjectSlice({
     closeProjectDialog: () => {
       set({ createProjectDialogOpen: false });
     },
-    createProjectFromFolders: async ({ name, folders, primaryPath }) =>
+    createProjectFromFolders: async ({ name, folders, primaryPath, description }) =>
       createNamedProjectGroup(
         { get, set, runtime },
-        { name, folders, primaryPath },
+        { name, folders, primaryPath, description },
       ),
-    createProjectFromGit: async ({ name, url, parentPath }) => {
+    createProjectFromGit: async ({ name, url, parentPath, description }) => {
       // Clone first, then create the project through the same group path, so a
       // checkout and a folder pick produce identical project semantics.
       const checkout = await api.cloneProjectInto(url, parentPath);
       await createNamedProjectGroup(
         { get, set, runtime },
-        { name, folders: [checkout.path], primaryPath: checkout.path },
+        { name, folders: [checkout.path], primaryPath: checkout.path, description },
       );
     },
 

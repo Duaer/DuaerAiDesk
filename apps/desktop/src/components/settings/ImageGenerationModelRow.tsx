@@ -5,7 +5,7 @@ import {
   type AppSettings,
   type ImageGenerationBinding,
   type ProviderPublic,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import { SettingsMenuSelect } from "./SettingsMenuSelect";
 import { imageGenerationBindingAvailable } from "./image-generation-default";
 

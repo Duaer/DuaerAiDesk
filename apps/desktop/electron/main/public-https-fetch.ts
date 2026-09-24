@@ -15,7 +15,7 @@ import {
   type PublicNetworkRefusalDetail,
   type PublicNetworkRefusalReason,
   type PublicNetworkRoute,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 
 const DEFAULT_TIMEOUT_MS = 8_000;
 const MAX_HOPS = 5;

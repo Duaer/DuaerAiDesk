@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 
-import { AgentHost, RacpError, type Principal } from "@pi-desktop/agent-host";
+import { AgentHost, RacpError, type Principal } from "@duaer-ai-desk/agent-host";
 import {
   RACP_DEFAULT_LIMITS,
   RACP_DEFAULT_POLICY,
@@ -18,7 +18,7 @@ import {
   type RacpOperation,
   type RacpPolicy,
   type RacpServerCapabilities,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import * as Value from "typebox/value";
 
 import type { ConnectionAuth, DeviceTokenAuthenticator } from "./auth.js";
@@ -149,7 +149,7 @@ export class RacpConnection {
  * dispatch with role checks from the operation catalog, event fan-out from
  * the Agent Host hub, and connection teardown that releases every
  * subscription and terminal the connection held. Transport framing is
- * injected so the same core runs over `ws` in `pi-host` and over an
+ * injected so the same core runs over `ws` in `duaer-ai-desk-host` and over an
  * in-memory pair in tests.
  */
 export class RacpServer {
@@ -353,7 +353,7 @@ export class RacpServer {
     connection.initialized = true;
     return {
       protocolVersion: RACP_PROTOCOL_VERSION,
-      server: { name: this.options.serverName ?? "pi-host", version: this.options.serverVersion, hostId: this.options.hostId },
+      server: { name: this.options.serverName ?? "duaer-ai-desk-host", version: this.options.serverVersion, hostId: this.options.hostId },
       connectionId: connection.id,
       principal: { subject: connection.principal.subject, roles: [...connection.principal.roles] },
       capabilities: this.capabilities,

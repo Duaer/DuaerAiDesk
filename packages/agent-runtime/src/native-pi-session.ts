@@ -29,7 +29,7 @@ import {
   type AgentSession,
   type AgentSessionEvent,
   type SessionMessageEntry,
-} from "@earendil-works/pi-coding-agent";
+} from "@duaer-ai-desk/upstream-coding-agent";
 import type {
   AgentEvent,
   AgentEventEnvelope,
@@ -38,7 +38,7 @@ import type {
   SessionSummary,
   ThinkingLevel,
   UiMessage,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import {
   NativePiSessionLease,
   guardNativePiSessionManager,

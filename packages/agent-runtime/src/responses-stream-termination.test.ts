@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import type { Model } from "@earendil-works/pi-ai";
-import { stream } from "@earendil-works/pi-ai/api/openai-responses";
+import type { Model } from "@duaer-ai-desk/upstream-ai";
+import { stream } from "@duaer-ai-desk/upstream-ai/api/openai-responses";
 
 const model: Model<"openai-responses"> = {
   id: "responses-test",

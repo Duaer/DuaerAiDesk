@@ -575,3 +575,8 @@ The default conversation model has a separate **Image generation model** row bel
 it. Model Advanced can select that unique binding; provider form Save commits it,
 Cancel discards it, and replacing it leaves the conversation default unchanged.
 See [image generation and editing](21-image-generation.md) for the tool and batch contract.
+
+The same defaults panel has a **Judgment model** row under that one. It uses the
+same show and hide rules: the row appears only when a marked binding can run,
+and it names the provider and model. No marked model, or a binding that cannot
+run, leaves the row out.

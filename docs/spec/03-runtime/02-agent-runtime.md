@@ -372,7 +372,7 @@ The complete visible transcript and the model context are separate views of
 the same session. A durable checkpoint summarizes older model context while
 the renderer continues to show every original user, assistant, and tool row.
 
-PI-Desktop reuses pi-agent-core's `convertToLlm`, `estimateContextTokens`,
+DuaerAiDesk reuses pi-agent-core's `convertToLlm`, `estimateContextTokens`,
 `prepareCompaction`, and `compact` primitives, and applies the same session
 context projection pi used to export as `buildSessionContext` (slice from the
 newest compaction, then `compactionSummary` before the retained tail). pi 0.85
@@ -397,7 +397,7 @@ For every pi loop turn:
 
 1. pi emits and awaits `turn_end` after the assistant message and all tool
    results for that turn are complete
-2. PI-Desktop rebuilds the context from the full transcript plus the newest
+2. DuaerAiDesk rebuilds the context from the full transcript plus the newest
    valid checkpoint and estimates the next request budget
 3. below the hard boundary, and with no pending model request, the next turn
    proceeds unchanged
@@ -485,7 +485,7 @@ re-estimation, host-core append, `compaction_end`, transcript row, warning:
   being summarized.
 
 The family is resolved from a construction option, then
-`PI_DESKTOP_COMPACTION_STRATEGY`. It is not a setting, is absent from
+`DUAER_AI_DESK_COMPACTION_STRATEGY`. It is not a setting, is absent from
 `AppSettings` and i18n, and exists so the no-summary mechanism is implemented
 and testable.
 
@@ -577,7 +577,7 @@ counts as running state until durable persistence completes.
 
 The file list a checkpoint carries is read out of the summarized range by pi's
 own collector, which recognizes the lowercase spellings `read` / `write` /
-`edit` — the names pi's tools carry. PI-Desktop registers `Read` / `Write` /
+`edit` — the names pi's tools carry. DuaerAiDesk registers `Read` / `Write` /
 `Edit`, so the runtime converts exactly those three on the way into pi's
 preparation (`withPiFileOpToolNames`): nothing stored changes, and every other
 tool name is left spelled the way we register it. Without that conversion a
@@ -805,7 +805,7 @@ arrives with the repository, so honoring its scope would let cloned code grant
 itself `auto`. A project document that declares a non-`inherit` scope keeps
 loading with a warning and its delegates run under the session's effective
 mode; a user who wants the scope copies the document into their own agents
-directory. Builtins, including the write-capable `fixer` and `ui-designer`, do
+directory. Builtins, including the write-capable `fixer` and `coder`, do
 not override the parent session by default: they follow `auto` completely
 (including explicit external paths) while `ask` and `accept-edits` retain
 their normal approval behavior. An explicit builtin or user scope remains an
@@ -904,8 +904,9 @@ the session's requests keep the model binding. A value past the ceiling is a
 typo and is clamped rather than forwarded to the provider.
 The built-in `explorer` declares `Read`,
 `Glob`, `Grep`, and `Bash`, while `code-reviewer` remains read-only;
-`fixer` and `ui-designer` write inside the workspace, and `ui-designer` adds
-`BrowserPreview` so it can open and inspect its rendered result before reporting.
+`fixer` and `coder` write inside the workspace. `ui-designer` is read-only
+(`Read`, `Glob`, `Grep`) and returns a style and a layout after architecture
+locks; it does not edit files.
 `BrowserPreview` only opens a live-reloading workspace HTML page; responsive,
 keyboard-focus, and reduced-motion checks require project-provided browser
 tests or other tooling. Its statuses are `completed`, `failed`,
@@ -1207,8 +1208,8 @@ those values, or whose base URL host is `opencode.ai` send:
 
 - `x-opencode-session`: the durable conversation id, or a per-call UUID when
   the caller has no session
-- `x-opencode-client: pi-desktop`
-- `User-Agent: pi-desktop/<APP_VERSION>`
+- `x-opencode-client: duaer-ai-desk`
+- `User-Agent: duaer-ai-desk/<APP_VERSION>`
 
 Caller-supplied headers override the client and User-Agent defaults. An empty
 session header is restored from the conversation id so OpenCode Go cannot
@@ -1582,7 +1583,7 @@ browseable.
 The desktop sidecar starts with Node's `--use-system-ca`, retaining bundled
 roots and inherited `NODE_EXTRA_CA_CERTS`. It uses the OS trust store without
 turning off chain or hostname validation. Restart after updating local trust
-or the extra-CA startup environment. Headless pi-host launch behavior and
+or the extra-CA startup environment. Headless duaer-ai-desk-host launch behavior and
 System/Direct/Custom proxy routing are unchanged.
 
 Explicit certificate verification errors are terminal for both setup and

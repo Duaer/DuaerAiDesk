@@ -10,8 +10,8 @@ import type {
   Context,
   Model,
   SimpleStreamOptions,
-} from "@earendil-works/pi-ai";
-import type { MessageUsage, ThinkingLevel } from "@pi-desktop/shared";
+} from "@duaer-ai-desk/upstream-ai";
+import type { MessageUsage, ThinkingLevel } from "@duaer-ai-desk/shared";
 import { classifyAgentError } from "./agent-errors.js";
 import { clampOutputToContext } from "./output-cap.js";
 import { assistantContent, usageFromPi } from "./agent-messages.js";

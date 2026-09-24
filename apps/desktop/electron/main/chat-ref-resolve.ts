@@ -5,8 +5,8 @@ import type {
   FsChatRefMatchKind,
   FsChatRefProjectRoot,
   FsChatRefRoot,
-} from "@pi-desktop/shared";
-import { isAttachmentBlobRef, isIgnoredName } from "@pi-desktop/host-runtime";
+} from "@duaer-ai-desk/shared";
+import { isAttachmentBlobRef, isIgnoredName } from "@duaer-ai-desk/host-runtime";
 import { getWorkspaceFileIndex } from "./fs-index.js";
 
 /**

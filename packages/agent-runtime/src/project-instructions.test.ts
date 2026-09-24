@@ -18,7 +18,7 @@ afterEach(async () => {
 
 describe("loadProjectInstructions", () => {
   it("loads a non-empty workspace-root AGENTS.md", async () => {
-    root = await mkdtemp(join(tmpdir(), "pi-desktop-instructions-"));
+    root = await mkdtemp(join(tmpdir(), "duaer-ai-desk-instructions-"));
     await writeFile(join(root, "AGENTS.md"), "Use pnpm for package commands.\n");
 
     await expect(loadProjectInstructions(root)).resolves.toEqual({
@@ -27,7 +27,7 @@ describe("loadProjectInstructions", () => {
   });
 
   it("layers root and nested instructions with stable slash-normalized sources", async () => {
-    root = await mkdtemp(join(tmpdir(), "pi-desktop-instructions-"));
+    root = await mkdtemp(join(tmpdir(), "duaer-ai-desk-instructions-"));
     await mkdir(join(root, "packages", "api"), { recursive: true });
     await writeFile(join(root, "AGENTS.md"), "Use the root convention.");
     await writeFile(join(root, "packages", "AGENTS.md"), "Use package rules.");
@@ -45,7 +45,7 @@ describe("loadProjectInstructions", () => {
   });
 
   it("prefers AGENTS.override.md within a directory", async () => {
-    root = await mkdtemp(join(tmpdir(), "pi-desktop-instructions-"));
+    root = await mkdtemp(join(tmpdir(), "duaer-ai-desk-instructions-"));
     await writeFile(join(root, "AGENTS.md"), "Use shared rules.");
     await writeFile(join(root, "AGENTS.override.md"), "Use local override.");
 
@@ -57,7 +57,7 @@ describe("loadProjectInstructions", () => {
   });
 
   it("uses Claude-compatible files only when no AGENTS file exists", async () => {
-    root = await mkdtemp(join(tmpdir(), "pi-desktop-instructions-"));
+    root = await mkdtemp(join(tmpdir(), "duaer-ai-desk-instructions-"));
     await writeFile(join(root, "CLAUDE.md"), "Use Claude-compatible rules.");
 
     await expect(loadProjectInstructions(root)).resolves.toEqual({
@@ -68,7 +68,7 @@ describe("loadProjectInstructions", () => {
   });
 
   it("prefers AGENTS.md over Claude-compatible files", async () => {
-    root = await mkdtemp(join(tmpdir(), "pi-desktop-instructions-"));
+    root = await mkdtemp(join(tmpdir(), "duaer-ai-desk-instructions-"));
     await writeFile(join(root, "AGENTS.md"), "Use AGENTS rules.");
     await writeFile(join(root, "CLAUDE.md"), "Use Claude rules.");
 
@@ -78,7 +78,7 @@ describe("loadProjectInstructions", () => {
   });
 
   it("caps the complete chain at 32 KiB without splitting UTF-8 characters", async () => {
-    root = await mkdtemp(join(tmpdir(), "pi-desktop-instructions-"));
+    root = await mkdtemp(join(tmpdir(), "duaer-ai-desk-instructions-"));
     await writeFile(join(root, "AGENTS.md"), "中".repeat(20_000));
 
     const loaded = await loadProjectInstructions(root);
@@ -89,7 +89,7 @@ describe("loadProjectInstructions", () => {
   });
 
   it("treats missing, blank, and out-of-workspace files as absent", async () => {
-    root = await mkdtemp(join(tmpdir(), "pi-desktop-instructions-"));
+    root = await mkdtemp(join(tmpdir(), "duaer-ai-desk-instructions-"));
     await expect(loadProjectInstructions(root)).resolves.toBeUndefined();
 
     await writeFile(join(root, "AGENTS.md"), " \n\t ");
@@ -100,7 +100,7 @@ describe("loadProjectInstructions", () => {
 
 describe("loadInstructionChain", () => {
   it("loads global instructions before project instructions", async () => {
-    root = await mkdtemp(join(tmpdir(), "pi-desktop-instructions-"));
+    root = await mkdtemp(join(tmpdir(), "duaer-ai-desk-instructions-"));
     const globalPath = join(root, "global-AGENTS.md");
     await writeFile(globalPath, "Use global conventions.");
     await writeFile(join(root, "AGENTS.md"), "Use project conventions.");
@@ -114,7 +114,7 @@ describe("loadInstructionChain", () => {
   });
 
   it("shares the 32 KiB byte budget between global and project instructions", async () => {
-    root = await mkdtemp(join(tmpdir(), "pi-desktop-instructions-"));
+    root = await mkdtemp(join(tmpdir(), "duaer-ai-desk-instructions-"));
     const globalPath = join(root, "global-AGENTS.md");
     await writeFile(globalPath, "a".repeat(32 * 1024));
     await writeFile(join(root, "AGENTS.md"), "Use project conventions.");

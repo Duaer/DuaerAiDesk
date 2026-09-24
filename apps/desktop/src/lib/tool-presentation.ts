@@ -1,4 +1,4 @@
-import type { UiMessage } from "@pi-desktop/shared";
+import type { UiMessage } from "@duaer-ai-desk/shared";
 import {
   delegationLifecycleKind,
   getToolAction,

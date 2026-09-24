@@ -91,7 +91,7 @@ pi.plugin.getDataPath(): Promise<string> // plugin-private directory
 支持生成字符串、数字、布尔、枚举、JSON 和 `shortcut` 控件。生成式 `title` /
 `description` / `enum[].label` 是作者语言纯字符串，宿主不会在这些字段上解析 locale
 map。需要本地化设置页的插件应贡献 `settingsDestinations` 并读取 `pi.app.getLocale`
-（ADR 0280）。快捷键仅属于插件域：只有在 PI-Desktop 窗口聚焦且插件激活范围匹配当前项目时，
+（ADR 0280）。快捷键仅属于插件域：只有在 DuaerAiDesk 窗口聚焦且插件激活范围匹配当前项目时，
 才会调用声明的命令；本版本不会注册操作系统全局快捷键。用户编辑后，主机会向插件发送
 `plugin:settingsChanged`，便于刷新内存中的配置。
 
@@ -366,7 +366,7 @@ Projects 页面也会据此刷新持久项目索引；插件不需要、也不�
 
 主机限制每会话 2,000 条消息、每批 100 个会话、每条消息 512 KiB、每个工具值
 256 KiB、每个 payload 32 MiB、JSON 深度 8。每个插件每分钟最多 10 次单条导入、
-5 次批量导入和 20 次删除。写入前会移除工具 `__pi*` 与 `piDesktop.*` 对象键。
+5 次批量导入和 20 次删除。写入前会移除工具 `__pi*` 与 `duaerAiDesk.*` 对象键。
 P2/P3（会话创建、消息变更、任意重新绑定、provider/model 绑定、批量删除、标签）不属于本次接口。
 
 ### 用量（需要 `usage.read`）
@@ -632,7 +632,7 @@ pi.desktop.invoke(input: {
 这是第一方插件通往与可选启用的本地 MCP 控制平面共用同一份已审查操作目录的
 网关（ADR 0203 / D370）。两份目录的差异仅在于标记为 plugin-only 的操作：六个
 `session/collaboration/*` 操作可以通过该网关调用，却被刻意排除在 MCP 可见目录
-之外（`tools/list`、`pi_control_describe` 以及 `pi_desktop_invoke` 的枚举），
+之外（`tools/list`、`pi_control_describe` 以及 `duaer_ai_desk_invoke` 的枚举），
 因为它们需要已认证的插件调用上下文，且渲染器没有任何变更通道。返回的目录省略
 Electron 通道名，插件也永远拿不到 MCP bearer token。调用复用控制器、IPC 处理器、
 生命周期检查、完成事件和审计边界；插件无法触达任意 Electron IPC。
@@ -721,7 +721,7 @@ type PluginGlobalShortcut = {
 也只是属于该插件的一条命令。
 
 `command` 必须已经由调用插件注册；否则以 `INVALID_ARGUMENT` 失败。被操作
-系统保留、被 PI-Desktop 自己当前占用（默认 `Alt+Space` 打开插件启动器、
+系统保留、被 DuaerAiDesk 自己当前占用（默认 `Alt+Space` 打开插件启动器、
 `Alt+Shift+W` 呼出或隐藏窗口；用户改绑后释放出来的加速键可以再次被插件使用）或
 已被另一个插件持有的加速键会被拒绝而不是被抢走，被拒绝的重新注册会保留原来
 的绑定。拒绝是返回的结果，不是抛出的异常：

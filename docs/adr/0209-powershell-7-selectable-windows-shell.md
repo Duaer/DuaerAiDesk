@@ -106,7 +106,7 @@ the choice ADR 0054 §1 deliberately granted by freezing the catalog.
 
 Rejected: ADR 0054 already rejected renderer- or sidecar-supplied executable
 paths, because catalog policy and identity validation depend on a closed ID set.
-A `PI_DESKTOP_*` env override could be added later for unusual installs, but it
+A `DUAER_AI_DESK_*` env override could be added later for unusual installs, but it
 is not needed for the install layouts above and is deliberately left out of this
 change.
 

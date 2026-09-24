@@ -83,7 +83,7 @@ function harness(realCatalog) {
     },
   };
   const { registerProviderIpc } = load("../electron/main/ipc/provider-ipc.ts", {
-    "@pi-desktop/shared": {
+    "@duaer-ai-desk/shared": {
       IPC,
       ErrorCodes,
       resolveBindingContextWindow: () => ({}),
@@ -94,7 +94,7 @@ function harness(realCatalog) {
         throw new Error("the lookup must not probe the network");
       },
     },
-    "@pi-desktop/agent-runtime": {},
+    "@duaer-ai-desk/agent-runtime": {},
     "../models-dev-catalog": modelsDev,
     "../host-process": {},
     "../logger": { app: () => {} },

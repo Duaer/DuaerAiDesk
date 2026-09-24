@@ -40,6 +40,6 @@
       "scope": ["**"]
     }
   },
-  "engines": { "piDesktop": ">=0.9.0" },
+  "engines": { "duaerAiDesk": ">=0.9.0" },
   "activationEvents": ["onStartup"]
 }

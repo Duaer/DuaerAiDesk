@@ -7,7 +7,7 @@ import {
   type ModelBinding,
   type ModelInfo,
   type ProviderPublic,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 
 type ConfiguredProvider = Pick<ProviderPublic, "id" | "models" | "defaultModelId">;
 

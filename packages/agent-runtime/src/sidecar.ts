@@ -7,7 +7,7 @@ import { createHash, randomUUID } from "node:crypto";
 import { constants as fsConstants } from "node:fs";
 import { copyFile, mkdir, readFile, realpath, stat } from "node:fs/promises";
 import { isAbsolute, relative, resolve } from "node:path";
-import type { ModelAuth } from "@earendil-works/pi-ai";
+import type { ModelAuth } from "@duaer-ai-desk/upstream-ai";
 import { ParentHostProxy } from "./parent-host-proxy.js";
 import { visionFromModelConfig } from "./model-capabilities.js";
 import { classifyAgentError } from "./agent-errors.js";
@@ -20,7 +20,7 @@ import {
   type RuntimeProviderConfig,
 } from "./runtime.js";
 import type { PluginSkillDef } from "./plugin-skills-prompt.js";
-import type { SessionMessageOrigin, TrustedExtensionSpec } from "@pi-desktop/shared";
+import type { SessionMessageOrigin, TrustedExtensionSpec } from "@duaer-ai-desk/shared";
 import type { ProjectInstructions } from "./project-instructions.js";
 import type { CustomSystemPrompt } from "./custom-system-prompt.js";
 import {
@@ -37,7 +37,7 @@ import {
   normalizeNetworkProxy,
   OAUTH_AUTH_KIND,
   readNdjsonLines,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import type {
   AgentEventEnvelope,
   AskToolResolution,
@@ -50,7 +50,7 @@ import type {
   PlanExecution,
   SessionThinkingLevel,
   UiMessage,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 
 type RuntimeMap = Map<string, DesktopAgentRuntime>;
 
@@ -58,7 +58,7 @@ const runtimes: RuntimeMap = new Map();
 const hostProxy = new ParentHostProxy();
 const testRuntimeIds = new WeakMap<DesktopAgentRuntime, string>();
 function testRuntimeIdentity(sessionId: string) {
-  if (process.env.PI_DESKTOP_PLAN_UI_PROBE !== "1") {
+  if (process.env.DUAER_AI_DESK_PLAN_UI_PROBE !== "1") {
     throw Object.assign(new Error("test runtime identity RPC is unavailable"), {
       rpcCode: -32601,
     });
@@ -723,7 +723,7 @@ process.on("unhandledRejection", (reason) => {
   process.stderr.write(`[agent-sidecar] unhandled promise rejection: ${detail}\n`);
 });
 
-const bootProxy = process.env.PI_DESKTOP_PROXY_JSON;
+const bootProxy = process.env.DUAER_AI_DESK_PROXY_JSON;
 if (bootProxy) {
   try {
     applyNodeNetworkProxy(normalizeNetworkProxy(JSON.parse(bootProxy)));

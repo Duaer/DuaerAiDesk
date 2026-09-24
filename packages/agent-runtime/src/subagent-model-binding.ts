@@ -16,8 +16,8 @@ import {
   omitThinkingModel as withOmittedThinking,
 } from "./thinking-level.js";
 import { captureProviderResponse, carriesRetryDelayHeaders, createProviderRetryStream } from "./provider-retry.js";
-import type { AgentOptions } from "@earendil-works/pi-agent-core";
-import type { SubagentThinkingLevel } from "@pi-desktop/shared";
+import type { AgentOptions } from "@duaer-ai-desk/upstream-agent-core";
+import type { SubagentThinkingLevel } from "@duaer-ai-desk/shared";
 import type { ClassifiedAgentError } from "./agent-errors.js";
 import type { ProviderFetchFailure } from "./provider-transport-recovery.js";
 

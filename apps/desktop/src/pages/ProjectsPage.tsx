@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import { useTranslation } from "react-i18next";
-import type { ProjectGroupRecord } from "@pi-desktop/shared";
-import { ErrorCodes } from "@pi-desktop/shared";
+import type { ProjectGroupRecord } from "@duaer-ai-desk/shared";
+import { ErrorCodes } from "@duaer-ai-desk/shared";
 import { useAppStore } from "../stores/app-store";
 import { api } from "../lib/api";
 import { Button, TooltipButton, cx } from "../components/ui";

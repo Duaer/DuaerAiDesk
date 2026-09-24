@@ -2,7 +2,7 @@ import type { IncomingMessage } from "node:http";
 import { createServer, type Server } from "node:http";
 import type { Socket } from "node:net";
 
-import { RACP_WS_PATH, RACP_WS_SUBPROTOCOL } from "@pi-desktop/shared";
+import { RACP_WS_PATH, RACP_WS_SUBPROTOCOL } from "@duaer-ai-desk/shared";
 import { WebSocket, WebSocketServer } from "ws";
 
 import { isLoopbackAddress, type DeviceTokenAuthenticator } from "./auth.js";
@@ -54,7 +54,7 @@ function wsTransport(socket: WebSocket): ServerConnectionTransport {
 export async function bindRacpWebSocket(options: WsBindingOptions): Promise<WsBinding> {
   const host = options.host ?? "127.0.0.1";
   if (!isLoopbackAddress(host)) {
-    throw Object.assign(new Error("pi-host binds loopback only; a non-loopback bind requires TLS"), {
+    throw Object.assign(new Error("duaer-ai-desk-host binds loopback only; a non-loopback bind requires TLS"), {
       errorCode: "INVALID_ARGUMENT",
     });
   }

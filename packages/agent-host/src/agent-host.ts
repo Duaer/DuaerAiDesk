@@ -27,7 +27,7 @@ import type {
   RacpTurnAdmission,
   ToolPermissionRequest,
   UiMessage,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import {
   RACP_ACTIVE_TURN_STATUSES,
   RACP_DEFAULT_LIMITS,
@@ -37,7 +37,7 @@ import {
   effectiveRemotePermissionMode,
   racpKindForAgentEvent,
   rolesAllowOperation,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 
 import { ApprovalBroker, type ApprovalPort } from "./approvals.js";
 import { racpError } from "./errors.js";

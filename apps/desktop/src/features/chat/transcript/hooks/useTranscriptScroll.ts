@@ -11,7 +11,7 @@ import type {
   ContextCompactionMark,
   PlanningState,
   UiMessage,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import type { PendingPermission } from "../../../../lib/pending-permissions";
 import {
   buildTranscriptEntries,

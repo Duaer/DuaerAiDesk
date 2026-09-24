@@ -21,7 +21,7 @@
  * and api/replay details depend on the binding.
  */
 
-import { estimateTokens } from "@earendil-works/pi-agent-core";
+import { estimateTokens } from "@duaer-ai-desk/upstream-agent-core";
 import type {
   AssistantMessage,
   Message,
@@ -30,13 +30,13 @@ import type {
   ToolCall,
   ToolResultMessage,
   UserMessage,
-} from "@earendil-works/pi-ai";
+} from "@duaer-ai-desk/upstream-ai";
 import {
   MAX_RESUMABLE_LISTED_FILES,
   MAX_RESUMABLE_READ_LINES,
   normalizeSubagentName,
   type UiMessage,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import { isRecord, timestampMs, toJsonObject, toJsonValue, usageToPi } from "./agent-messages.js";
 import type { ContextBudgetLimits } from "./context-budget.js";
 import {

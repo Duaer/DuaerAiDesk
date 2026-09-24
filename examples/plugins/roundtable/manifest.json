@@ -42,7 +42,7 @@
   },
   "permissions": ["agent.prompt.inject", "agent.tool.register"],
   "engines": {
-    "piDesktop": ">=0.1.0"
+    "duaerAiDesk": ">=0.1.0"
   },
   "activationEvents": ["onStartup"]
 }

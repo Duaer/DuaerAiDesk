@@ -30,8 +30,8 @@ test("defaultProjectName names a local pick after its first folder", () => {
 
 test("defaultProjectName names a git source after its repository", () => {
   assert.equal(
-    defaultProjectName({ source: "git", folders: [], repositoryName: "PI-Desktop" }),
-    "PI-Desktop",
+    defaultProjectName({ source: "git", folders: [], repositoryName: "DuaerAiDesk" }),
+    "DuaerAiDesk",
   );
   assert.equal(
     defaultProjectName({ source: "git", folders: ["/Users/dev/work/api-server"] }),

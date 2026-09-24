@@ -7,7 +7,7 @@
  * handler byte-for-byte.
  *
  * The transport factory is injected. Production wires it to
- * `wsClientTransport` from `@pi-desktop/racp` (loopback for local dev, the
+ * `wsClientTransport` from `@duaer-ai-desk/racp` (loopback for local dev, the
  * forwarded loopback port for an SSH-bootstrapped host); tests wire the
  * in-memory `MemoryLink` so this boot layer exercises the real `RacpClient`
  * state machine without a socket.
@@ -24,9 +24,9 @@ import type {
   RemoteHostSshMetadata,
   RemoteHostSummary,
   RemoteHostTransport,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import { assertSshArgument } from "../remote/ssh-transport.js";
-import { wsClientTransport } from "@pi-desktop/racp";
+import { wsClientTransport } from "@duaer-ai-desk/racp";
 import type { BackendRouter } from "../remote/backend-router.js";
 import { createRacpRemoteHostClient, exchangePairingToken, type RacpRemoteHostClient } from "../remote/racp-remote-host-client.js";
 import {
@@ -76,7 +76,7 @@ export interface RemoteHostsBoot {
   /** Persist a paired record, then open one live connection for it. */
   addHost(record: RemoteHostRecord): Promise<RemoteHostSummary>;
   /**
-   * Install and pair a `pi-host` over SSH and bring it online (spec §5.2).
+   * Install and pair a `duaer-ai-desk-host` over SSH and bring it online (spec §5.2).
    * The forward the bootstrap opened is adopted rather than reopened, so
    * pairing pays for exactly one tunnel.
    */

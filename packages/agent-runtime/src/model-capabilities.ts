@@ -5,7 +5,7 @@ import {
   type ModelInfo,
   type ModelModality,
   type ThinkingLevel,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import type { ModelConfig, ThinkingCapabilitySet } from "./thinking-level.js";
 
 export {

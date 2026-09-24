@@ -2,7 +2,7 @@
 
 ## 1. Positioning
 
-PI-Desktop is for developers and power users who want a local agent that can read/modify projects with visible control.
+DuaerAiDesk is for developers and power users who want a local agent that can read/modify projects with visible control.
 
 It combines:
 
@@ -130,10 +130,10 @@ the internal `page = "chat"` route value; that value is not an operating mode.
 
 ## 8. Naming
 
-- Product: `PI-Desktop`
-- Package: `pi-desktop`
-- Application ID: `net.aiuo.pi-desktop`
-- Window title: `PI-Desktop`
+- Product: `DuaerAiDesk`
+- Package: `duaer-ai-desk`
+- Application ID: `net.aiuo.duaer-ai-desk`
+- Window title: `DuaerAiDesk`
 
 ## 9. Platform strategy
 

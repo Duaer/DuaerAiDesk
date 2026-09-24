@@ -15,6 +15,8 @@ const here = dirname(fileURLToPath(import.meta.url));
 register(pathToFileURL(join(here, "helpers/ts-import-hooks.mjs")));
 const {
   groupSubagentModelChoices,
+  judgmentOnlyModelChoices,
+  withJudgeEmployee,
   isSubagentModelProvider,
   subagentModelChoices,
   subagentModelOrphanPin,
@@ -321,6 +323,47 @@ test("the shared option-menu styles bound the list height and let it scroll", as
   const menu = styles.match(/\.provider-service-menu \{([^}]*)\}/);
   assert.ok(menu, ".provider-service-menu rule is missing");
   assert.match(menu[1], /max-height:/);
+});
+
+test("judge choices keep only the marked judgment model", () => {
+  const choices = [
+    { value: "p/chat", modelId: "chat", providerId: "p", providerName: "P", vendorKey: "p" },
+    { value: "p/jev-latest", modelId: "jev-latest", providerId: "p", providerName: "P", vendorKey: "p" },
+    { value: "q/jev-latest", modelId: "jev-latest", providerId: "q", providerName: "Q", vendorKey: "q" },
+  ];
+  assert.deepEqual(
+    judgmentOnlyModelChoices(choices, { providerId: "p", modelId: "jev-latest" }).map((choice) => choice.value),
+    ["p/jev-latest"],
+  );
+  assert.deepEqual(judgmentOnlyModelChoices(choices, null), []);
+  assert.deepEqual(judgmentOnlyModelChoices(choices, { providerId: "p", modelId: "" }), []);
+});
+
+test("the settings list gains one judge employee and leaves existing pins alone", () => {
+  const catalog = [
+    { name: "explorer", description: "", prompt: "", source: "builtin", enabled: true },
+  ];
+  const added = withJudgeEmployee(catalog);
+  const judge = added.find((row) => row.name === "judge");
+  assert.equal(added.length, 2);
+  assert.equal(added[0].name, "explorer");
+  assert.equal(judge?.enabled, true);
+  assert.equal(judge?.model, undefined);
+
+  const existing = [{
+    name: "judge",
+    description: "Judge",
+    prompt: "",
+    source: "builtin",
+    enabled: false,
+    model: { providerId: "other", modelId: "chat" },
+    fallbackModels: [{ providerId: "other", modelId: "backup" }],
+  }];
+  const kept = withJudgeEmployee(existing);
+  assert.equal(kept.length, 1);
+  assert.equal(kept[0].enabled, false);
+  assert.deepEqual(kept[0].model, { providerId: "other", modelId: "chat" });
+  assert.deepEqual(kept[0].fallbackModels, [{ providerId: "other", modelId: "backup" }]);
 });
 
 test("the editor exposes the no-pass thinking option", async () => {

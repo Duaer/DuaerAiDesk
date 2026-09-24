@@ -1,5 +1,5 @@
 {
-  "name": "pi-desktop",
+  "name": "duaer-ai-desk",
   "private": true,
   "version": "0.15.6",
   "description": "Local-first AI coding agent desktop client",
@@ -9,10 +9,10 @@
     "pnpm": ">=10"
   },
   "scripts": {
-    "dev": "pnpm --filter @pi-desktop/desktop dev",
-    "preview": "pnpm --filter @pi-desktop/desktop run preview",
-    "pack": "pnpm --filter @pi-desktop/desktop run pack",
-    "dist": "pnpm --filter @pi-desktop/desktop run dist",
+    "dev": "pnpm --filter @duaer-ai-desk/desktop dev",
+    "preview": "pnpm --filter @duaer-ai-desk/desktop run preview",
+    "pack": "pnpm --filter @duaer-ai-desk/desktop run pack",
+    "dist": "pnpm --filter @duaer-ai-desk/desktop run dist",
     "pi-plugin": "pi-plugin",
     "build": "pnpm -r --if-present build && cargo build --release -p host-core",
     "build:js": "pnpm -r --if-present build",
@@ -49,10 +49,10 @@
     "check:release-docs": "node scripts/check-release-docs.mjs",
     "check:agent-policy": "node scripts/check-agent-policy-sync.mjs",
     "check:pr-base": "node scripts/check-pr-base-main.mjs",
-    "docs:dev": "pnpm --filter @pi-desktop/docs dev",
-    "docs:build": "pnpm --filter @pi-desktop/docs build",
-    "docs:preview": "pnpm --filter @pi-desktop/docs preview",
-    "docs:check": "pnpm --filter @pi-desktop/docs check:locales && pnpm --filter @pi-desktop/docs check:docs",
+    "docs:dev": "pnpm --filter @duaer-ai-desk/docs dev",
+    "docs:build": "pnpm --filter @duaer-ai-desk/docs build",
+    "docs:preview": "pnpm --filter @duaer-ai-desk/docs preview",
+    "docs:check": "pnpm --filter @duaer-ai-desk/docs check:locales && pnpm --filter @duaer-ai-desk/docs check:docs",
     "lint": "pnpm lint:biome && pnpm -r --if-present lint",
     "host:dev": "cargo run -p host-core",
     "clean": "pnpm -r --if-present clean && cargo clean",
@@ -68,8 +68,11 @@
     "test:e2e:shortcut-settings": "node scripts/test-shortcut-settings.mjs",
     "test:e2e:dialog-overflow": "node scripts/test-dialog-overflow.mjs"
   },
+  "dependencies": {
+    "duaer-spec": "0.27.3"
+  },
   "devDependencies": {
     "@biomejs/biome": "^2.5.13",
-    "@pi-desktop/plugin-devkit": "workspace:*"
+    "@duaer-ai-desk/plugin-devkit": "workspace:*"
   }
 }

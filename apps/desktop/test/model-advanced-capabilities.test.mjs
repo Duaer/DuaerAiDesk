@@ -16,6 +16,14 @@ const imageModelRowSource = await readFile(
   new URL("../src/components/settings/ImageGenerationModelRow.tsx", import.meta.url),
   "utf8",
 );
+const judgmentRowSource = await readFile(
+  new URL("../src/components/settings/JudgmentModelRow.tsx", import.meta.url),
+  "utf8",
+);
+const modelConfigPageSource = await readFile(
+  new URL("../src/components/settings/ModelConfigPage.tsx", import.meta.url),
+  "utf8",
+);
 const composerSource = await readComposerSource();
 const capabilitiesSource = await readFile(
   new URL(
@@ -94,6 +102,13 @@ test("image generation selection hides the summary when nothing can be chosen", 
   assert.match(imageModelRowSource, /if \(!options\.some\(\(option\) => !option\.disabled\)\) return null;/);
   assert.match(imageModelRowSource, /if \(candidates\.length === 0\) return null;/);
   assert.match(imageModelRowSource, /imageModelUnavailable/);
+  assert.match(judgmentRowSource, /if \(candidates\.length === 0\) return null;/);
+  assert.match(judgmentRowSource, /if \(!options\.some\(\(option\) => !option\.disabled\)\) return null;/);
+  assert.match(judgmentRowSource, /settings\.judgmentModel/);
+  assert.match(judgmentRowSource, /imageGenerationBindingAvailable/);
+  const imageAt = modelConfigPageSource.indexOf("<ImageGenerationModelRow");
+  const judgmentAt = modelConfigPageSource.indexOf("<JudgmentModelRow");
+  assert.ok(imageAt > 0 && judgmentAt > imageAt);
 });
 
 test("the Composer model rows use the provider binding for vision badges", () => {

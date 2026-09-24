@@ -36,7 +36,7 @@ describe("Plan protocol contracts", () => {
     expect(IPC_WHITELIST.has(IPC.invoke.plansPending)).toBe(true);
     expect(IPC_WHITELIST.has(IPC.invoke.plansResolve)).toBe(true);
     expect(IPC_WHITELIST.has(IPC.event.plansChanged)).toBe(true);
-    expect(IPC.invoke.commandShellList).toBe("pi-desktop/commandShell/list");
+    expect(IPC.invoke.commandShellList).toBe("duaer-ai-desk/commandShell/list");
     expect(IPC_WHITELIST.has(IPC.invoke.commandShellList)).toBe(true);
     expect(IPC_WHITELIST.has(IPC.invoke.scheduledList)).toBe(true);
     expect(IPC_WHITELIST.has(IPC.invoke.scheduledCreate)).toBe(true);
@@ -46,38 +46,46 @@ describe("Plan protocol contracts", () => {
     expect(IPC_WHITELIST.has(IPC.invoke.scheduledExecute)).toBe(true);
     expect(IPC_WHITELIST.has(IPC.invoke.scheduledListRuns)).toBe(true);
     expect(IPC.invoke.providersRefreshModelCatalog).toBe(
-      "pi-desktop/providers/refreshModelCatalog",
+      "duaer-ai-desk/providers/refreshModelCatalog",
     );
     expect(IPC_WHITELIST.has(IPC.invoke.providersRefreshModelCatalog)).toBe(true);
     expect(IPC_WHITELIST.has(IPC.invoke.windowSetWorkPanelChatWidth)).toBe(true);
     expect(IPC_WHITELIST.has(IPC.event.windowWorkPanelResize)).toBe(true);
-    expect(IPC.invoke.appOpenFeedback).toBe("pi-desktop/app/openFeedback");
+    expect(IPC.invoke.appOpenFeedback).toBe("duaer-ai-desk/app/openFeedback");
     expect(IPC_WHITELIST.has(IPC.invoke.appOpenFeedback)).toBe(true);
-    expect(IPC.invoke.fsOpen).toBe("pi-desktop/fs/open");
+    expect(IPC.invoke.fsOpen).toBe("duaer-ai-desk/fs/open");
     expect(IPC_WHITELIST.has(IPC.invoke.fsOpen)).toBe(true);
     expect(IPC.invoke.statsGetTokenUsageHistory).toBe(
-      "pi-desktop/stats/getTokenUsageHistory",
+      "duaer-ai-desk/stats/getTokenUsageHistory",
     );
     expect(IPC_WHITELIST.has(IPC.invoke.statsGetTokenUsageHistory)).toBe(true);
-    expect(IPC.invoke.fsReadImageDataUrl).toBe("pi-desktop/fs/readImageDataUrl");
+    expect(IPC.invoke.fsReadImageDataUrl).toBe("duaer-ai-desk/fs/readImageDataUrl");
     expect(IPC_WHITELIST.has(IPC.invoke.fsReadImageDataUrl)).toBe(true);
-    expect(IPC.invoke.networkProxyTest).toBe("pi-desktop/network/testProxy");
+    expect(IPC.invoke.networkProxyTest).toBe("duaer-ai-desk/network/testProxy");
     expect(IPC_WHITELIST.has(IPC.invoke.networkProxyTest)).toBe(true);
-    expect(IPC.invoke.modelConfigImportScan).toBe("pi-desktop/modelConfig/importScan");
-    expect(IPC.invoke.modelConfigImportRun).toBe("pi-desktop/modelConfig/importRun");
+    expect(IPC.invoke.modelConfigImportScan).toBe("duaer-ai-desk/modelConfig/importScan");
+    expect(IPC.invoke.modelConfigImportRun).toBe("duaer-ai-desk/modelConfig/importRun");
     expect(IPC_WHITELIST.has(IPC.invoke.modelConfigImportScan)).toBe(true);
     expect(IPC_WHITELIST.has(IPC.invoke.modelConfigImportRun)).toBe(true);
-    expect(IPC.invoke.projectClone).toBe("pi-desktop/project/clone");
+    expect(IPC.invoke.projectClone).toBe("duaer-ai-desk/project/clone");
     expect(IPC_WHITELIST.has(IPC.invoke.projectClone)).toBe(true);
-    expect(IPC.invoke.speechTranscribe).toBe("pi-desktop/speech/transcribe");
+    expect(IPC.invoke.speechTranscribe).toBe("duaer-ai-desk/speech/transcribe");
     expect(IPC_WHITELIST.has(IPC.invoke.speechTranscribe)).toBe(true);
     expect(IPC_WHITELIST.has(IPC.invoke.speechSynthesize)).toBe(true);
     expect(IPC_WHITELIST.has(IPC.invoke.speechGetStatus)).toBe(true);
+    expect(IPC.invoke.deliveryArchitectureRender).toBe(
+      "duaer-ai-desk/delivery/architecture/render",
+    );
+    expect(IPC.invoke.deliveryArchitectureGet).toBe(
+      "duaer-ai-desk/delivery/architecture/get",
+    );
+    expect(IPC_WHITELIST.has(IPC.invoke.deliveryArchitectureRender)).toBe(true);
+    expect(IPC_WHITELIST.has(IPC.invoke.deliveryArchitectureGet)).toBe(true);
   });
 
   it("exposes the vendor-account OAuth channels through the preload whitelist", () => {
     expect(IPC.invoke.providersOauthStart).toBe(
-      "pi-desktop/providers/oauth/start",
+      "duaer-ai-desk/providers/oauth/start",
     );
     for (const channel of [
       IPC.invoke.providersOauthVendors,
@@ -312,7 +320,7 @@ describe("Plan protocol contracts", () => {
     // reports are the liveness signal, so the deadline is only a ceiling that
     // stops a genuinely lost answer from hanging the caller forever.
     expect(IPC.event.configSyncProgress).toBe(
-      "pi-desktop/configSync/event/progress",
+      "duaer-ai-desk/configSync/event/progress",
     );
     expect(IPC_WHITELIST.has(IPC.event.configSyncProgress)).toBe(true);
     expect(CONFIG_SYNC_RPC_TIMEOUT_MS).toBe(1_800_000);

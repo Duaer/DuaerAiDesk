@@ -38,14 +38,14 @@ Local plugins usable → developer-friendly → marketplace distribution → sig
 - plugin-sdk ✅
 - Template generation ✅ (`panel-basic`, `agent-tool-basic`, `skill-pack`,
   `full-demo`, from the plugins page, the agent, or `pi-plugin init`)
-- `pi-plugin check/pack` ✅ (`@pi-desktop/plugin-devkit`, also exposed as the
+- `pi-plugin check/pack` ✅ (`@duaer-ai-desk/plugin-devkit`, also exposed as the
   `PluginCheck` / `PluginScaffold` / `PluginPack` agent tools)
 - `.piplug` install ✅
 - dev hot reload ✅ (watch + debounce, and a reload can never widen permissions)
 
 ### R4 — Marketplace Read-only ✅
 - market provider abstraction (official remote GitHub catalog provider)
-- Official-source browse/search from `vastsa/pi-desktop-plugins`
+- Official-source browse/search from `vastsa/duaer-ai-desk-plugins`
 - Download + checksum install
 - updates list (manual update)
 

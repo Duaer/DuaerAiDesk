@@ -2,7 +2,7 @@
 
 - Status: Accepted for implementation
 - Date: 2026-08-12
-- Deciders: PI-Desktop core
+- Deciders: DuaerAiDesk core
 - Related: E2E-123
 
 ## Context
@@ -17,7 +17,7 @@ stable tool output so the model can distinguish it from a missing tool result.
 
 1. Add a built-in `asktool` to every operating mode. It emits a typed
    `asktool_request` event and pauses the runtime until the renderer resolves
-   the request through `pi-desktop/agent/askTool/resolve`.
+   the request through `duaer-ai-desk/agent/askTool/resolve`.
 2. The request carries an ordered array of question text, option labels, and an
    optional multi-select flag. The renderer always supplies a custom text-input
    option, regardless of the model's option list.

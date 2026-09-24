@@ -59,10 +59,10 @@ export function ConversationTopbar({
           unmounting it would reintroduce the first-frame title jump. While the
           sidebar is open the slot is zero-width and hidden from AT.
         */}
-        <div className="ct-lead" aria-hidden={!sidebarCollapsed}>
+        <div className="ct-lead no-drag" aria-hidden={!sidebarCollapsed}>
           <TooltipButton
             type="button"
-            className="ct-icon-btn"
+            className="ct-icon-btn no-drag"
             tooltip={t("nav.toggleSidebar")}
             ariaLabel={t("nav.toggleSidebar")}
             tabIndex={sidebarCollapsed ? undefined : -1}
@@ -79,11 +79,11 @@ export function ConversationTopbar({
         </div>
       </div>
 
-      <div className="ct-right">
-        <div className="ct-actions">
+      <div className="ct-right no-drag">
+        <div className="ct-actions no-drag">
           <TooltipButton
             type="button"
-            className="ct-icon-btn"
+            className="ct-icon-btn no-drag"
             tooltip={t("nav.newTask")}
             ariaLabel={t("nav.newTask")}
             onClick={onNewTask}
@@ -92,7 +92,7 @@ export function ConversationTopbar({
           </TooltipButton>
           <TooltipButton
             type="button"
-            className="ct-icon-btn"
+            className="ct-icon-btn no-drag"
             tooltip={t("nav.search")}
             ariaLabel={t("nav.search")}
             onClick={onOpenSearch}

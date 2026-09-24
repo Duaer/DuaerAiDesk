@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
-import type { AgentMessage } from "@earendil-works/pi-agent-core";
-import { transformMessages } from "@earendil-works/pi-ai/api/transform-messages";
+import type { AgentMessage } from "@duaer-ai-desk/upstream-agent-core";
+import { transformMessages } from "@duaer-ai-desk/upstream-ai/api/transform-messages";
 import {
   dedupeToolCallMessages,
   reportDuplicateToolCallDrop,

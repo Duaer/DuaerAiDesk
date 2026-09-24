@@ -1,4 +1,4 @@
-import type { GlobalPermissionMode } from "@pi-desktop/shared";
+import type { GlobalPermissionMode } from "@duaer-ai-desk/shared";
 
 export const PLAN_APPROVAL_MODE_STORAGE_KEY = "pi.desktop.planApprovalMode";
 export const PLAN_APPROVAL_FALLBACK_MODE: GlobalPermissionMode = "ask";

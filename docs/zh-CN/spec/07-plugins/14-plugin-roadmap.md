@@ -35,14 +35,14 @@ Local plugins usable → developer-friendly → marketplace distribution → sig
 - 插件 SDK ✅
 - 模板生成✅（`panel-basic`、`agent-tool-basic`、`skill-pack`、
   `full-demo`，来自插件页面、代理或 `pi-plugin init`）
-- `pi-plugin check/pack` ✅（`@pi-desktop/plugin-devkit`，也暴露为
+- `pi-plugin check/pack` ✅（`@duaer-ai-desk/plugin-devkit`，也暴露为
   `PluginCheck` / `PluginScaffold` / `PluginPack` 代理工具）
 - `.piplug` 安装 ✅
 - 开发热重载✅（监视+反跳，并且重载永远不会扩大权限）
 
 ### R4 — 市场只读 ✅
 - 市场提供商抽象（官方远程 GitHub 目录提供商）
-- 来自 `vastsa/pi-desktop-plugins` 的官方来源 browse/search
+- 来自 `vastsa/duaer-ai-desk-plugins` 的官方来源 browse/search
 - 下载+校验和安装
 - 更新列表（手动更新）
 

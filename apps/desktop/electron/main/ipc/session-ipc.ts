@@ -13,7 +13,7 @@ import {
   type ModelConfigImportDraft,
   type Mode,
   type SessionThinkingLevel,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import {
   convertSession,
   scanAllSources,
@@ -324,7 +324,7 @@ export function registerSessionIpc({
   });
   handle(IPC.invoke.sessionDelete, async (id: string) => {
     if (id.startsWith("native-pi:")) {
-      throw Object.assign(new Error("Native Pi sessions cannot be deleted from PI-Desktop"), {
+      throw Object.assign(new Error("Native Pi sessions cannot be deleted from DuaerAiDesk"), {
         errorCode: ErrorCodes.INVALID_ARGUMENT,
       });
     }

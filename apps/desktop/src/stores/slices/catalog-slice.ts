@@ -3,7 +3,7 @@ import type {
   ModelInfo,
   ProviderPublic,
   SessionSummary,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import { api } from "../../lib/api";
 import { latestSessionOutcomes } from "../../lib/sidebar-session-status";
 import type { AppState } from "../app-state";

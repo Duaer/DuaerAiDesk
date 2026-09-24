@@ -6,10 +6,10 @@ import {
   type ProviderReorderInput,
   type OAuthRespondInput,
   type ThinkingLevel,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import { OAUTH_AUTH_KIND, type VendorOAuth } from "../oauth";
 import { discoverProviderModels } from "../model-discovery";
-import { genericModelConfig, modelConfigWithBinding, mergeProviderHeaders } from "@pi-desktop/agent-runtime";
+import { genericModelConfig, modelConfigWithBinding, mergeProviderHeaders } from "@duaer-ai-desk/agent-runtime";
 import { modelConfigFromModelsDev, modelInfoFromModelsDev, type ModelsDevCatalog } from "../models-dev-catalog";
 import type { HostProcess } from "../host-process";
 import type { Logger } from "../logger";

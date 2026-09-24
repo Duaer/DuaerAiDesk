@@ -59,7 +59,7 @@ type PluginManifestV1 = {
  fs?: PluginFsPolicy; // which paths each file permission may touch (§5.2)
  net?: { domains?: string[] }; // egress allowlist (§5.3)
  engines?: {
- piDesktop?: string; // semver range
+ duaerAiDesk?: string; // semver range
  };
  entrypoints?: {
  onInstall?: string;

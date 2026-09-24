@@ -12,7 +12,7 @@ import {
 } from "../../components/icons";
 import { ScopeControl } from "../../components/extensions/ScopeControl";
 import { AnchoredMenu } from "../../components/settings/AnchoredMenu";
-import type { ActivationScope } from "@pi-desktop/shared";
+import type { ActivationScope } from "@duaer-ai-desk/shared";
 import { GROUP_LABEL_KEYS, TEMPLATE_IDS } from "./model";
 import { PluginRowDetails } from "./presentation";
 import type { PluginsPageModel } from "./usePluginsPage";

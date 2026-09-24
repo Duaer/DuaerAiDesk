@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { createServer } from "node:http";
 import test from "node:test";
-import { anthropicProvider } from "@earendil-works/pi-ai/providers/anthropic";
+import { anthropicProvider } from "@duaer-ai-desk/upstream-ai/providers/anthropic";
 import { VendorOAuth, secretRefForProviderOauth } from "../electron/main/oauth.ts";
 
 const TOKEN_URL = "https://platform.claude.com/v1/oauth/token";

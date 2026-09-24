@@ -1,4 +1,4 @@
-import type { ToolPermissionRequest } from "@pi-desktop/shared";
+import type { ToolPermissionRequest } from "@duaer-ai-desk/shared";
 
 export const PERMISSION_TIMEOUT_MS = 120_000;
 

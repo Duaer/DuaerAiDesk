@@ -3,7 +3,7 @@ import type {
   AgentMessage,
   CompactionEntry,
   MessageEntry,
-} from "@earendil-works/pi-agent-core";
+} from "@duaer-ai-desk/upstream-agent-core";
 import { buildSessionContext } from "./session-context.js";
 
 function user(id: string, text: string, seq: number): MessageEntry {

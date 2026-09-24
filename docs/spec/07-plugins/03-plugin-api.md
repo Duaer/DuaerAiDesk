@@ -111,7 +111,7 @@ Generated `title` / `description` / `enum[].label` are author-language strings;
 the host does not resolve locale maps on them. A plugin that needs a localized
 settings surface ships `settingsDestinations` and reads `pi.app.getLocale`
 (ADR 0280). Shortcut settings are plugin-local: they invoke the declared
-`command` only while the PI-Desktop app window is focused and while the plugin's
+`command` only while the DuaerAiDesk app window is focused and while the plugin's
 activation scope matches the current project. They are never registered as
 OS-global shortcuts in this release. The host emits `plugin:settingsChanged`
 after a user edit so a plugin can refresh in-memory configuration.
@@ -446,7 +446,7 @@ opened as a sidebar tab, preserving the existing closed-project behavior.
 The host enforces a 2,000-message/session, 100-session/batch, 512 KiB/message,
 256 KiB/tool-value, 32 MiB/payload, and JSON-depth-8 limit. Import is limited
 to 10 calls/minute plus 5 batch calls/minute per plugin; delete is limited to
-20 calls/minute. Tool `__pi*` and `piDesktop.*` object keys are removed before
+20 calls/minute. Tool `__pi*` and `duaerAiDesk.*` object keys are removed before
 storage. P2/P3 operations (session create, message mutation, arbitrary re-binding,
 provider/model binding, batch delete, and tags) are intentionally not part of
 this contract.
@@ -772,7 +772,7 @@ with the opt-in local MCP control plane (ADR 0203 / D370). The two catalogs
 differ only for operations marked plugin-only: the six
 `session/collaboration/*` operations are callable through this gateway but are
 deliberately absent from the MCP-visible catalog (`tools/list`,
-`pi_control_describe`, and the `pi_desktop_invoke` enum), because they require
+`pi_control_describe`, and the `duaer_ai_desk_invoke` enum), because they require
 an authenticated plugin invocation context and no renderer mutation channel
 exists for them. The returned catalog omits Electron channel names and the
 plugin never receives the MCP bearer token. Invocation reuses the controller,
@@ -893,7 +893,7 @@ command belonging to that plugin.
 
 `command` must already be registered by the calling plugin; anything else fails
 `INVALID_ARGUMENT`. An accelerator reserved by the operating system, one
-PI-Desktop itself currently spends (by default `Alt+Space` opens the plugin
+DuaerAiDesk itself currently spends (by default `Alt+Space` opens the plugin
 launcher and `Alt+Shift+W` shows or hides the window; once the user rebinds one of
 them, the freed accelerator is available again), or one held by another plugin
 is refused rather than taken over, and a refused re-registration leaves the

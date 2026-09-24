@@ -1,5 +1,5 @@
 import { spawn } from "node:child_process";
-import { IPC } from "@pi-desktop/shared";
+import { IPC } from "@duaer-ai-desk/shared";
 import type { HostProcess } from "../host-process";
 import type { IpcRegistrar } from "./types";
 

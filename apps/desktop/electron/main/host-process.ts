@@ -4,8 +4,8 @@ import {
   HostProcess as RuntimeHostProcess,
   type DiagnosedHostFailure,
   type StderrHandler,
-} from "@pi-desktop/host-runtime";
-import { ErrorCodes } from "@pi-desktop/shared";
+} from "@duaer-ai-desk/host-runtime";
+import { ErrorCodes } from "@duaer-ai-desk/shared";
 import {
   GlibcUnsupportedError,
   glibcMissingSymbol,
@@ -17,19 +17,19 @@ export type {
   HostNotificationHandler,
   ProcessExitHandler,
   StderrHandler,
-} from "@pi-desktop/host-runtime";
+} from "@duaer-ai-desk/host-runtime";
 
 function resolveHostBinary(): string {
-  if (process.env.PI_DESKTOP_HOST_BIN && existsSync(process.env.PI_DESKTOP_HOST_BIN)) {
-    return process.env.PI_DESKTOP_HOST_BIN;
+  if (process.env.DUAER_AI_DESK_HOST_BIN && existsSync(process.env.DUAER_AI_DESK_HOST_BIN)) {
+    return process.env.DUAER_AI_DESK_HOST_BIN;
   }
   const exe = process.platform === "win32" ? ".exe" : "";
   const candidates = [
     // packaged resources
-    join(process.resourcesPath || "", `bin/pi-desktop-host-core${exe}`),
+    join(process.resourcesPath || "", `bin/duaer-ai-desk-host-core${exe}`),
     // monorepo dev/build
-    join(__dirname, `../../../../target/debug/pi-desktop-host-core${exe}`),
-    join(__dirname, `../../../../target/release/pi-desktop-host-core${exe}`),
+    join(__dirname, `../../../../target/debug/duaer-ai-desk-host-core${exe}`),
+    join(__dirname, `../../../../target/release/duaer-ai-desk-host-core${exe}`),
   ];
   for (const c of candidates) {
     if (c && existsSync(c)) return c;
@@ -101,7 +101,7 @@ function fallbackStderrLogger(text: string): void {
 
 /**
  * The desktop's host-core child: the shared stdio transport from
- * `@pi-desktop/host-runtime` plus the two things only Electron knows — where
+ * `@duaer-ai-desk/host-runtime` plus the two things only Electron knows — where
  * this build keeps the binary and its bundled plugins, and how to name the
  * boot refusals the renderer phrases.
  */
@@ -114,7 +114,7 @@ export class HostProcess extends RuntimeHostProcess {
       // Only Electron knows whether this build runs from `resources/` or a
       // source checkout, so it resolves the bundled-plugin directory and
       // host-core simply reconciles its registry against it (ADR 0105).
-      env: builtinPlugins ? { PI_DESKTOP_BUILTIN_PLUGINS_DIR: builtinPlugins } : {},
+      env: builtinPlugins ? { DUAER_AI_DESK_BUILTIN_PLUGINS_DIR: builtinPlugins } : {},
       onStderr: onStderr ?? fallbackStderrLogger,
       diagnoseFailure: diagnoseHostFailure,
     });

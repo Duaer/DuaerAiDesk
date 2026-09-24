@@ -1,4 +1,4 @@
-import { serializeInlineComposerFileReferences } from "@pi-desktop/shared";
+import { serializeInlineComposerFileReferences } from "@duaer-ai-desk/shared";
 import { useComposerSubmit } from "../../apps/desktop/src/features/chat/composer/hooks/useComposerSubmit";
 import { verifyComposerSubmission } from "./composer-submission";
 import { ComposerImageAttachments } from "../../apps/desktop/src/features/chat/composer/ComposerImageAttachments";
@@ -8,7 +8,7 @@ import { createInstance } from "i18next";
 import { I18nextProvider } from "react-i18next";
 import { isBlockingOverlayActive } from "../../apps/desktop/src/lib/blocking-overlay";
 import type { TFunction } from "i18next";
-import { en } from "@pi-desktop/i18n";
+import { en } from "@duaer-ai-desk/i18n";
 import {
   ComposerInput,
   type ComposerInputProps,

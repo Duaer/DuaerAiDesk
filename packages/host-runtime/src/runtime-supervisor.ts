@@ -6,7 +6,7 @@
  * per two-minute window per child, single-flight per child, and never after
  * shutdown began. The supervisor owns only the loop; how a child is started,
  * what happens after it came back, and how an outcome is reported belong to
- * the embedding host, so Electron Main and the headless `pi-host` share one
+ * the embedding host, so Electron Main and the headless `duaer-ai-desk-host` share one
  * implementation of the policy without sharing their renderer or logger.
  */
 export type SupervisedKind = "host" | "sidecar";

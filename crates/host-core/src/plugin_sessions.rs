@@ -137,7 +137,7 @@ fn scrub_host_reserved(value: &mut Value) {
     match value {
         Value::Array(items) => items.iter_mut().for_each(scrub_host_reserved),
         Value::Object(object) => {
-            object.retain(|key, _| !(key.starts_with("__pi") || key.starts_with("piDesktop.")));
+            object.retain(|key, _| !(key.starts_with("__pi") || key.starts_with("duaerAiDesk.")));
             object.values_mut().for_each(scrub_host_reserved);
         }
         _ => {}
@@ -1410,7 +1410,7 @@ mod tests {
             "toolCallId": "call-1",
             "toolStatus": "success",
             "toolArgs": { "keep": true, "__piSecret": "drop" },
-            "toolResult": { "piDesktop.internal": "drop", "value": 1 }
+            "toolResult": { "duaerAiDesk.internal": "drop", "value": 1 }
         }]);
         input["source"] = json!("legacy");
         let id = import(&db, "plugin.one", &input).unwrap()["sessionId"].clone();

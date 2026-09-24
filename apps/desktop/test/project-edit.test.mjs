@@ -39,7 +39,7 @@ test("project edit dialog updates names and adjusts folder roots", () => {
 });
 
 test("project group update is available through the host RPC and preload API", () => {
-  assert.match(protocolSource, /projectGroupUpdate:\s*"pi-desktop\/project-group\/update"/);
+  assert.match(protocolSource, /projectGroupUpdate:\s*"duaer-ai-desk\/project-group\/update"/);
   assert.match(apiSource, /updateProjectGroup: \(groupId: string, name: string, folders: string\[\]\)/);
   assert.match(hostSource, /"project\.group\.update"/);
   assert.match(hostSource, /update_project_group\(group_id, name, &folders\)/);

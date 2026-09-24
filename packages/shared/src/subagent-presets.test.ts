@@ -15,7 +15,7 @@ import {
 } from "./subagent-presets.js";
 
 describe("SUBAGENT_PRESETS", () => {
-  it("ships the five builtin roles", () => {
+  it("ships the builtin roles", () => {
     const ids = SUBAGENT_PRESETS.map((preset) => preset.id);
     expect(ids).toEqual([
       "explorer",
@@ -23,6 +23,8 @@ describe("SUBAGENT_PRESETS", () => {
       "test-runner",
       "fixer",
       "ui-designer",
+      "coder",
+      "judge",
     ]);
   });
 
@@ -58,12 +60,18 @@ describe("SUBAGENT_PRESETS", () => {
     const designer = findSubagentPreset("ui-designer");
     expect(fixer?.tools).toContain("Edit");
     expect(fixer?.tools).toContain("Write");
-    expect(designer?.tools).toContain("Edit");
-    expect(designer?.tools).toContain("Write");
-    expect(designer?.tools).toContain("BrowserPreview");
+    expect(designer?.tools).toEqual(["Read", "Glob", "Grep"]);
+    expect(designer?.description).toMatch(/style and layout/);
     expect(explorer?.tools ?? []).not.toContain("Edit");
     expect(reviewer?.tools ?? []).not.toContain("Edit");
     expect(runner?.tools ?? []).not.toContain("Edit");
+    const coder = findSubagentPreset("coder");
+    expect(coder?.tools).toEqual(["Read", "Glob", "Grep", "Edit", "Write", "Bash"]);
+    expect(coder?.description).toMatch(/acceptance/);
+    const judge = findSubagentPreset("judge");
+    expect(judge?.tools).toEqual(["Read", "Glob", "Grep"]);
+    expect(judge?.tools ?? []).not.toContain("Edit");
+    expect(judge?.tools ?? []).not.toContain("Bash");
   });
 });
 

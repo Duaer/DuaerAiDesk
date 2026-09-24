@@ -6,7 +6,7 @@ import {
   serializeComposerFileReferences,
   serializeInlineComposerFileReferences,
   stripInlineComposerFileReferenceTokens,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import type { AppState } from "../../../../stores/app-store";
 import { useAppStore } from "../../../../stores/app-store";
 import type { ComposerDraftSnapshot } from "../../../../lib/composer-smart-stop";

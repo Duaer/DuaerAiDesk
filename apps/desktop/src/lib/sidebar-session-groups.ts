@@ -1,4 +1,4 @@
-import type { SessionSummary } from "@pi-desktop/shared";
+import type { SessionSummary } from "@duaer-ai-desk/shared";
 import type { ProjectMeta, SessionMeta } from "./sidebar-preferences";
 
 export function normalizeProjectPath(projectPath?: string | null): string | null {

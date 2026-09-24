@@ -2,13 +2,13 @@
 
 Policy-Sync: 2026-09-21.2
 
-Instructions for Claude Code CLI and Claude Cowork on PI-Desktop.
+Instructions for Claude Code CLI and Claude Cowork on DuaerAiDesk.
 
 **Authoritative policy:** [`AGENTS.md`](AGENTS.md). Read it before any non-trivial change. If this file and `AGENTS.md` disagree, follow `AGENTS.md`. Domain specs under `docs/spec/` remain authoritative for product behavior, protocols, and security boundaries.
 
 **Mirror sync:** This file condenses `AGENTS.md` for Claude Code. When policy changes, update both files, keep the shared non-negotiables aligned, and set the same `Policy-Sync:` token in both. Enforced by `pnpm check:agent-policy` (`scripts/check-agent-policy-sync.mjs`).
 
-PI-Desktop is released software with real users. Treat every change as production maintenance, not prototype work.
+DuaerAiDesk is released software with real users. Treat every change as production maintenance, not prototype work.
 
 Priority order when deciding what to do:
 
@@ -55,7 +55,7 @@ git worktree add \
 cd <worktree-path>
 ```
 
-Suggested worktree path: `../PI-Desktop-worktrees/<short-description>`.
+Suggested worktree path: `../DuaerAiDesk-worktrees/<short-description>`.
 
 Branch names: `feat/...`, `fix/...`, `docs/...`, `refactor/...`, `chore/...`.
 
@@ -239,7 +239,7 @@ apps/desktop/          Electron app
   electron/main|preload|shared/
   src/                 React renderer (components, stores, lib, pages, hooks)
   test/                node --test suites
-crates/host-core/      Rust privileged host (binary pi-desktop-host-core)
+crates/host-core/      Rust privileged host (binary duaer-ai-desk-host-core)
 packages/
   shared/              IPC/protocol contracts, error codes
   i18n/                UI catalogs
@@ -264,7 +264,7 @@ Run only checks that match the affected surface. Prefer the narrower authoritati
 
 | Surface | Typical checks |
 | --- | --- |
-| JS packages | `pnpm build:js` · `pnpm --filter @pi-desktop/desktop typecheck` · `pnpm lint` · `pnpm -r --if-present test` |
+| JS packages | `pnpm build:js` · `pnpm --filter @duaer-ai-desk/desktop typecheck` · `pnpm lint` · `pnpm -r --if-present test` |
 | Rust host-core | `cargo fmt --check` · `cargo test -p host-core --locked` · `cargo clippy -p host-core --all-targets` |
 | Full local | `pnpm typecheck` · `pnpm test` |
 | Architecture budgets | see `scripts/check-architecture.mjs` |

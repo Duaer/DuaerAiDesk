@@ -5,8 +5,8 @@ import {
   type AssistantMessage,
   type Model,
   type SimpleStreamOptions,
-} from "@earendil-works/pi-ai";
-import { APP_VERSION } from "@pi-desktop/shared";
+} from "@duaer-ai-desk/upstream-ai";
+import { APP_VERSION } from "@duaer-ai-desk/shared";
 import { completeOneShot } from "./one-shot-complete.js";
 import {
   OPENCODE_CLIENT_HEADER,
@@ -93,9 +93,9 @@ describe("mergeOpenCodeSessionHeaders", () => {
     ).toEqual({
       [OPENCODE_SESSION_HEADER]: "session-1",
       [OPENCODE_CLIENT_HEADER]: OPENCODE_CLIENT_VALUE,
-      "User-Agent": `pi-desktop/${APP_VERSION}`,
+      "User-Agent": `duaer-ai-desk/${APP_VERSION}`,
     });
-    expect(OPENCODE_USER_AGENT).toBe(`pi-desktop/${APP_VERSION}`);
+    expect(OPENCODE_USER_AGENT).toBe(`duaer-ai-desk/${APP_VERSION}`);
   });
 
   it("lets caller headers override client/UA but restores a missing session id", () => {

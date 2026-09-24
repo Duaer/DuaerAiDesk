@@ -12,7 +12,7 @@ import type {
   PluginSummary,
   ProjectRecord,
   ProjectWorkspace,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import {
   GROUP_ORDER,
   type GroupId,

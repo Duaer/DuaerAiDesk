@@ -10,7 +10,7 @@
 
 ## Context
 
-ADR 0292 bootstraps a `pi-host` on a machine the user already reaches over SSH
+ADR 0292 bootstraps a `duaer-ai-desk-host` on a machine the user already reaches over SSH
 by shelling out to the system `ssh` client. That choice was made deliberately
 and its main argument was that the app holds no SSH secret at all:
 `~/.ssh/config`, the agent, and `known_hosts` decide the login, so there is

@@ -5,7 +5,7 @@
 
 ## 1. 概述
 
-PI-Desktop 使用分层桌面架构：
+DuaerAiDesk 使用分层桌面架构：
 
 ```text
 ┌──────────────────────────────────────────────────────────┐
@@ -88,7 +88,7 @@ Electron Main 独家拥有更新客户端和修复的 GitHub 版本
 
 ### 3. 6 本地 MCP 控制面
 
-设置 `PI_DESKTOP_MCP_CONTROL=1` 时，Electron Main 会在 `127.0.0.1` 启动可选的
+设置 `DUAER_AI_DESK_MCP_CONTROL=1` 时，Electron Main 会在 `127.0.0.1` 启动可选的
 Streamable HTTP MCP 服务。服务提供项目/会话/Agent/工作区常用命名工具，以及经过
 审查的通用桌面操作目录。每次调用都委托给渲染器使用的同一主进程 IPC 处理器，不会
 创建第二套权限或持久化实现。
@@ -106,7 +106,7 @@ Streamable HTTP MCP 服务。服务提供项目/会话/Agent/工作区常用命�
 RACP 契约：WebSocket JSON-RPC 是 v1 规范绑定，HTTP/JSON + SSE 是其浏览器 profile，
 gRPC 保留（D374）。它不暴露 Electron IPC、`host.proxy` 或 host-core RPC，也不改变当前
 MVP 对远程 Gateway 的排除。首个实现把该模块放在 Electron Main 内，桌面 IPC、本地 MCP
-和 RACP 都调用它。首个远程部署（D375）把同一模块打包为另一台机器上的无头 `pi-host`，
+和 RACP 都调用它。首个远程部署（D375）把同一模块打包为另一台机器上的无头 `duaer-ai-desk-host`，
 桌面经 SSH 隧道连接；Gateway 路由与浏览器访问保留规格但不排期。
 
 ## 4. 请求路径（对话+工具）

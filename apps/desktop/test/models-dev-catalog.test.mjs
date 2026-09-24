@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
-import { apiStyleForAdapter, catalogModelIdsMatch, modelIdsMatch } from "@pi-desktop/shared";
+import { apiStyleForAdapter, catalogModelIdsMatch, modelIdsMatch } from "@duaer-ai-desk/shared";
 
 import {
   MODELS_DEV_API_URL,

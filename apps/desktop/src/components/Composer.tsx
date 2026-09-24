@@ -9,7 +9,7 @@ import { useTranslation } from "react-i18next";
 import type {
   Mode,
   PermissionMode,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import {
   initialThinkingLevelForBinding,
   imageGenerationBindings,
@@ -17,7 +17,7 @@ import {
   modelIdsMatch,
   normalizeLargePasteThreshold,
   stripInlineComposerFileReferenceTokens,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import { useAppStore } from "../stores/app-store";
 import { latestTurnContextInspector } from "../lib/latest-turn-context";
 import { isActivePlanExecution } from "../lib/plan-mode-state";

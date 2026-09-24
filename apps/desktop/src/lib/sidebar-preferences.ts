@@ -1,6 +1,6 @@
-import type { ProjectWorkspace, SessionSummary, SessionSort } from "@pi-desktop/shared";
-export type { SessionSort } from "@pi-desktop/shared";
-export { sortSessions, sessionIsPinned, sessionIsArchived } from "@pi-desktop/shared";
+import type { ProjectWorkspace, SessionSummary, SessionSort } from "@duaer-ai-desk/shared";
+export type { SessionSort } from "@duaer-ai-desk/shared";
+export { sortSessions, sessionIsPinned, sessionIsArchived } from "@duaer-ai-desk/shared";
 
 /** Local copy keeps this pure module runnable in Node's TS test loader. */
 export function normalizeProjectPath(projectPath?: string | null): string | null {

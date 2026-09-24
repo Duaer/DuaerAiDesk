@@ -8,7 +8,7 @@
 MVP 目标拓扑：
 
 ```text
-PI-Desktop.app
+DuaerAiDesk.app
 ├── Electron Main
 │   ├── Renderer (React UI)
 │   ├── Rust host-core sidecar
@@ -32,12 +32,12 @@ PI-Desktop.app
 窗口、托盘、日志行或子进程之前退出；持有锁的实例通过 `second-instance` 恢复并
 聚焦自己的主窗口，若窗口已关闭或隐藏到托盘则重新创建，与托盘的“显示”操作完全
 一致。该锁是 Electron 的锁，作用域是 `userData`（由应用名派生，因此应用名在请求
-之前设置），而不是数据目录：指向自有 `PI_DESKTOP_DATA_DIR` 的运行（E2E 测试装置、
+之前设置），而不是数据目录：指向自有 `DUAER_AI_DESK_DATA_DIR` 的运行（E2E 测试装置、
 截图装置、并行 profile）与默认安装不共享数据库、outbox 或日志，在已有实例运行时
 仍可启动（D236、ADR 0094）。
 
 开发构建本身就是独立安装，而不是同一安装的第二个进程：它运行在操作系统应用
-数据根目录下的 `PI-Desktop Dev`，数据目录为 `~/.pi-desktop-dev`。因此正式打包版
+数据根目录下的 `DuaerAiDesk Dev`，数据目录为 `~/.duaer-ai-desk-dev`。因此正式打包版
 持有锁时 `pnpm dev` 仍可启动，两者不会共享数据库、outbox 或日志树（D599、
 ADR 0094）。显式 `--user-data-dir` 仍然优先，E2E 装置正是用它把构建指向临时
 profile。
@@ -64,7 +64,7 @@ queued/running `plan_approvals` 执行状态已中断并中止它们
 因此慢但成功的启动永远不会被报告为失败。看门狗从不取消它所监视的启动：成功完成
 的启动会用 shell 替换该表面，恢复表面则替换启动画面。渲染器绘制的窗口控制按钮
 保持在该表面之上，因此无边框的 Windows/Linux 窗口始终可以关闭；从该表面退出走
-渲染器退出通道（`pi-desktop/app/quit`），它与“退出”菜单项执行同一套有序关停。
+渲染器退出通道（`duaer-ai-desk/app/quit`），它与“退出”菜单项执行同一套有序关停。
 
 ## 4. 崩溃策略
 
@@ -76,7 +76,7 @@ queued/running `plan_approvals` 执行状态已中断并中止它们
 | Electron 主要崩溃 | 完整的应用程序退出 |
 
 Crashpad 在 `ready` 之前以本地模式启动（`uploadToServer: false`），转储放在
-`<data_dir>/crash-dumps`（D602），因此 `PI_DESKTOP_DATA_DIR` profile 不会与
+`<data_dir>/crash-dumps`（D602），因此 `DUAER_AI_DESK_DATA_DIR` profile 不会与
 其它安装共用转储。下一次持有单实例锁的启动会为新于 `crash-dumps.json` 的
 转储写一条诊断记录。Crashpad 记录 Chromium 进程崩溃（main、renderer、GPU、
 utility）；应用已经恢复的 renderer 崩溃仍会留下转储，并记为 warn。host-core
@@ -105,7 +105,7 @@ Linux 打包的 host-core 在 Ubuntu 22.04 上构建，需要 glibc 2.35 或更�
   会拒绝打开（stderr 输出 `database schema version N is newer than supported
   M`）。Electron 从退出前的最后一段 stderr 解析该行，首次失败即停止重启循环，
   并推送 `message: "DB_SCHEMA_TOO_NEW"` 且带有两个版本号的 `hostStatus`。横幅
-  提示用户安装上次打开这些数据的更新版 PI-Desktop。不会向下迁移数据。
+  提示用户安装上次打开这些数据的更新版 DuaerAiDesk。不会向下迁移数据。
 - **非原生构建。** 启动时 Electron 比较 `process.arch` 与实际 CPU（macOS 通过
   `sysctl.proc_translated` 判断，仅在 Rosetta 2 下为 `1`；其他平台用
   `os.machine()`）。不匹配时即使启动成功，也会随启动 `hostStatus` 附带
@@ -206,13 +206,13 @@ sidecar/host 关闭序列在更新程序替换应用程序之前运行。
 
 ### 发布
 - Electron 应用程序包
-- 在资源中发送 Rust 主机二进制文件 (`Resources/bin/pi-desktop-host-core`)
+- 在资源中发送 Rust 主机二进制文件 (`Resources/bin/duaer-ai-desk-host-core`)
 - 代理 sidecar 在 Electron 上运行捆绑的 `agent-runtime/sidecar.js`
   二进制文件本身与 `ELECTRON_RUN_AS_NODE=1` — 没有单独的 Node 运行时
   已发货（解决 **D008**）
 - `Resources/agent-runtime/sidecar.js` 是 sidecar 唯一独立的
   释放条目。 ASAR 不携带第二个完整的
-  `@pi-desktop/agent-runtime` 包树； Electron 主要可能内联
+  `@duaer-ai-desk/agent-runtime` 包树； Electron 主要可能内联
   它调用的纯 JS 助手无需更改进程或协议所有权
 - 渲染器依赖项通过 Vite 输出传送，而不是重复原始数据
   包树；桌面包不再携带交互式 PTY 原生模块
@@ -226,7 +226,7 @@ sidecar/host 关闭序列在更新程序替换应用程序之前运行。
 远程控制不会给 Rust host-core 或当前 renderer IPC 表面增加公共监听器。目标 Agent
 Host 是无头模块（`packages/agent-host`），拥有会话与回合准入、回合队列、审批代理和
 事件日志，与 Node pi sidecar、Rust host-core 一起受监督，其上是已认证的 RACP 服务
-（D374）。首个远程部署（D375）把该模块作为无头 `pi-host` 运行在远端机器上，只绑定
+（D374）。首个远程部署（D375）把该模块作为无头 `duaer-ai-desk-host` 运行在远端机器上，只绑定
 loopback，桌面经 SSH 端口转发连接。未排期的 Gateway 拓扑会增加出站 Host link；
 Gateway 负责路由已认证客户，但不拥有工作区状态。
 

@@ -12,7 +12,7 @@ const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const require = createRequire(join(root, "packages/agent-runtime/package.json"));
 const { build } = require("esbuild");
 const temp = await mkdtemp(join(tmpdir(), "pi-rpc-unicode-"));
-const previousBinary = process.env.PI_DESKTOP_HOST_BIN;
+const previousBinary = process.env.DUAER_AI_DESK_HOST_BIN;
 let host;
 let sidecar;
 let server;
@@ -47,7 +47,7 @@ try {
     define: { __dirname: JSON.stringify(join(root, "apps/desktop/electron/main")) },
   });
   const { HostProcess, AgentSidecar } = require(bundle);
-  process.env.PI_DESKTOP_HOST_BIN ??= join(root, "target/debug", `pi-desktop-host-core${process.platform === "win32" ? ".exe" : ""}`);
+  process.env.DUAER_AI_DESK_HOST_BIN ??= join(root, "target/debug", `duaer-ai-desk-host-core${process.platform === "win32" ? ".exe" : ""}`);
   host = new HostProcess(join(temp, "data"), () => {});
   await deadline(host.handshake());
   const created = await deadline(host.call("session.create", { title: "Unicode regression", mode: "agent", projectPath: temp }));
@@ -128,7 +128,7 @@ try {
     server.closeAllConnections();
     await new Promise((resolve) => server.close(resolve));
   }
-  if (previousBinary === undefined) delete process.env.PI_DESKTOP_HOST_BIN;
-  else process.env.PI_DESKTOP_HOST_BIN = previousBinary;
+  if (previousBinary === undefined) delete process.env.DUAER_AI_DESK_HOST_BIN;
+  else process.env.DUAER_AI_DESK_HOST_BIN = previousBinary;
   await rm(temp, { recursive: true, force: true });
 }

@@ -22,8 +22,11 @@ test("the sidebar forwards collapse-animation props to the aside element", () =>
   assert.match(sidebarSource, /onAnimationEnd\?:\s*ReactAnimationEventHandler<HTMLElement>;/);
 });
 
-test("collapsing keeps the sidebar mounted until its exit animation ends", () => {
-  assert.match(appSource, /!sidebarCollapsed \|\| sidebarExiting \?/);
+test("collapsing keeps the sidebar mounted as an icon rail", () => {
+  assert.match(appSource, /useState\(true\)/);
+  assert.match(appSource, /className="sidebar-slot"/);
+  assert.match(appSource, /onPointerEnter=\{revealSidebar\}/);
+  assert.match(appSource, /sidebarCollapsed && sidebarRevealed && "sidebar-revealed"/);
   assert.match(appSource, /className=\{cx\(sidebarEntering && "is-entering", sidebarExiting && "is-exiting"\)\}/);
   assert.match(appSource, /onAnimationEnd=\{handleSidebarAnimationEnd\}/);
   assert.match(appSource, /event\.target !== event\.currentTarget/);
@@ -156,6 +159,10 @@ test("the top bar's collapsed lead-in tracks the dock instead of snapping", () =
   assert.doesNotMatch(leadBlock, /width:\s*0/);
   assert.match(leadBlock, /opacity:\s*0/);
   assert.match(leadBlock, /pointer-events:\s*none/);
+  assert.match(
+    globalStyles,
+    /\.conversation-topbar:not\(\.ct-collapsed\) \.ct-lead > \.ct-icon-btn \{[^}]*pointer-events:\s*none;/,
+  );
   // Out of flow means .ct-left's no-drag box (which starts at the padding edge)
   // no longer covers the button, so it must carve out its own region or the top
   // bar's drag region swallows the click and the pointer cursor.
@@ -187,7 +194,7 @@ test("the top bar's collapsed lead-in tracks the dock instead of snapping", () =
   // The button stays mounted so it can cross-fade with the dock's own toggle;
   // unmounting it would restore the first-frame jump. Hidden from AT and taken
   // out of the tab order while the dock is open.
-  assert.match(topbarSource, /<div className="ct-lead" aria-hidden=\{!sidebarCollapsed\}>/);
+  assert.match(topbarSource, /<div className="ct-lead(?: no-drag)?" aria-hidden=\{!sidebarCollapsed\}>/);
   assert.match(topbarSource, /tabIndex=\{sidebarCollapsed \? undefined : -1\}/);
   assert.doesNotMatch(topbarSource, /\{sidebarCollapsed \? \(\s*<button/);
 });

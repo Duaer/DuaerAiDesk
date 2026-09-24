@@ -1,4 +1,4 @@
-# PI-Desktop 基线冻结
+# DuaerAiDesk 基线冻结
 
 > **翻译说明：** 本页是与 [英文源规格](/spec/00-baseline) 一一对应的机器辅助翻译。代码、协议字段和标识符保持原文；如翻译与英文源事实有歧义，以英文版本为准。
 
@@ -73,7 +73,7 @@
 > `AppSettings.fontFamily` 并覆盖 `--font-sans`。四款开源
 > （SIL OFL 1.1）字体——Geist、Inter、Noto Sans SC 和 LXGW WenKai——
 > 随应用本地发布并附带许可证文本，系统已安装字体由 Electron
-> 主进程通过新增的白名单通道 `pi-desktop/app/systemFonts` 枚举。
+> 主进程通过新增的白名单通道 `duaer-ai-desk/app/systemFonts` 枚举。
 > D598 / ADR 0298 后来移除了内置字体：应用不再自带任何字体，
 > 选择器只提供「跟随系统」与系统已安装字体，每个字体栈以纯系统 CJK 回退层收尾。
 > 主机协议或存储架构没有更改。
@@ -93,7 +93,7 @@
 
 ## 冻结的决定
 
-1.产品名称：**PI-Desktop**
+1.产品名称：**DuaerAiDesk**
 2. 桌面外壳：**Electron**
 3. 用户界面：**React + TypeScript + Vite + Tailwind**
 4. UI语言默认：**英语**
@@ -136,7 +136,7 @@
 35. 示范政策：**无封闭许可名单；可刷新的目录+自由格式的模型ID**
 36. 提供程序存储：**Rust SQLite 配置 + 操作系统密钥存储引用**
 37. Secrets后端：**safeStorage主+加密文件后备**
-38. 工作区忽略：**拒绝列表 + 默认值 + `.pi-desktopignore`**
+38. 工作区忽略：**拒绝列表 + 默认值 + `.duaer-ai-deskignore`**
 39. 工具结果限制：**按工具预算（搜索 128KB / 4000 行，shell 96KB / 4000 行）；仅在结果被切断时 `truncated`**
 40.设置目录：**Basics/模型配置/Import/Project archive/Info**；
     项目档案拥有持久的项目发现、归档、恢复和

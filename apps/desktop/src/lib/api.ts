@@ -13,6 +13,12 @@ import type {
   AgentPromptResponse,
   PromptEnhancementRequest,
   PromptEnhancementResponse,
+  DeliveryArchitectureGetRequest,
+  DeliveryArchitectureGetResponse,
+  DeliveryArchitectureRenderRequest,
+  DeliveryArchitectureRenderResponse,
+  DeliveryReviewRequest,
+  DeliveryReviewResponse,
   SpeechStatus,
   SpeechSynthesizeRequest,
   SpeechSynthesizeResult,
@@ -122,7 +128,7 @@ import type {
   TrustedExtensionStatusEvent,
   TrustedExtensionUiPrompt,
   TrustedExtensionUiPromptResponse,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import {
   defaultCommandShellForPlatform,
   IPC,
@@ -136,7 +142,7 @@ import {
   validateNetworkPolicy,
   validateNetworkProxy,
   validateSpeechSettings,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 
 export type ImportSource = "claude-code" | "opencode" | "codex" | "pi";
 // One definition, owned by the shared package (the host and sidecar use the
@@ -144,7 +150,7 @@ export type ImportSource = "claude-code" | "opencode" | "codex" | "pi";
 import type {
   ModelConfigImportCandidate,
   ModelConfigImportSource,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 export type { ModelConfigImportCandidate, ModelConfigImportSource };
 
 export interface ImportCandidate {
@@ -291,7 +297,7 @@ export interface ExternalMcpImportRunResult {
 
 declare global {
   interface Window {
-    piDesktop?: {
+    duaerAiDesk?: {
       invoke: <T = unknown>(channel: string, ...args: unknown[]) => Promise<Result<T>>;
       on: (channel: string, listener: (...args: unknown[]) => void) => () => void;
       channels: typeof IPC;
@@ -305,10 +311,10 @@ declare global {
 }
 
 async function invoke<T>(channel: string, ...args: unknown[]): Promise<T> {
-  if (!window.piDesktop?.invoke) {
-    throw new Error("piDesktop preload bridge unavailable");
+  if (!window.duaerAiDesk?.invoke) {
+    throw new Error("duaerAiDesk preload bridge unavailable");
   }
-  const result = await window.piDesktop.invoke<T>(channel, ...args);
+  const result = await window.duaerAiDesk.invoke<T>(channel, ...args);
   if (!result.ok) {
     const error = new Error(result.error.message) as Error & {
       code?: string;
@@ -360,7 +366,7 @@ export function normalizeSettings(settings: AppSettings): AppSettings {
     )
       ? (settings as { defaultCommandShell: AppSettings["defaultCommandShell"] })
           .defaultCommandShell
-      : defaultCommandShellForPlatform(window.piDesktop?.platform ?? ""),
+      : defaultCommandShellForPlatform(window.duaerAiDesk?.platform ?? ""),
     largePasteThreshold: normalizeLargePasteThreshold(
       (settings as { largePasteThreshold?: unknown }).largePasteThreshold,
     ),
@@ -664,6 +670,12 @@ export const api = {
       IPC.invoke.providersSetSecret,
       input,
     ),
+  /** Write one secret. The renderer never reads the stored value back. */
+  setSecret: (secretRef: string, value: string) =>
+    invoke(IPC.invoke.secretsSet, { secretRef, value }),
+  deleteSecret: (secretRef: string) => invoke(IPC.invoke.secretsDelete, secretRef),
+  hasSecret: (secretRef: string) =>
+    invoke<{ has: boolean }>(IPC.invoke.secretsHas, secretRef),
   testProvider: (id: string) => invoke(IPC.invoke.providersTest, id),
   /**
    * Discover models from the provider's own endpoint. Saved providers pass
@@ -793,7 +805,7 @@ export const api = {
   pickFiles: () =>
     invoke<{ token: string | null; canceled?: boolean }>(IPC.invoke.composerPickFiles),
   getDroppedFilePath: (file: File) =>
-    window.piDesktop?.getDroppedFilePath?.(file) ?? null,
+    window.duaerAiDesk?.getDroppedFilePath?.(file) ?? null,
   pickPhotos: () =>
     invoke<{ token: string | null; canceled?: boolean }>(IPC.invoke.composerPickPhotos),
   importFiles: (sessionId: string, token: string) =>
@@ -876,6 +888,12 @@ export const api = {
     invoke<AgentPromptResponse>(IPC.invoke.agentPrompt, req),
   enhancePrompt: (req: PromptEnhancementRequest) =>
     invoke<PromptEnhancementResponse>(IPC.invoke.promptEnhance, req),
+  reviewDeliveryCard: (req: DeliveryReviewRequest) =>
+    invoke<DeliveryReviewResponse>(IPC.invoke.deliveryReview, req),
+  renderDeliveryArchitecture: (req: DeliveryArchitectureRenderRequest) =>
+    invoke<DeliveryArchitectureRenderResponse>(IPC.invoke.deliveryArchitectureRender, req),
+  getDeliveryArchitectureHtml: (req: DeliveryArchitectureGetRequest) =>
+    invoke<DeliveryArchitectureGetResponse>(IPC.invoke.deliveryArchitectureGet, req),
   speechStatus: () => invoke<SpeechStatus>(IPC.invoke.speechGetStatus),
   speechTranscribe: (req: SpeechTranscribeRequest) =>
     invoke<{ text: string }>(IPC.invoke.speechTranscribe, req),
@@ -1167,6 +1185,19 @@ export const api = {
       id,
       enabled,
     }),
+  /**
+   * Pin or clear the model for one shipped default. An empty model with no
+   * fallbacks deletes the pin, so the builtin follows the session again.
+   */
+  setBuiltinSubagentModel: (
+    id: string,
+    pins: { model: string; fallbackModels: string[] },
+  ) =>
+    invoke<{ id: string }>(IPC.invoke.subagentSetBuiltinModel, {
+      id,
+      model: pins.model,
+      fallbackModels: pins.fallbackModels,
+    }),
   setUserSubagentScope: (id: string, scope: ActivationScope) =>
     invoke(IPC.invoke.subagentSetScope, { id, scope }),
   /** Registry entries reveal by id; project documents pass their own path. */
@@ -1358,7 +1389,7 @@ export const api = {
       behavior,
     }),
   getTokenUsageHistory: (query?: { startDate?: number; endDate?: number; bucket?: "day" | "week" | "month" }) =>
-    invoke<import("@pi-desktop/shared").TokenUsageHistoryResult>(
+    invoke<import("@duaer-ai-desk/shared").TokenUsageHistoryResult>(
       IPC.invoke.statsGetTokenUsageHistory,
       query,
     ),
@@ -1367,8 +1398,8 @@ export const api = {
   setTraySessionPreferences: (preferences: TraySessionPreferences) =>
     invoke<{ ok: boolean }>(IPC.invoke.traySetSessionPreferences, preferences),
   onTraySessionActivated: (listener: (sessionId: string | null) => void) => {
-    if (!window.piDesktop?.on) return () => undefined;
-    return window.piDesktop.on(IPC.event.traySessionActivated, (payload) => {
+    if (!window.duaerAiDesk?.on) return () => undefined;
+    return window.duaerAiDesk.on(IPC.event.traySessionActivated, (payload) => {
       const sessionId = (payload as { sessionId?: unknown })?.sessionId;
       if (sessionId === null || (typeof sessionId === "string" && sessionId)) listener(sessionId);
     });
@@ -1379,14 +1410,14 @@ export const api = {
       { action },
     ),
   onWindowMaximized: (listener: (event: { maximized: boolean }) => void) => {
-    if (!window.piDesktop?.on) return () => undefined;
-    return window.piDesktop.on(IPC.event.windowMaximized, (payload) =>
+    if (!window.duaerAiDesk?.on) return () => undefined;
+    return window.duaerAiDesk.on(IPC.event.windowMaximized, (payload) =>
       listener(payload as { maximized: boolean }),
     );
   },
   onWindowFullScreen: (listener: (event: { fullScreen: boolean }) => void) => {
-    if (!window.piDesktop?.on) return () => undefined;
-    return window.piDesktop.on(IPC.event.windowFullScreen, (payload) =>
+    if (!window.duaerAiDesk?.on) return () => undefined;
+    return window.duaerAiDesk.on(IPC.event.windowFullScreen, (payload) =>
       listener(payload as { fullScreen: boolean }),
     );
   },
@@ -1396,8 +1427,8 @@ export const api = {
       panelWidth: number;
     }) => void,
   ) => {
-    if (!window.piDesktop?.on) return () => undefined;
-    return window.piDesktop.on(IPC.event.windowWorkPanelResize, (payload) =>
+    if (!window.duaerAiDesk?.on) return () => undefined;
+    return window.duaerAiDesk.on(IPC.event.windowWorkPanelResize, (payload) =>
       listener(
         payload as {
           phase: "preview" | "commit";
@@ -1407,103 +1438,103 @@ export const api = {
     );
   },
   onMenuCommand: (listener: (command: AppMenuCommand) => void) => {
-    if (!window.piDesktop?.on) return () => undefined;
-    return window.piDesktop.on(IPC.event.menuCommand, (payload) =>
+    if (!window.duaerAiDesk?.on) return () => undefined;
+    return window.duaerAiDesk.on(IPC.event.menuCommand, (payload) =>
       listener((payload as { command: AppMenuCommand }).command),
     );
   },
   onBrowserState: (listener: (state: BrowserState) => void) => {
-    if (!window.piDesktop?.on) return () => undefined;
-    return window.piDesktop.on(IPC.event.browserState, (payload) =>
+    if (!window.duaerAiDesk?.on) return () => undefined;
+    return window.duaerAiDesk.on(IPC.event.browserState, (payload) =>
       listener(payload as BrowserState),
     );
   },
   onBrowserPreview: (
     listener: (event: { sessionId: string; path?: string; url?: string }) => void,
   ) => {
-    if (!window.piDesktop?.on) return () => undefined;
-    return window.piDesktop.on(IPC.event.browserPreview, (payload) =>
+    if (!window.duaerAiDesk?.on) return () => undefined;
+    return window.duaerAiDesk.on(IPC.event.browserPreview, (payload) =>
       listener(payload as { sessionId: string; path?: string; url?: string }),
     );
   },
   onAgentEvent: (listener: (event: AgentEventEnvelope) => void) => {
-    if (!window.piDesktop?.on) return () => undefined;
-    return window.piDesktop.on(IPC.event.agentMessage, (payload) =>
+    if (!window.duaerAiDesk?.on) return () => undefined;
+    return window.duaerAiDesk.on(IPC.event.agentMessage, (payload) =>
       listener(payload as AgentEventEnvelope),
     );
   },
   onAgentQueueChanged: (listener: (event: AgentQueueChangedEvent) => void) => {
-    if (!window.piDesktop?.on) return () => undefined;
-    return window.piDesktop.on(IPC.event.agentQueueChanged, (payload) =>
+    if (!window.duaerAiDesk?.on) return () => undefined;
+    return window.duaerAiDesk.on(IPC.event.agentQueueChanged, (payload) =>
       listener(payload as AgentQueueChangedEvent),
     );
   },
   onPlansChanged: (listener: (event: PlanningStateEvent) => void) => {
-    if (!window.piDesktop?.on) return () => undefined;
-    return window.piDesktop.on(IPC.event.plansChanged, (payload) =>
+    if (!window.duaerAiDesk?.on) return () => undefined;
+    return window.duaerAiDesk.on(IPC.event.plansChanged, (payload) =>
       listener(normalizePlansChangedEvent(payload)),
     );
   },
   onOauthLogin: (listener: (event: OAuthLoginEvent) => void) => {
-    if (!window.piDesktop?.on) return () => undefined;
-    return window.piDesktop.on(IPC.event.providersOauth, (payload) =>
+    if (!window.duaerAiDesk?.on) return () => undefined;
+    return window.duaerAiDesk.on(IPC.event.providersOauth, (payload) =>
       listener(payload as OAuthLoginEvent),
     );
   },
   onMcpOAuth: (listener: (event: McpOAuthLoginEvent) => void) => {
-    if (!window.piDesktop?.on) return () => undefined;
-    return window.piDesktop.on(IPC.event.mcpOauth, (payload) =>
+    if (!window.duaerAiDesk?.on) return () => undefined;
+    return window.duaerAiDesk.on(IPC.event.mcpOauth, (payload) =>
       listener(payload as McpOAuthLoginEvent),
     );
   },
   onExtensionPrompt: (listener: (prompt: TrustedExtensionUiPrompt) => void) => {
-    if (!window.piDesktop?.on) return () => undefined;
-    return window.piDesktop.on(IPC.event.extensionsUiPrompt, (payload) =>
+    if (!window.duaerAiDesk?.on) return () => undefined;
+    return window.duaerAiDesk.on(IPC.event.extensionsUiPrompt, (payload) =>
       listener(payload as TrustedExtensionUiPrompt),
     );
   },
   onExtensionStatus: (listener: (event: TrustedExtensionStatusEvent) => void) => {
-    if (!window.piDesktop?.on) return () => undefined;
-    return window.piDesktop.on(IPC.event.extensionsStatus, (payload) =>
+    if (!window.duaerAiDesk?.on) return () => undefined;
+    return window.duaerAiDesk.on(IPC.event.extensionsStatus, (payload) =>
       listener(payload as TrustedExtensionStatusEvent),
     );
   },
   onToast: (listener: (message: string) => void) => {
-    if (!window.piDesktop?.on) return () => undefined;
-    return window.piDesktop.on(IPC.event.toast, (payload) =>
+    if (!window.duaerAiDesk?.on) return () => undefined;
+    return window.duaerAiDesk.on(IPC.event.toast, (payload) =>
       listener((payload as { message: string }).message),
     );
   },
   onInsecureEndpointNotice: (listener: (payload: { host: string }) => void) => {
-    if (!window.piDesktop?.on) return () => undefined;
-    return window.piDesktop.on(IPC.event.insecureEndpointNotice, (payload) =>
+    if (!window.duaerAiDesk?.on) return () => undefined;
+    return window.duaerAiDesk.on(IPC.event.insecureEndpointNotice, (payload) =>
       listener(payload as { host: string }),
     );
   },
   onHostStatus: (listener: (status: HostStatusEvent) => void) => {
-    if (!window.piDesktop?.on) return () => undefined;
-    return window.piDesktop.on(IPC.event.hostStatus, (payload) =>
+    if (!window.duaerAiDesk?.on) return () => undefined;
+    return window.duaerAiDesk.on(IPC.event.hostStatus, (payload) =>
       listener(payload as HostStatusEvent),
     );
   },
   onNotificationChanged: (
     listener: (notification: AppNotification) => void,
   ) => {
-    if (!window.piDesktop?.on) return () => undefined;
-    return window.piDesktop.on(IPC.event.notificationChanged, (payload) =>
+    if (!window.duaerAiDesk?.on) return () => undefined;
+    return window.duaerAiDesk.on(IPC.event.notificationChanged, (payload) =>
       listener((payload as { notification: AppNotification }).notification),
     );
   },
 
   // --- Remote hosts (R2b pairing UX) -----------------------------------------
-  /** Paired remote `pi-host` list, redacted so no device token reaches here. */
+  /** Paired remote `duaer-ai-desk-host` list, redacted so no device token reaches here. */
   listRemoteHosts: () =>
     invoke<{ hosts: RemoteHostSummary[] }>(IPC.invoke.remoteHostList),
   /** Exchange `ppt1.` pairing token for a durable device token and connect. */
   pairRemoteHost: (request: RemoteHostPairRequest) =>
     invoke<RemoteHostPairResult>(IPC.invoke.remoteHostPair, request),
   /**
-   * Install and pair a `pi-host` over SSH on a machine the user already
+   * Install and pair a `duaer-ai-desk-host` over SSH on a machine the user already
    * reaches, then bring it online (spec §5.2). Credentials come from the
    * user's own SSH configuration and agent.
    */
@@ -1520,8 +1551,8 @@ export const api = {
       selectSessionId?: string;
     }) => void,
   ) => {
-    if (!window.piDesktop?.on) return () => undefined;
-    return window.piDesktop.on(IPC.event.sessionsChanged, (payload) =>
+    if (!window.duaerAiDesk?.on) return () => undefined;
+    return window.duaerAiDesk.on(IPC.event.sessionsChanged, (payload) =>
       listener(
         (payload ?? {}) as {
           reason?: string;
@@ -1535,20 +1566,20 @@ export const api = {
   onNotificationActivated: (
     listener: (event: { id: string; sessionId: string }) => void,
   ) => {
-    if (!window.piDesktop?.on) return () => undefined;
-    return window.piDesktop.on(IPC.event.notificationActivated, (payload) =>
+    if (!window.duaerAiDesk?.on) return () => undefined;
+    return window.duaerAiDesk.on(IPC.event.notificationActivated, (payload) =>
       listener(payload as { id: string; sessionId: string }),
     );
   },
   onUpdateState: (listener: (state: UpdateState) => void) => {
-    if (!window.piDesktop?.on) return () => undefined;
-    return window.piDesktop.on(IPC.event.updatesState, (payload) =>
+    if (!window.duaerAiDesk?.on) return () => undefined;
+    return window.duaerAiDesk.on(IPC.event.updatesState, (payload) =>
       listener(payload as UpdateState),
     );
   },
   onPluginInstallProgress: (listener: (event: PluginInstallProgress) => void) => {
-    if (!window.piDesktop?.on) return () => undefined;
-    return window.piDesktop.on(IPC.event.pluginInstallProgress, (payload) =>
+    if (!window.duaerAiDesk?.on) return () => undefined;
+    return window.duaerAiDesk.on(IPC.event.pluginInstallProgress, (payload) =>
       listener(payload as PluginInstallProgress),
     );
   },
@@ -1556,31 +1587,31 @@ export const api = {
   onPluginChanged: (
     listener: (event: { reason?: string; pluginId?: string }) => void,
   ) => {
-    if (!window.piDesktop?.on) return () => undefined;
-    return window.piDesktop.on(IPC.event.pluginChanged, (payload) =>
+    if (!window.duaerAiDesk?.on) return () => undefined;
+    return window.duaerAiDesk.on(IPC.event.pluginChanged, (payload) =>
       listener((payload ?? {}) as { reason?: string; pluginId?: string }),
     );
   },
   onSettingsChanged: (listener: (patch: Record<string, unknown>) => void) => {
-    if (!window.piDesktop?.on) return () => undefined;
-    return window.piDesktop.on(IPC.event.settingsChanged, (payload) =>
+    if (!window.duaerAiDesk?.on) return () => undefined;
+    return window.duaerAiDesk.on(IPC.event.settingsChanged, (payload) =>
       listener((payload ?? {}) as Record<string, unknown>),
     );
   },
   onConfigSyncChanged: (listener: (state: ConfigSyncState) => void) => {
-    if (!window.piDesktop?.on) return () => undefined;
-    return window.piDesktop.on(IPC.event.configSyncChanged, (payload) =>
+    if (!window.duaerAiDesk?.on) return () => undefined;
+    return window.duaerAiDesk.on(IPC.event.configSyncChanged, (payload) =>
       listener(payload as ConfigSyncState),
     );
   },
   onConfigSyncProgress: (listener: (progress: ConfigSyncProgress) => void) => {
-    if (!window.piDesktop?.on) return () => undefined;
-    return window.piDesktop.on(IPC.event.configSyncProgress, (payload) =>
+    if (!window.duaerAiDesk?.on) return () => undefined;
+    return window.duaerAiDesk.on(IPC.event.configSyncProgress, (payload) =>
       listener(payload as ConfigSyncProgress),
     );
   },
   onPluginLauncherShown: (listener: () => void) => {
-    if (!window.piDesktop?.on) return () => undefined;
-    return window.piDesktop.on(IPC.event.pluginLauncherShown, () => listener());
+    if (!window.duaerAiDesk?.on) return () => undefined;
+    return window.duaerAiDesk.on(IPC.event.pluginLauncherShown, () => listener());
   },
 };

@@ -113,9 +113,9 @@ test("the default imagegen skill is discoverable and loads in an ordinary sessio
       "../electron/main/builtin-skills.ts"
     );
     const skills = builtinSkills({});
-    assert.equal(skills.find((skill) => skill.id === "pi-desktop/imagegen")?.name, "imagegen");
-    assert.ok(!skills.some((skill) => skill.id === "pi-desktop/plugin-development"));
-    const body = loadBuiltinSkillBody("pi-desktop/imagegen").body;
+    assert.equal(skills.find((skill) => skill.id === "duaer-ai-desk/imagegen")?.name, "imagegen");
+    assert.ok(!skills.some((skill) => skill.id === "duaer-ai-desk/plugin-development"));
+    const body = loadBuiltinSkillBody("duaer-ai-desk/imagegen").body;
     assert.match(body, /GenerateImages/);
     assert.match(body, /previous result path/);
     assert.match(body, /Do not retry/);

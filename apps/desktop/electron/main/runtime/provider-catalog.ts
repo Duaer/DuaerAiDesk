@@ -10,14 +10,14 @@ import {
   type CommandShellId,
   type ModelBinding,
   type SessionThinkingLevel,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import {
   capabilitiesFromModelConfig,
   genericModelConfig,
   modelConfigWithBinding,
   visionFromModelConfig,
   type ThinkingCapabilities,
-} from "@pi-desktop/agent-runtime";
+} from "@duaer-ai-desk/agent-runtime";
 import type { HostProcess } from "../host-process";
 import {
   modelConfigFromModelsDev,

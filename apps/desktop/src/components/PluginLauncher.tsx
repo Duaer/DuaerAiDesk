@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { isThemeColorScheme, type PluginSummary } from "@pi-desktop/shared";
+import { isThemeColorScheme, type PluginSummary } from "@duaer-ai-desk/shared";
 import { api } from "../lib/api";
 import { searchLaunchablePlugins } from "../lib/plugin-launcher-search";
 import {
@@ -193,7 +193,7 @@ export function PluginLauncher() {
             }}
           />
           <span className="plugin-launcher-shortcut" aria-hidden>
-            {window.piDesktop?.platform === "darwin" ? "⌥ Space" : "Alt + Space"}
+            {window.duaerAiDesk?.platform === "darwin" ? "⌥ Space" : "Alt + Space"}
           </span>
         </div>
 

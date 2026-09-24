@@ -359,6 +359,8 @@ test("Settings lists shipped builtin subagents with a switch of their own", () =
     subagents.indexOf("const renderRow"),
   );
   assert.notEqual(builtinRow, "", "builtin row renderer should be present");
+  assert.match(builtinRow, /IconPencil/);
+  assert.match(builtinRow, /openBuiltin\(definition\)/);
   assert.match(builtinRow, /IconCopy/);
   assert.match(builtinRow, /<CapabilityToggle/);
   assert.match(builtinRow, /checked=\{definition\.enabled\}/);
@@ -378,6 +380,9 @@ test("Settings lists shipped builtin subagents with a switch of their own", () =
   assert.doesNotMatch(toggle.slice(0, toggle.indexOf("catch")), /await load\(\)/);
   assert.match(toggle, /catch[\s\S]*?enabled: builtin\.enabled/);
   assert.match(api, /setBuiltinSubagentEnabled: \(id: string, enabled: boolean\) =>/);
+  assert.match(api, /setBuiltinSubagentModel:/);
+  assert.match(subagents, /api\.setBuiltinSubagentModel\(builtinHandle/);
+  assert.match(subagents, /modelOnly=\{Boolean\(editor\.builtinHandle\)\}/);
 });
 
 test("a capability can be moved between the global and a project level", () => {
@@ -396,8 +401,8 @@ test("a capability can be moved between the global and a project level", () => {
     sharedTypes,
     /export type AgentCapabilityMove = \{[\s\S]*?from: AgentCapabilityTarget;[\s\S]*?to: AgentCapabilityTarget;/,
   );
-  assert.match(protocol, /mcpTransfer: "pi-desktop\/mcp\/transfer"/);
-  assert.match(protocol, /skillTransfer: "pi-desktop\/skill\/transfer"/);
+  assert.match(protocol, /mcpTransfer: "duaer-ai-desk\/mcp\/transfer"/);
+  assert.match(protocol, /skillTransfer: "duaer-ai-desk\/skill\/transfer"/);
   assert.match(api, /transferMcpServer: \(move: AgentCapabilityMove\) =>/);
   assert.match(api, /transferUserSkill: \(move: AgentCapabilityMove\) =>/);
   assert.match(mcpIpc, /host\.call<\{ server: McpServerRecord \}>\("mcp\.transfer", payload\)/);

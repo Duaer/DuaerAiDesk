@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { ErrorCodes } from "@pi-desktop/shared";
+import { ErrorCodes } from "@duaer-ai-desk/shared";
 import {
   classifySkillMarketFailure,
   hasFakeIpFailure,

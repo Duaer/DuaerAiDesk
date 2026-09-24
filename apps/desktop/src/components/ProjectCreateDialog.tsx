@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { MAX_PROJECT_NAME_CHARS } from "../lib/sidebar-preferences";
 import { api } from "../lib/api";
 import { parseGitCloneUrl } from "../lib/git-clone-url";
-import { allowInsecureUserEndpoints } from "@pi-desktop/shared";
+import { allowInsecureUserEndpoints } from "@duaer-ai-desk/shared";
 import {
   defaultProjectName,
   folderNameFromPath,
@@ -50,6 +50,7 @@ export function ProjectCreateDialog() {
   const showToast = useAppStore((state) => state.showToast);
   const [source, setSource] = useState<ProjectSource>("local");
   const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
   const [folders, setFolders] = useState<string[]>([]);
   const [gitUrl, setGitUrl] = useState("");
   const [cloneParent, setCloneParent] = useState("");
@@ -76,6 +77,7 @@ export function ProjectCreateDialog() {
     if (!open) return;
     setSource("local");
     setName("");
+    setDescription("");
     setFolders([]);
     setGitUrl("");
     setCloneParent("");
@@ -97,7 +99,7 @@ export function ProjectCreateDialog() {
       }
       if (event.key !== "Tab") return;
       const focusable = dialogRef.current?.querySelectorAll<HTMLElement>(
-        'input:not([disabled]), button:not([disabled])',
+        'input:not([disabled]), textarea:not([disabled]), button:not([disabled])',
       );
       if (!focusable?.length) return;
       const first = focusable[0];
@@ -172,6 +174,8 @@ export function ProjectCreateDialog() {
   const submit = async () => {
     const projectName = resolveProjectName(name, defaultName);
     if (!projectName || busyRef.current) return;
+    const background = description.trim();
+    if (!background) return;
     if (source === "git") {
       if (!cloneTarget || !cloneParent) return;
     } else if (folders.length === 0) {
@@ -185,12 +189,14 @@ export function ProjectCreateDialog() {
           name: projectName,
           url: cloneTarget.url,
           parentPath: cloneParent,
+          description: background,
         });
       } else {
         await createProject({
           name: projectName,
           folders,
           primaryPath: folders[0],
+          description: background,
         });
       }
     } catch (error) {
@@ -276,6 +282,31 @@ export function ProjectCreateDialog() {
                 spellCheck={false}
                 autoCorrect="off"
                 autoCapitalize="off"
+              />
+            </section>
+
+            <section
+              className="project-create-dialog-section project-create-dialog-identity"
+              aria-labelledby="project-create-background-heading"
+            >
+              <div className="project-create-dialog-section-head">
+                <label
+                  id="project-create-background-heading"
+                  className="project-create-dialog-section-title project-create-dialog-field-label"
+                  htmlFor="project-create-background"
+                >
+                  {t("project.createBackgroundLabel")}
+                </label>
+              </div>
+              <textarea
+                id="project-create-background"
+                className="field-input project-create-dialog-background"
+                rows={3}
+                value={description}
+                placeholder={t("project.createBackgroundPlaceholder")}
+                aria-label={t("project.createBackgroundLabel")}
+                disabled={busy}
+                onChange={(event) => setDescription(event.target.value)}
               />
             </section>
 
@@ -468,9 +499,10 @@ export function ProjectCreateDialog() {
               type="submit"
               variant="primary"
               disabled={
-                source === "git"
+                !description.trim() ||
+                (source === "git"
                   ? !projectName || !cloneTarget || !cloneParent || busy
-                  : !projectName || folders.length === 0 || busy
+                  : !projectName || folders.length === 0 || busy)
               }
             >
               {busy

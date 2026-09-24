@@ -2,9 +2,9 @@
 
 **Effective date: 2026-09-20**
 
-This Privacy Policy describes how PI-Desktop handles information when you use
-the PI-Desktop desktop application. PI-Desktop is a local-first, open-source
-project maintained by contributors to [vastsa/PI-Desktop](https://github.com/vastsa/PI-Desktop).
+This Privacy Policy describes how DuaerAiDesk handles information when you use
+the DuaerAiDesk desktop application. DuaerAiDesk is a local-first, open-source
+project maintained by contributors to [Duaer/DuaerAiDesk](https://github.com/Duaer/DuaerAiDesk).
 
 This policy describes the current application behavior. It is not legal advice;
 operators who distribute a modified build or offer an additional hosted service
@@ -18,10 +18,10 @@ processing.
 
 ## 1. Privacy at a glance
 
-- PI-Desktop does not require a PI-Desktop account.
+- DuaerAiDesk does not require a DuaerAiDesk account.
 - Projects, sessions, settings, transcripts, and application logs are stored
   locally by default.
-- PI-Desktop does not currently operate a remote telemetry pipeline or cloud
+- DuaerAiDesk does not currently operate a remote telemetry pipeline or cloud
   crash-analytics service. Crash minidumps stay on this machine.
 - Your prompts, files, tool results, and other content may be sent to the model
   provider, gateway, local model server, plugin, or MCP server that you choose
@@ -32,7 +32,7 @@ processing.
 
 ## 2. Information stored locally
 
-Depending on the features you use, PI-Desktop may store the following on your
+Depending on the features you use, DuaerAiDesk may store the following on your
 computer:
 
 - project paths and project/session metadata;
@@ -51,12 +51,12 @@ computer:
   up to 30 days, and plugins with clipboard permission may read it.
 
 Some of this information can contain personal data or confidential source code.
-PI-Desktop treats it as user data and does not upload it to PI-Desktop merely
+DuaerAiDesk treats it as user data and does not upload it to DuaerAiDesk merely
 because it is stored locally.
 
 ## 3. Information sent to other services
 
-PI-Desktop is a client. Network destinations depend on your configuration and
+DuaerAiDesk is a client. Network destinations depend on your configuration and
 actions.
 
 ### 3.1 Model providers and gateways
@@ -74,7 +74,7 @@ before sending confidential information.
 
 ### 3.2 Plugins and MCP servers
 
-Plugins and MCP servers can be local or remote. Through PI-Desktop host APIs,
+Plugins and MCP servers can be local or remote. Through DuaerAiDesk host APIs,
 a plugin or MCP server receives data involved in an operation you invoke or
 authorize, but its own code and service may process that data under its own
 terms. A remote MCP server may also receive protocol initialization and tool
@@ -82,7 +82,7 @@ catalog requests (including `initialize` and `tools/list`) before any tool is
 called. Review permissions, source, and privacy practices before installing or
 enabling one.
 
-PI-Desktop does not intentionally expose the host secret store through its
+DuaerAiDesk does not intentionally expose the host secret store through its
 documented plugin APIs. However, plugin code currently runs locally with the
 user's operating-system privileges and is not fully capability-sandboxed. Treat
 all plugins, especially marketplace packages, as user-privileged third-party
@@ -119,13 +119,13 @@ loopback interface when enabled. It is intended for trusted local clients, not
 for remote access or untrusted local users. Protect the local user-data
 directory and its bearer token.
 
-## 4. What PI-Desktop does not do
+## 4. What DuaerAiDesk does not do
 
-PI-Desktop does not currently:
+DuaerAiDesk does not currently:
 
 - sell personal information or use it for advertising;
-- require registration with PI-Desktop to use the desktop application;
-- send application telemetry to a PI-Desktop-operated remote analytics service;
+- require registration with DuaerAiDesk to use the desktop application;
+- send application telemetry to a DuaerAiDesk-operated remote analytics service;
   or
 - send raw provider credentials to the renderer, application logs, or plugins.
 
@@ -145,13 +145,13 @@ Information is used to:
   may check the configured GitHub release endpoint after startup and roughly
   every six hours while running.
 
-PI-Desktop does not use your local project or transcript content for its own
+DuaerAiDesk does not use your local project or transcript content for its own
 model training. A model provider or other service may have its own training and
 retention policy; consult that service before using it.
 
 ## 6. Retention and deletion
 
-PI-Desktop keeps local data until you remove it, subject to normal filesystem,
+DuaerAiDesk keeps local data until you remove it, subject to normal filesystem,
 backup, and operating-system behavior.
 
 - Sessions and transcripts are not automatically deleted by age. Delete a
@@ -170,7 +170,7 @@ backup, and operating-system behavior.
 - Plugin code, plugin data, and plugin-specific logs are removed according to
   the uninstall flow. Plugin diagnostics written to shared application logs
   may remain until log rotation or application-data deletion. A plugin may also
-  maintain data outside PI-Desktop if its own code creates it there.
+  maintain data outside DuaerAiDesk if its own code creates it there.
 
 Deleting local data does not delete copies already sent to a provider, plugin,
 MCP server, update service, or other third party. Request deletion from that
@@ -178,7 +178,7 @@ service under its own policy.
 
 ## 7. Security
 
-PI-Desktop uses local process boundaries, renderer sandboxing, workspace path
+DuaerAiDesk uses local process boundaries, renderer sandboxing, workspace path
 checks, permission prompts, secret redaction, and encrypted local secret files.
 Plugin capability sandboxing is not complete. No security measure is perfect.
 You are responsible for protecting your computer, project files, credentials,
@@ -201,18 +201,18 @@ You can control data collection and exposure by:
   reports, URLs, and remote media.
 
 Where applicable law gives you rights to access, correct, export, restrict, or
-delete personal information, contact the maintainers first. Because PI-Desktop
+delete personal information, contact the maintainers first. Because DuaerAiDesk
 is local-first, the maintainers generally do not possess your local project,
 transcript, or credential data and may be unable to retrieve or delete it for
 you. You can contact the project through the
-[GitHub repository](https://github.com/vastsa/PI-Desktop); do not post personal
+[GitHub repository](https://github.com/Duaer/DuaerAiDesk); do not post personal
 or confidential information in a public issue.
 
 ## 9. Children
 
-PI-Desktop is a general-purpose developer tool and is not directed to children.
+DuaerAiDesk is a general-purpose developer tool and is not directed to children.
 We do not knowingly collect personal information from children through a
-PI-Desktop-operated service.
+DuaerAiDesk-operated service.
 
 ## 10. Changes to this policy
 
@@ -222,6 +222,6 @@ will be communicated through the repository or release notes when practical.
 
 ## 11. Contact
 
-For privacy questions, use the [PI-Desktop GitHub repository](https://github.com/vastsa/PI-Desktop).
+For privacy questions, use the [DuaerAiDesk GitHub repository](https://github.com/Duaer/DuaerAiDesk).
 For security vulnerabilities, follow the repository's security reporting
 instructions rather than disclosing sensitive details in a public issue.

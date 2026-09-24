@@ -6,13 +6,13 @@
 
 - Status: Accepted for implementation
 - Date: 2026-08-18
-- Deciders: PI-Desktop plugin and distribution maintainers
+- Deciders: DuaerAiDesk plugin and distribution maintainers
 - Supersedes: ADR 0006 (marketplace postponed)
 - Amends: ADR 0007 (plugin package format), ADR 0005 (user-installable plugins)
 
 ## Context
 
-The shipped marketplace stores everything in one repository. `vastsa/pi-desktop-plugins`
+The shipped marketplace stores everything in one repository. `vastsa/duaer-ai-desk-plugins`
 holds plugin source under `plugins/<id>/`, built packages under `packages/*.piplug`,
 and the `catalog.json` the client reads. Publishing means a maintainer commits
 somebody else's source into the marketplace repository and regenerates the catalog
@@ -44,7 +44,7 @@ We want the ownership model without operating object storage.
 ### 1. The publisher's repository is the source of truth
 
 A publisher submits a repository coordinate — canonical HTTPS repository URL,
-path, and a ref that resolves to a 40-hex commit. PI-Desktop never copies plugin
+path, and a ref that resolves to a 40-hex commit. DuaerAiDesk never copies plugin
 source into a project-owned repository. `pluginId`, `publisherId`, the linked
 repository, and the packaged `manifest.json` identity must agree, and a published
 version is pinned to exactly one `(repository, commit, path)` tuple.
@@ -55,7 +55,7 @@ version is pinned to exactly one `(repository, commit, path)` tuple.
 verification, isolated builds, review, the policy gate, and the registry that
 records what has been published.
 
-`vastsa/pi-desktop-plugins` stays the distribution repository. It keeps serving
+`vastsa/duaer-ai-desk-plugins` stays the distribution repository. It keeps serving
 `catalog.json` from its root and packages from `packages/`, and the CNB copy
 keeps mirroring it. There is no S3, no R2, and no separately operated CDN.
 
@@ -63,7 +63,7 @@ keeps mirroring it. There is no S3, no R2, and no separately operated CDN.
   own repository, or the center's isolated runner builds it from the pinned
   commit.
 - The center verifies the bytes, then commits the package to
-  `pi-desktop-plugins/packages/` together with a regenerated `catalog.json`, in
+  `duaer-ai-desk-plugins/packages/` together with a regenerated `catalog.json`, in
   one commit.
 - Package URLs stay relative, so they resolve against whichever host served the
   catalog. Switching between GitHub and the CNB mirror therefore cannot send a
@@ -113,7 +113,7 @@ attention.
 ## Consequences
 
 - Third-party publishers can ship plugins without write access to any
-  PI-Desktop-owned repository, and can version on their own schedule.
+  DuaerAiDesk-owned repository, and can version on their own schedule.
 - The default catalog URL is unchanged, so no client release and no user action
   is needed to reach plugins published through the center.
 - The client needs no code change for this decision: relative package URLs

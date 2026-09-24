@@ -14,6 +14,12 @@ export const WORK_PANEL_CHAT_MAX_WIDTH = 10000;
  * composer reservation of ADR 0226.
  */
 export const MAIN_PANE_MIN_WIDTH = 450;
+/** Delivery chat can shrink to this floor on a narrow window. */
+export const DELIVERY_CHAT_MIN_WIDTH = 242;
+/** Delivery chat column never grows past this, so the requirements column keeps the rest. */
+export const DELIVERY_CHAT_MAX_WIDTH = 460;
+/** Icon rail that stays in the layout while the sidebar list is collapsed. */
+export const SIDEBAR_RAIL_WIDTH = 56;
 export const MAIN_PANE_REOPEN_TARGET_WIDTH = MAIN_PANE_MIN_WIDTH + 10;
 /**
  * The regular panel minimum is a presentation affordance. The sidebar reopen
@@ -81,10 +87,22 @@ export type WorkPanelLayout = {
 };
 
 /**
+ * Width of the requirements column when the chat column is capped at
+ * `DELIVERY_CHAT_MAX_WIDTH`. The confirm column takes whatever remains.
+ */
+export function deliveryWorkPanelWidth(availableWidth: number): number {
+  const available = Math.max(0, Math.round(availableWidth));
+  if (available <= DELIVERY_CHAT_MIN_WIDTH) return 0;
+  const chat = Math.min(DELIVERY_CHAT_MAX_WIDTH, available);
+  return Math.max(0, available - chat);
+}
+
+/**
  * Shared three-column budget. The shell is a fixed-width client area, so the
  * only way to satisfy the MainChat floor is to cap the panel and, at the
  * threshold, collapse the sidebar. The cap is the client width itself: a wide
  * window lets the panel keep growing until MainChat reaches its floor.
+ * Delivery requirements use the Duaer-spec chat floor instead of 450px.
  */
 export function workPanelLayout({
   containerWidth,
@@ -92,15 +110,23 @@ export function workPanelLayout({
   sidebarCollapsed,
   requestedPanelWidth,
   maximized = false,
+  mainMinWidth = MAIN_PANE_MIN_WIDTH,
+  mainMaxWidth,
 }: {
   containerWidth: number;
   sidebarWidth: number;
   sidebarCollapsed: boolean;
   requestedPanelWidth: number;
   maximized?: boolean;
+  mainMinWidth?: number;
+  /** When set, the chat column cannot grow past this width. */
+  mainMaxWidth?: number;
 }): WorkPanelLayout {
   const width = Math.max(0, Math.round(containerWidth));
-  const leftWidth = sidebarCollapsed ? 0 : Math.max(0, Math.round(sidebarWidth));
+  const leftWidth = sidebarCollapsed
+    ? SIDEBAR_RAIL_WIDTH
+    : Math.max(0, Math.round(sidebarWidth));
+  const floor = Math.max(0, Math.round(mainMinWidth));
   // Maximized preview: MainChat is not rendered at all, so the panel takes the
   // whole client area beside the sidebar and the MainChat floor does not apply.
   if (maximized) {
@@ -120,16 +146,27 @@ export function workPanelLayout({
   );
   const maxPanelWidth = Math.max(
     0,
-    width - leftWidth - MAIN_PANE_MIN_WIDTH,
+    width - leftWidth - floor,
   );
-  const panelWidth = Math.min(requested, maxPanelWidth);
+  const chatCap = mainMaxWidth == null ? 0 : Math.max(floor, Math.round(mainMaxWidth));
+  const minPanelForChatCap = chatCap > 0
+    ? Math.max(0, width - leftWidth - chatCap)
+    : 0;
+  const panelWidth = Math.min(
+    maxPanelWidth,
+    Math.max(requested, minPanelForChatCap),
+  );
+  // Delivery chat is CSS-capped: the dock fills the remainder, so a large
+  // persisted panel width must not auto-collapse the sidebar. Only collapse
+  // when the window cannot hold sidebar + chat floor + panel minimum.
+  const collapsePanelWidth = chatCap > 0 ? WORK_PANEL_MIN_WIDTH : requestedPanelWidth;
   return {
     mainWidth: Math.max(0, width - leftWidth - panelWidth),
     panelWidth,
     maxPanelWidth,
     shouldCollapseSidebar:
       !sidebarCollapsed &&
-      width - leftWidth - requestedPanelWidth <= MAIN_PANE_MIN_WIDTH,
+      width - leftWidth - collapsePanelWidth <= floor,
   };
 }
 

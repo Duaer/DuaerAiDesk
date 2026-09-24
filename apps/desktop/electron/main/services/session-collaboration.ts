@@ -5,7 +5,7 @@ import type {
   SessionCollaborationDelivery,
   SessionCollaborationMessage,
   SessionCollaborationSummary,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import { DESKTOP_PRINCIPAL, type AgentHostBridge } from "../agent-host-bridge";
 import { listReadyPluginModels, parsePluginModelKey } from "../plugin-agent-complete";
 import type { McpControlInvokeInput } from "../mcp-control";

@@ -1,4 +1,4 @@
-import type { AppSettings, UiMessage } from "@pi-desktop/shared";
+import type { AppSettings, UiMessage } from "@duaer-ai-desk/shared";
 import type { AssistantTurnEntry, AssistantTurnPart } from "./assistant-turns";
 import { activityItemHasIssue } from "./activity-summary";
 

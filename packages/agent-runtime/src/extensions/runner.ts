@@ -10,7 +10,7 @@
  * never throws into extension code.
  */
 import { managedExec } from "./managed-exec.js";
-import type { AgentTool, AgentToolResult } from "@earendil-works/pi-agent-core";
+import type { AgentTool, AgentToolResult } from "@duaer-ai-desk/upstream-agent-core";
 import {
   createAssistantMessageEventStream,
   type Api,
@@ -19,11 +19,11 @@ import {
   type Context,
   type Model,
   type SimpleStreamOptions,
-} from "@earendil-works/pi-ai";
+} from "@duaer-ai-desk/upstream-ai";
 import {
   trustedExtensionAgentProviderId,
   type TrustedExtensionAgentModelConfig,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import {
   createVirtualModules,
   knownStubSymbols,
@@ -342,7 +342,7 @@ export class TrustedExtensionRunner {
       const reportStub = (symbol: string) => {
         if (reportedStubs.has(symbol)) return;
         reportedStubs.add(symbol);
-        this.report(spec.id, "stub_symbol", `pi-tui symbol "${symbol}" is a no-op in PI-Desktop`, symbol);
+        this.report(spec.id, "stub_symbol", `pi-tui symbol "${symbol}" is a no-op in DuaerAiDesk`, symbol);
       };
       setStubSymbolReporter(spec.id, reportStub);
       const virtualModules = createVirtualModules({ extensionId: spec.id });
@@ -620,7 +620,7 @@ export class TrustedExtensionRunner {
       this.report(
         extension.spec.id,
         "unsupported_api",
-        `${member} is not available in PI-Desktop`,
+        `${member} is not available in DuaerAiDesk`,
         member,
       );
       return returns;

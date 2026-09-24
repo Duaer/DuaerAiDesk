@@ -54,8 +54,8 @@ use remote::{
 const CONFIG_NS: &str = "configSync";
 const CONFIG_KEY: &str = "config";
 const WEBDAV_SECRET_REF: &str = "secret:config-sync:webdav-password";
-const FORMAT: &str = "pi-desktop-config-sync";
-const REVISION_FORMAT: &str = "pi-desktop-config-revision";
+const FORMAT: &str = "duaer-ai-desk-config-sync";
+const REVISION_FORMAT: &str = "duaer-ai-desk-config-revision";
 const MAX_ENTITIES: usize = 4096;
 const MAX_RESOURCES: usize = 4096;
 const MAX_RETRIES: usize = 3;
@@ -997,7 +997,7 @@ fn create_recovery_point(
 ) -> Result<()> {
     let filename = format!("recovery-{}.bin", Uuid::new_v4());
     let point = RecoveryPoint {
-        format: "pi-desktop-config-recovery".into(),
+        format: "duaer-ai-desk-config-recovery".into(),
         version: 1,
         created_at: Utc::now().to_rfc3339(),
         base,
@@ -1181,7 +1181,7 @@ mod tests {
     }
 
     fn run_in_isolated_process(test_name: &str) -> Result<bool> {
-        const ISOLATED_PROCESS: &str = "PI_DESKTOP_CONFIG_SYNC_TEST_CHILD";
+        const ISOLATED_PROCESS: &str = "DUAER_AI_DESK_CONFIG_SYNC_TEST_CHILD";
         if std::env::var(ISOLATED_PROCESS).as_deref() == Ok(test_name) {
             return Ok(false);
         }

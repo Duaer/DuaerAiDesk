@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
-import type { TrustedExtensionUiPrompt } from "@pi-desktop/shared";
+import type { TrustedExtensionUiPrompt } from "@duaer-ai-desk/shared";
 import { api } from "../lib/api";
 import { useAppStore } from "../stores/app-store";
 import { Button, TooltipButton } from "./ui";

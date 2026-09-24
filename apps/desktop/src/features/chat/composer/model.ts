@@ -5,13 +5,13 @@ import type {
   ProviderPublic,
   SessionThinkingLevel,
   ThinkingLevel,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import {
   isSessionThinkingLevel,
   modelIdsMatch,
   PERMISSION_MODES,
   sessionThinkingMenuLevels,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import { providerThinkingLevels } from "../../../lib/session-thinking";
 
 export const COMPOSER_MIN_HEIGHT_PX = 28;

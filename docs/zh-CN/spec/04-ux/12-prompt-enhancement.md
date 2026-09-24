@@ -30,7 +30,7 @@ Sparkles 操作仅在下列条件全部成立时启用：
 
 ## 3. 请求与提供商边界
 
-渲染层通过列入允许清单的 `pi-desktop/prompt/enhance` invoke 通道发起请求。
+渲染层通过列入允许清单的 `duaer-ai-desk/prompt/enhance` invoke 通道发起请求。
 Electron 主进程使用与 agent 回合相同的运行时启动解析器解析生效的提供商/模型，
 仅在主进程读取 API 凭据，并调用 agent-runtime 的一次性补全辅助函数。厂商 OAuth
 提供商通过既有的、由主进程持有的解析器获得短时效的 `ModelAuth`；任何密钥或

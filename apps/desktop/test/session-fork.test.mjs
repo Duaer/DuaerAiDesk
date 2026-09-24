@@ -21,7 +21,7 @@ test("session fork is wired through protocol, main, API, store, and sidebar", ()
 
   assert.match(
     protocol,
-    /sessionFork:\s*"pi-desktop\/session\/fork"/,
+    /sessionFork:\s*"duaer-ai-desk\/session\/fork"/,
   );
   assert.match(protocol, /PROTOCOL_VERSION = 11/);
   assert.match(main, /handle\(\s*IPC\.invoke\.sessionFork,/);

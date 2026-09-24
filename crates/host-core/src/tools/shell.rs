@@ -311,13 +311,13 @@ fn choices_for_platform(platform: ShellPlatform) -> Vec<ShellOption> {
 }
 
 fn find_bash() -> Result<PathBuf, String> {
-    if let Some(overridden) = env::var_os("PI_DESKTOP_BASH") {
+    if let Some(overridden) = env::var_os("DUAER_AI_DESK_BASH") {
         let path = PathBuf::from(&overridden);
         if is_executable(&path) {
             return Ok(path);
         }
         return Err(format!(
-            "PI_DESKTOP_BASH points to '{}', which is not an executable file",
+            "DUAER_AI_DESK_BASH points to '{}', which is not an executable file",
             path.display()
         ));
     }
@@ -485,7 +485,7 @@ fn probe_user_login_path() -> Option<String> {
     // contaminate the result.
     let (tx, rx) = std::sync::mpsc::channel();
     let _probe = std::thread::Builder::new()
-        .name("pi-host-login-path".into())
+        .name("duaer-ai-desk-host-login-path".into())
         .spawn(move || {
             let output = std::process::Command::new(&shell)
                 .args(["-lic", "printf %s \"$PATH\""])

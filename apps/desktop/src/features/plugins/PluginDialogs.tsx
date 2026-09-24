@@ -11,7 +11,7 @@ import {
   permissionRisk,
 } from "./model";
 import type { PluginsPageModel } from "./usePluginsPage";
-import type { PluginPermissionReview } from "@pi-desktop/shared";
+import type { PluginPermissionReview } from "@duaer-ai-desk/shared";
 
 export function PluginDialogs({
   t,
@@ -170,7 +170,7 @@ export function PluginDialogs({
       {settingsPlugin ? (
         <PluginSettingsSheet
           plugin={settingsPlugin}
-          platform={(window.piDesktop?.platform ?? "darwin") as "darwin" | "win32" | "linux"}
+          platform={(window.duaerAiDesk?.platform ?? "darwin") as "darwin" | "win32" | "linux"}
           onClose={() => setSettingsPlugin(null)}
           onSaved={async () => {
             await refreshPlugins();

@@ -1,5 +1,5 @@
-import type { AgentHost, Principal } from "@pi-desktop/agent-host";
-import { RacpError } from "@pi-desktop/agent-host";
+import type { AgentHost, Principal } from "@duaer-ai-desk/agent-host";
+import { RacpError } from "@duaer-ai-desk/agent-host";
 import {
   RacpApprovalResponseSchema,
   RacpCursorSchema,
@@ -10,7 +10,7 @@ import {
   type RacpOperation,
   type RacpServerCapabilities,
   type RacpEventEnvelope,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import Type from "typebox";
 import * as Value from "typebox/value";
 

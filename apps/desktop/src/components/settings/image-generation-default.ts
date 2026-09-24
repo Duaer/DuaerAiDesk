@@ -23,7 +23,7 @@ import {
   modelIdsMatch,
   type ImageGenerationBinding,
   type ProviderPublic,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 
 /**
  * True when `provider` can actually run `modelId` for image generation now.

@@ -7,12 +7,12 @@ import {
   type RuntimePort,
   type TurnStartRequest,
   type TurnSteerRequest,
-} from "@pi-desktop/agent-host";
+} from "@duaer-ai-desk/agent-host";
 import {
   createHostQueueStore,
   createHostSessionPort,
   listPendingToolRequests,
-} from "@pi-desktop/host-runtime";
+} from "@duaer-ai-desk/host-runtime";
 import type {
   AgentEventEnvelope,
   AgentQueueChangedEvent,
@@ -21,8 +21,8 @@ import type {
   QueuedTurnSummary,
   RacpApprovalResult,
   RacpPermissionMode,
-} from "@pi-desktop/shared";
-import { IPC, isGlobalPermissionMode } from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
+import { IPC, isGlobalPermissionMode } from "@duaer-ai-desk/shared";
 
 type IpcInvoke = (channel: string, args: readonly unknown[]) => Promise<unknown>;
 

@@ -4,7 +4,7 @@ import {
   type GlobalPermissionMode,
   type ProjectRecord,
   type SessionThinkingLevel,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import { IconFolder } from "../../components/icons";
 import { SettingsMenuSelect } from "../../components/settings/SettingsMenuSelect";
 import { useAppStore } from "../../stores/app-store";

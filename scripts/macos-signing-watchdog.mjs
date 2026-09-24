@@ -51,7 +51,7 @@ const SHIM_SOURCE_PATH = fileURLToPath(
 );
 const DEFAULT_CODESIGN_LOG = join(
   tmpdir(),
-  `pi-desktop-codesign-timing-${process.pid}.log`,
+  `duaer-ai-desk-codesign-timing-${process.pid}.log`,
 );
 const DEFAULT_TIMEOUT_SECONDS = 2400;
 const DEFAULT_STALL_SECONDS = 300;
@@ -110,7 +110,7 @@ function usage() {
     "  --timeout-seconds <n>     Hard timeout in seconds (default: 2400, env PI_SIGNING_TIMEOUT_SECONDS).",
     "  --stall-seconds <n>       Silence that counts as a stall, in seconds (default: 300, env PI_SIGNING_STALL_SECONDS).",
     "  --heartbeat-seconds <n>   Heartbeat interval while output is silent (default: 60, env PI_SIGNING_HEARTBEAT_SECONDS).",
-    "  --codesign-log <path>     codesign timing log (default: $TMPDIR/pi-desktop-codesign-timing.log).",
+    "  --codesign-log <path>     codesign timing log (default: $TMPDIR/duaer-ai-desk-codesign-timing.log).",
     "  --summary-file <path>     Also write the summary lines to this file.",
     "  --no-codesign-shim        Do not inject the codesign timing shim (env PI_SIGNING_NO_CODESIGN_SHIM).",
     "",
@@ -436,7 +436,7 @@ function run() {
   if (useShim) {
     try {
       const realCodesign = resolveRealCodesign(process.env.PATH ?? "");
-      shimRoot = mkdtempSync(join(tmpdir(), "pi-desktop-signing-watchdog-"));
+      shimRoot = mkdtempSync(join(tmpdir(), "duaer-ai-desk-signing-watchdog-"));
       const shimDir = join(shimRoot, "bin");
       mkdirSync(shimDir, { recursive: true });
       const shimPath = join(shimDir, "codesign");

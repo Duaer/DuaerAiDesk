@@ -6,17 +6,17 @@
  */
 
 import { randomUUID } from "node:crypto";
-import type { Api, Model, ProviderHeaders, SimpleStreamOptions } from "@earendil-works/pi-ai";
+import type { Api, Model, ProviderHeaders, SimpleStreamOptions } from "@duaer-ai-desk/upstream-ai";
 import {
   APP_VERSION,
   OPENCODE_GO_API_STYLE,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import type { RuntimeProviderConfig } from "./provider-binding.js";
 
 export const OPENCODE_SESSION_HEADER = "x-opencode-session";
 export const OPENCODE_CLIENT_HEADER = "x-opencode-client";
-export const OPENCODE_CLIENT_VALUE = "pi-desktop";
-export const OPENCODE_USER_AGENT = `pi-desktop/${APP_VERSION}`;
+export const OPENCODE_CLIENT_VALUE = "duaer-ai-desk";
+export const OPENCODE_USER_AGENT = `duaer-ai-desk/${APP_VERSION}`;
 
 export type OpenCodeEndpointInput = {
   apiStyle?: string;

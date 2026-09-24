@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import type { AppSettings } from "@pi-desktop/shared";
+import type { AppSettings } from "@duaer-ai-desk/shared";
 import { resolveThinkingDisplayMode } from "../../lib/turn-process";
 import { SettingsRow } from "../../features/settings/primitives";
 import { SettingsMenuSelect } from "./SettingsMenuSelect";

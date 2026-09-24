@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import type { UiMessage } from "@pi-desktop/shared";
+import type { UiMessage } from "@duaer-ai-desk/shared";
 import { useReferencedImageDataUrl } from "../../../lib/use-referenced-image-data-url";
 import { toolResultPayload } from "../../../lib/tool-presentation";
 import { useOpenChatFileRef } from "../../../hooks/use-preview-target";

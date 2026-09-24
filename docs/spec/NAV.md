@@ -1,4 +1,4 @@
-# PI-Desktop Spec Navigation
+# DuaerAiDesk Spec Navigation
 
 ## Overview
 - [README.md](README.md)

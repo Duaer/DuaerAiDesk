@@ -26,7 +26,7 @@ The operating system's existing trust policy is the authority for local roots.
 
 This applies to the desktop sidecar's default Node TLS clients, including the
 direct, HTTP proxy and SOCKS provider transports. It is a process-level default,
-not a per-provider exception. Headless pi-host launch policy is unchanged.
+not a per-provider exception. Headless duaer-ai-desk-host launch policy is unchanged.
 Restart the desktop after changing roots or its extra-CA startup environment.
 
 Explicit certificate verification codes make `NETWORK_ERROR` non-retriable

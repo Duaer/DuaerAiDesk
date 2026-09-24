@@ -7,7 +7,7 @@
  * is not configured, so these helpers keep the two notions apart: what a
  * provider itself offers, and what is safe to display for it.
  */
-import { isImageGenerationModel, modelIdsMatch, type ImageGenerationBindings, type ProviderPublic } from "@pi-desktop/shared";
+import { isImageGenerationModel, modelIdsMatch, type ImageGenerationBindings, type ProviderPublic } from "@duaer-ai-desk/shared";
 
 export type DefaultModelOption = {
   provider: ProviderPublic;

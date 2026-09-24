@@ -1,4 +1,4 @@
-import type { AgentEvent, MessageAttachment, UiMessage } from "@pi-desktop/shared";
+import type { AgentEvent, MessageAttachment, UiMessage } from "@duaer-ai-desk/shared";
 
 type OptimisticFileReference = {
   path: string;

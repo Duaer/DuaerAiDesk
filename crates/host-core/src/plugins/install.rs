@@ -204,7 +204,7 @@ impl PluginManager {
             publisher_id: Some(
                 info.publisher_id
                     .clone()
-                    .unwrap_or_else(|| "pi-desktop".into()),
+                    .unwrap_or_else(|| "duaer-ai-desk".into()),
             ),
             trust: info.trust.clone(),
             provenance: info.provenance.clone(),
@@ -695,7 +695,7 @@ pub(crate) fn download_scratch_path() -> PathBuf {
         .map(|d| d.as_nanos())
         .unwrap_or(0);
     std::env::temp_dir().join(format!(
-        "pi-desktop-download-{}-{seq}-{nanos}.bin",
+        "duaer-ai-desk-download-{}-{seq}-{nanos}.bin",
         std::process::id()
     ))
 }
@@ -751,7 +751,7 @@ pub(crate) fn download_url_observed(
         "--max-filesize".into(),
         max_filesize,
         "--user-agent".into(),
-        "pi-desktop-host-core".into(),
+        "duaer-ai-desk-host-core".into(),
     ];
     args.extend(crate::network_proxy::curl_proxy_args());
     if package_guard.is_some() && url.starts_with("https://") {
@@ -846,7 +846,7 @@ pub(crate) fn download_url_observed(
         stream.set_read_timeout(Some(Duration::from_secs(15)))?;
         stream.set_write_timeout(Some(Duration::from_secs(15)))?;
         let req = format!(
-        "GET {path} HTTP/1.1\r\nHost: {host}\r\nConnection: close\r\nUser-Agent: pi-desktop-host-core\r\nAccept: */*\r\n\r\n"
+        "GET {path} HTTP/1.1\r\nHost: {host}\r\nConnection: close\r\nUser-Agent: duaer-ai-desk-host-core\r\nAccept: */*\r\n\r\n"
     );
         stream.write_all(req.as_bytes())?;
         let mut buf = Vec::new();

@@ -24,7 +24,7 @@ renderer notification path, leaving the sidebar stale until another refresh.
   origin metadata unless an explicit active binding is supplied.
 - Make plugin session list/get projections report the explicit project binding
   and id while retaining ownership filtering and all existing import limits.
-- Electron main emits one `pi-desktop/session/event/changed` event after each
+- Electron main emits one `duaer-ai-desk/session/event/changed` event after each
   successful plugin import, batch import, rename, or delete. The renderer
   handles it through the existing `refreshSessions()` store action. Skipped
   imports do not emit the event, plugins never emit it, and a refresh never

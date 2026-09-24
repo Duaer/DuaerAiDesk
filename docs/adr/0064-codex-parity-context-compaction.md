@@ -2,7 +2,7 @@
 
 - Status: Accepted
 - Date: 2026-08-06
-- Deciders: PI-Desktop core
+- Deciders: DuaerAiDesk core
 - Amends: ADR 0061 / ADR 0030 / D158 / D200; amended by ADR 0136
 
 ## Context
@@ -81,7 +81,7 @@ retained-tail recovery, ADR 0061's model-window-derived budgets, and ADR 0061's
    so no orphaned `tool_use` can reach the provider.
 3. **Two families behind an internal switch.**
    `CompactionStrategy = "summary" | "fresh_window"` resolves from a
-   construction option, then `PI_DESKTOP_COMPACTION_STRATEGY`, defaulting to
+   construction option, then `DUAER_AI_DESK_COMPACTION_STRATEGY`, defaulting to
    `"summary"`. `fresh_window` issues no summary request: it installs a
    checkpoint with an empty retained tail and the fixed
    `CONTEXT_ROLLOVER_SUMMARY` marker text, then continues through the identical

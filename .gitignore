@@ -45,8 +45,8 @@ coverage/
 .turbo/
 
 # Local runtime data
-.pi-desktop/
-.pi-desktop-test/
+.duaer-ai-desk/
+.duaer-ai-desk-test/
 .pi/
 .cc-connect/
 

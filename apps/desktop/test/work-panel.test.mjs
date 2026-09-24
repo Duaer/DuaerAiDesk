@@ -150,6 +150,31 @@ test("a viewport-fixed toggle is the sole pointer collapse control", () => {
   );
 });
 
+test("chat keeps the right column open", () => {
+  assert.match(storeSource, /collapseWorkPanel: \(\) => \{[\s\S]*?state\.page === "chat"/);
+  assert.match(appSource, /page === "chat" \? null : \(/);
+  assert.match(appSource, /page === "chat" \? DELIVERY_CHAT_MAX_WIDTH : undefined/);
+  assert.match(appSource, /page === "chat" && "chat-column-capped"/);
+  assert.match(panelSource, /mainMaxWidth/);
+  assert.match(
+    globalStyles,
+    /\.app-shell\.chat-column-capped \.main-pane \{[^}]*max-width:\s*460px;[^}]*flex:\s*0 1 460px;/s,
+  );
+  assert.match(
+    globalStyles,
+    /\.app-shell\.chat-column-capped:not\(\.sidebar-collapsed\) \.main-pane \{[^}]*max-width:\s*calc\(460px - var\(--ds-sidebar-width\)\);/s,
+  );
+  assert.match(appSource, /delivery-work-column/);
+  assert.match(
+    globalStyles,
+    /\.app-shell\.chat-column-capped \.delivery-work-column \{[^}]*flex:\s*1 1 0;/s,
+  );
+  assert.match(
+    globalStyles,
+    /\.app-shell\.chat-column-capped \.delivery-work-column > \.work-panel \{[^}]*width:\s*100% !important;[^}]*animation:\s*none !important;/s,
+  );
+});
+
 test("the work panel shortcut closes the panel it opened", () => {
   assert.match(storeSource, /toggleWorkPanel:\s*\(\) => \{/);
   const toggleBody = storeSource.slice(
@@ -177,7 +202,7 @@ test("work panel uses the fixed-window internal dock", () => {
   // before unmounting, so MainChat reflows continuously in both directions.
   assert.match(
     appSource,
-    /<\/section>\s*\)\}\s*\{\(presentedWorkPanelOpen \|\| workPanelExiting\) && \(?\s*<WorkPanel/,
+    /<\/section>\s*\)\}\s*\{\(page === "chat" \|\| presentedWorkPanelOpen \|\| workPanelExiting\) && \([\s\S]*?display: "contents"[\s\S]*?<WorkPanel/,
   );
   assert.doesNotMatch(
     appSource,
@@ -240,7 +265,8 @@ test("work panel header exposes a scrollable tab strip and direct new-page actio
   // Launchable tools are plugin views (`pi.file-manager`, `pi.browser`, …). The
   // `file` *kind* remains: a `file:<path>` tab is a transcript artifact.
   assert.doesNotMatch(panelSource, /\{ kind: "file", Icon/);
-  assert.match(panelSource, /onClick=\{openNewWorkPanelTab\}/);
+  assert.doesNotMatch(panelSource, /onClick=\{openNewWorkPanelTab\}/);
+  assert.doesNotMatch(panelSource, /className="work-panel-maximize"/);
   assert.match(panelSource, /data-work-panel-launcher-item=\{item\.id\}/);
   assert.doesNotMatch(panelSource, /aria-haspopup|work-panel-new-menu|role="menuitemradio"/);
   assert.match(panelSource, /role="tabpanel"/);
@@ -286,7 +312,7 @@ test("work panel header exposes a scrollable tab strip and direct new-page actio
 });
 
 test("plus creates a blank page and launcher rows open tools in that page", () => {
-  assert.match(panelSource, /openNewWorkPanelTab/);
+  assert.doesNotMatch(panelSource, /openNewWorkPanelTab/);
   assert.match(panelSource, /activeTab\?\.kind === "new"/);
   assert.match(panelSource, /replaceWorkPanelTab/);
   assert.match(storeSource, /openNewWorkPanelTab: \(\) =>/);
@@ -354,7 +380,7 @@ test("work panel width is renderer-owned inside the fixed window", () => {
 test("work panel keeps its compatibility IPC seams without native geometry", () => {
   assert.match(
     protocolSource,
-    /windowSetWorkPanelReservation:\s*"pi-desktop\/window\/setWorkPanelReservation"/,
+    /windowSetWorkPanelReservation:\s*"duaer-ai-desk\/window\/setWorkPanelReservation"/,
   );
   assert.match(
     apiSource,
@@ -365,11 +391,11 @@ test("work panel keeps its compatibility IPC seams without native geometry", () 
   assert.match(mainSource, /return \{ requested: 0, reserved: 0 \}/);
   assert.match(
     protocolSource,
-    /windowSetWorkPanelChatWidth:\s*"pi-desktop\/window\/setWorkPanelChatWidth"/,
+    /windowSetWorkPanelChatWidth:\s*"duaer-ai-desk\/window\/setWorkPanelChatWidth"/,
   );
   assert.match(
     protocolSource,
-    /windowWorkPanelResize:\s*"pi-desktop\/window\/event\/workPanelResize"/,
+    /windowWorkPanelResize:\s*"duaer-ai-desk\/window\/event\/workPanelResize"/,
   );
   assert.match(apiSource, /setWorkPanelChatWidth/);
   assert.match(apiSource, /onWorkPanelResize/);
@@ -538,20 +564,16 @@ test("the panel and a new tab share the same launcher rows", async () => {
     new URL("../src/components/workpanel/WorkTabEmpty.tsx", import.meta.url),
     "utf8",
   );
-  // `Cmd/Ctrl+J` reveals the panel without creating a tab, while `+` creates
-  // an explicit launcher tab. Both states offer the same tool rows.
-  assert.match(panelSource, /!subagentPanel && \(!activeTab \|\| activeTab\.kind === "new"\)/);
-  assert.match(panelSource, /data-testid="work-panel-empty"/);
-  assert.match(panelSource, /panel\.new\.title/);
+  // The tool list is a horizontal header switcher. A blank panel shows
+  // requirements instead of a vertical launcher page.
+  assert.match(panelSource, /activeTab\?\.kind === "requirements" \|\| !activeTab \|\| activeTab\.kind === "new"/);
+  assert.match(panelSource, /<RequirementsTab \/>/);
   assert.match(panelSource, /panel\.toolsAndPanels/);
   assert.match(panelSource, /className="work-panel-launcher"/);
-  assert.match(panelSource, /className="work-panel-launcher-row"/);
+  assert.match(panelSource, /work-panel-launcher-row/);
   assert.match(panelSource, /tools\.map\(\(item\) =>/);
   assert.doesNotMatch(panelSource, /panel\.empty\.title|panel\.empty\.body/);
   assert.doesNotMatch(panelSource, /work-panel-empty-tools|openPluginView\(view\)/);
-  // The explicit New tab gets a labelled tabpanel; the legacy no-tab reveal
-  // remains a plain body with a labelled launcher group.
-  assert.match(panelSource, /role=\{activeTab \? "tabpanel" : undefined\}/);
   assert.match(panelSource, /role="group"/);
   // Tab empty states share one component so they keep one visual treatment.
   assert.match(emptySource, /work-tab-empty-icon/);
@@ -645,6 +667,36 @@ test("preview mode keeps shell actions and restores routes before navigation", (
   assert.match(globalStyles, /\.app-shell\.work-panel-maximized\.sidebar-collapsed \{[^}]*--preview-chrome-action-lane:\s*var\(--ds-preview-action-lane-width\);/);
   assert.match(globalStyles, /:root\[data-platform="darwin"\] \.app-shell\.work-panel-maximized\.sidebar-collapsed \{[^}]*--preview-chrome-inset:\s*var\(--ds-window-lead-inset\);/);
   assert.match(globalStyles, /\.app-shell\.work-panel-maximized \.work-panel-header \{[^}]*margin-left:\s*calc\(var\(--preview-chrome-inset\) \+ var\(--preview-chrome-action-lane\)\);[^}]*padding-left:\s*0;/);
-  assert.match(globalStyles, /\.work-panel-header \{[^}]*app-region:\s*drag;/);
+  assert.match(globalStyles, /\.work-panel-header \{[^}]*app-region:\s*no-drag;/);
+  assert.match(
+    globalStyles,
+    /\.work-panel-tab-strip-wrap \{[^}]*app-region:\s*no-drag;[^}]*pointer-events:\s*auto;/,
+  );
+  assert.match(
+    globalStyles,
+    /\.work-panel-launcher-row \{[^}]*app-region:\s*no-drag;[^}]*pointer-events:\s*auto;/,
+  );
+  assert.match(
+    globalStyles,
+    /\.conversation-topbar \{[^}]*app-region:\s*no-drag;/,
+  );
+  assert.doesNotMatch(
+    globalStyles.match(/\.conversation-topbar \.ct-title-wrap \{[\s\S]*?\n\}/)?.[0] ?? "",
+    /app-region:\s*drag/,
+  );
+  assert.match(
+    globalStyles,
+    /\.work-panel \{[^}]*\/\* Do not raise z-index/,
+  );
+  assert.doesNotMatch(
+    globalStyles.match(/\.work-panel \{[\s\S]*?\n\}/)?.[0] ?? "",
+    /z-index:\s*20/,
+  );
+  assert.match(
+    globalStyles,
+    /html,\s*\nbody,\s*\n#root \{[\s\S]*?-webkit-app-region:\s*no-drag;/,
+  );
+  assert.doesNotMatch(globalStyles, /\.window-drag-strip/);
+  assert.doesNotMatch(appSource, /window-drag-strip/);
   assert.match(globalStyles, /\.app-shell\.work-panel-maximized \.work-panel-main \{[^}]*var\(--ds-bg-dock-raised\) 0 var\(--ds-toolbar-height\)/);
 });

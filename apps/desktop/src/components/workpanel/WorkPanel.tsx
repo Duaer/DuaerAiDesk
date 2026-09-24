@@ -10,7 +10,7 @@ import {
 } from "react";
 import { useTranslation } from "react-i18next";
 import { useBlockingOverlayActive } from "../../lib/blocking-overlay";
-import type { PluginViewMeta } from "@pi-desktop/shared";
+import type { PluginViewMeta } from "@duaer-ai-desk/shared";
 import {
   isKnownWorkPanelTab,
   parsePluginViewRef,
@@ -29,17 +29,20 @@ import {
   IconClose,
   IconDiff,
   IconFileText,
-  IconPanelMaximize,
-  IconPanelRestore,
+  IconWorkflow,
   IconPlug,
   IconPlus,
 } from "../icons";
+import { ArchitectureTab } from "./ArchitectureTab";
+import { DispatchTab } from "./DispatchTab";
+import { RequirementsTab } from "./RequirementsTab";
 import { ReviewTab } from "./ReviewTab";
 import { FilesTab } from "./FilesTab";
 import { PluginViewTab } from "./PluginViewTab";
 import { SubagentPanel } from "./SubagentPanel";
 import type { SubagentPanelSelection } from "../../lib/subagent-panel";
 import {
+  DELIVERY_CHAT_MIN_WIDTH,
   MAIN_PANE_MIN_WIDTH,
   WORK_PANEL_COMPACT_MIN_WIDTH,
   WORK_PANEL_MIN_WIDTH,
@@ -54,6 +57,9 @@ const TAB_ICONS = {
   review: IconDiff,
   file: IconFileText,
   plugin: IconPlug,
+  requirements: IconFileText,
+  architecture: IconWorkflow,
+  dispatch: IconBot,
 } as const;
 
 type WorkPanelResizeState = {
@@ -96,9 +102,27 @@ function workPanelTools(
   t: (key: string) => string,
   pluginViews: PluginViewMeta[],
 ): WorkPanelTool[] {
-  // Review is the only host-owned launcher. Files, Browser, and every future
-  // tool are plugin-contributed views, so their list stays data-driven.
+  // Requirements and Review are host-owned launchers. Files, Browser, and
+  // every other tool are plugin-contributed views, so that list stays data-driven.
   return [
+    {
+      id: "requirements",
+      tab: toolWorkPanelTab("requirements"),
+      label: t("panel.tabs.requirements"),
+      icon: IconFileText,
+    },
+    {
+      id: "architecture",
+      tab: toolWorkPanelTab("architecture"),
+      label: t("panel.tabs.architecture"),
+      icon: IconWorkflow,
+    },
+    {
+      id: "dispatch",
+      tab: toolWorkPanelTab("dispatch"),
+      label: t("panel.tabs.dispatch"),
+      icon: IconBot,
+    },
     {
       id: "review",
       tab: toolWorkPanelTab("review"),
@@ -140,7 +164,7 @@ export function WorkPanel({
   sidebarWidth = 0,
   onAutoCollapseSidebar,
   maximized = false,
-  onToggleMaximize,
+  mainMaxWidth,
 }: {
   /**
    * Hides every native surface in the panel. Both the preview browser and a
@@ -165,8 +189,8 @@ export function WorkPanel({
   onAutoCollapseSidebar?: () => void;
   /** Preview mode: the panel takes MainChat's width as well. */
   maximized?: boolean;
-  /** Toggles the preview mode from the panel header. */
-  onToggleMaximize?: () => void;
+  /** Chat column cap. The divider cannot drag the chat wider than this. */
+  mainMaxWidth?: number;
 }) {
   const { t } = useTranslation();
   const blockingOverlayActive = useBlockingOverlayActive();
@@ -179,7 +203,6 @@ export function WorkPanel({
   const activateTab = useAppStore((s) => s.activateWorkPanelTab);
   const closeTab = useAppStore((s) => s.closeWorkPanelTab);
   const openWorkPanelTab = useAppStore((s) => s.openWorkPanelTab);
-  const openNewWorkPanelTab = useAppStore((s) => s.openNewWorkPanelTab);
   const replaceWorkPanelTab = useAppStore((s) => s.replaceWorkPanelTab);
   const setWidth = useAppStore((s) => s.setWorkPanelWidth);
   const activeTab = tabs.find((tab) => tab.id === activeTabId) ?? null;
@@ -188,7 +211,6 @@ export function WorkPanel({
   const [panelDragWidth, setPanelDragWidth] = useState<number | null>(null);
   const panelResizeState = useRef<WorkPanelResizeState | null>(null);
   const tabButtonRefs = useRef<Record<string, HTMLButtonElement | null>>({});
-  const newTabButtonRef = useRef<HTMLButtonElement | null>(null);
   const [nativeSurfaceReadyForExit, setNativeSurfaceReadyForExit] =
     useState(false);
 
@@ -201,18 +223,23 @@ export function WorkPanel({
   // conservative shell estimate for that frame; the measured width takes over
   // before a user can interact with the divider.
   const sidebarOccupiesBudget = !sidebarCollapsed || sidebarExiting;
+  const mainFloor = mainMaxWidth == null
+    ? MAIN_PANE_MIN_WIDTH
+    : Math.min(DELIVERY_CHAT_MIN_WIDTH, mainMaxWidth);
   const budgetWidth =
     containerWidth > 0
       ? containerWidth
       : requestedPanelWidth +
         (sidebarOccupiesBudget ? sidebarWidth : 0) +
-        MAIN_PANE_MIN_WIDTH;
+        mainFloor;
   const layout = workPanelLayout({
     containerWidth: budgetWidth,
     sidebarWidth,
     sidebarCollapsed: !sidebarOccupiesBudget,
     requestedPanelWidth,
     maximized,
+    mainMinWidth: mainFloor,
+    mainMaxWidth,
   });
   const renderPanelWidth = layout.panelWidth;
   const isResizing = panelDragWidth !== null;
@@ -263,6 +290,17 @@ export function WorkPanel({
     [activateTab, openWorkPanelTab, replaceWorkPanelTab, tabs],
   );
 
+  useEffect(() => {
+    if (subagentPanel || exiting) return;
+    if (activeTab && activeTab.kind !== "new") return;
+    const requirements = tools.find((item) => item.id === "requirements");
+    if (!requirements) return;
+    selectTool(requirements, activeTab?.kind === "new" ? activeTab.id : undefined);
+    // Open the requirements page once when the panel is blank. Tool identity
+    // changes every render, so the blank tab id is the only signal.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab?.id, activeTab?.kind, exiting, subagentPanel]);
+
   const closeTabAndFocus = useCallback(
     (tabId: string) => {
       const index = tabs.findIndex((tab) => tab.id === tabId);
@@ -270,7 +308,6 @@ export function WorkPanel({
       closeTab(tabId);
       requestAnimationFrame(() => {
         if (nextTab) tabButtonRefs.current[nextTab.id]?.focus();
-        else newTabButtonRef.current?.focus();
       });
     },
     [closeTab, tabs],
@@ -453,11 +490,20 @@ export function WorkPanel({
     ? tabLabel(activeTab, t, pluginViews)
     : t("panel.title");
   const exitAnimationReady = exiting && nativeSurfaceReadyForExit;
-  const panelStyle = {
-    width: renderPanelWidth,
-    maxWidth: layout.maxPanelWidth,
-    "--work-panel-width": `${renderPanelWidth}px`,
-  } as CSSProperties;
+  const panelStyle = (
+    mainMaxWidth == null
+      ? {
+          width: renderPanelWidth,
+          maxWidth: layout.maxPanelWidth,
+          "--work-panel-width": `${renderPanelWidth}px`,
+        }
+      : {
+          width: "100%",
+          maxWidth: "none",
+          flex: "1 1 auto",
+          "--work-panel-width": "100%",
+        }
+  ) as unknown as CSSProperties;
 
   return (
     <aside
@@ -518,7 +564,44 @@ export function WorkPanel({
                 aria-label={t("panel.tabsLabel")}
                 onWheel={onTabStripWheel}
               >
-                {tabs.map((tab) => {
+                <div
+                  className="work-panel-launcher"
+                  role="group"
+                  aria-label={t("panel.toolsAndPanels")}
+                >
+                {tools.map((item) => {
+                  const selected =
+                    activeTab?.id === item.tab.id ||
+                    ((!activeTab || activeTab.kind === "new") && item.id === "requirements");
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      role="tab"
+                      aria-selected={selected}
+                      className={
+                        selected
+                          ? "work-panel-launcher-row no-drag is-active"
+                          : "work-panel-launcher-row no-drag"
+                      }
+                      data-work-panel-launcher-item={item.id}
+                      title={item.label}
+                      onClick={() =>
+                        selectTool(
+                          item,
+                          activeTab?.kind === "new" ? activeTab.id : undefined,
+                        )
+                      }
+                    >
+                      <span className="work-panel-launcher-icon" aria-hidden>
+                        <ToolIcon item={item} size={14} />
+                      </span>
+                      <span className="work-panel-launcher-label">{item.label}</span>
+                    </button>
+                  );
+                })}
+                </div>
+                {tabs.filter((tab) => tab.kind === "file").map((tab) => {
                   const label = tabLabel(tab, t, pluginViews);
                   const selected = tab.id === activeTabId;
                   const Icon =
@@ -568,8 +651,8 @@ export function WorkPanel({
               </div>
             )}
           </div>
-          <div className="work-panel-actions no-drag">
-            {subagentPanel && onCloseSubagentPanel ? (
+          {subagentPanel && onCloseSubagentPanel ? (
+            <div className="work-panel-actions no-drag">
               <TooltipButton
                 type="button"
                 className="work-panel-subagent-back"
@@ -579,36 +662,42 @@ export function WorkPanel({
               >
                 <IconChevronLeft size={15} />
               </TooltipButton>
-            ) : (
-              <TooltipButton
-                ref={newTabButtonRef}
-                type="button"
-                className="work-panel-new-tab"
-                tooltip={t("panel.new.open")}
-                ariaLabel={t("panel.new.open")}
-                onClick={openNewWorkPanelTab}
-              >
-                <IconPlus size={16} />
-              </TooltipButton>
-            )}
-            <TooltipButton
-              type="button"
-              className="work-panel-maximize"
-              tooltip={t(maximized ? "panel.restore" : "panel.maximize")}
-              ariaLabel={t(maximized ? "panel.restore" : "panel.maximize")}
-              aria-pressed={maximized}
-              onClick={() => onToggleMaximize?.()}
-            >
-              {maximized ? (
-                <IconPanelRestore size={15} />
-              ) : (
-                <IconPanelMaximize size={15} />
-              )}
-            </TooltipButton>
-          </div>
+            </div>
+          ) : null}
         </header>
         <div className="work-panel-body">
           {subagentPanel ? <SubagentPanel selection={subagentPanel} /> : null}
+          {!subagentPanel &&
+            (activeTab?.kind === "requirements" || !activeTab || activeTab.kind === "new") && (
+            <div
+              id={activeTab ? `work-panel-surface-${activeTab.id}` : "work-panel-surface-requirements"}
+              className="work-panel-tabpane"
+              role="tabpanel"
+              aria-labelledby={activeTab ? `work-panel-tab-${activeTab.id}` : undefined}
+            >
+              <RequirementsTab />
+            </div>
+          )}
+          {!subagentPanel && activeTab?.kind === "dispatch" && (
+            <div
+              id={`work-panel-surface-${activeTab.id}`}
+              className="work-panel-tabpane"
+              role="tabpanel"
+              aria-labelledby={`work-panel-tab-${activeTab.id}`}
+            >
+              <DispatchTab />
+            </div>
+          )}
+          {!subagentPanel && activeTab?.kind === "architecture" && (
+            <div
+              id={`work-panel-surface-${activeTab.id}`}
+              className="work-panel-tabpane"
+              role="tabpanel"
+              aria-labelledby={`work-panel-tab-${activeTab.id}`}
+            >
+              <ArchitectureTab />
+            </div>
+          )}
           {!subagentPanel && activeTab?.kind === "review" && (
             <div
               id={`work-panel-surface-${activeTab.id}`}
@@ -656,47 +745,6 @@ export function WorkPanel({
                 </div>
               );
             })()}
-          {!subagentPanel && (!activeTab || activeTab.kind === "new") && (
-            <div
-              className="work-panel-tabpane"
-              data-testid="work-panel-empty"
-              id={activeTab ? `work-panel-surface-${activeTab.id}` : undefined}
-              role={activeTab ? "tabpanel" : undefined}
-              aria-labelledby={
-                activeTab ? `work-panel-tab-${activeTab.id}` : undefined
-              }
-            >
-              <div className="work-panel-launcher">
-                <div className="work-panel-launcher-title">{t("panel.new.title")}</div>
-                <div
-                  className="work-panel-launcher-list"
-                  role="group"
-                  aria-label={t("panel.toolsAndPanels")}
-                >
-                  {tools.map((item) => (
-                    <button
-                      key={item.id}
-                      type="button"
-                      className="work-panel-launcher-row"
-                      data-work-panel-launcher-item={item.id}
-                      onClick={() =>
-                        selectTool(
-                          item,
-                          activeTab?.kind === "new" ? activeTab.id : undefined,
-                        )
-                      }
-                    >
-                      <span className="work-panel-launcher-icon" aria-hidden>
-                        <ToolIcon item={item} />
-                      </span>
-                      <span className="work-panel-launcher-label">{item.label}</span>
-                      {item.shortcut ? <kbd>{item.shortcut}</kbd> : null}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       </div>
     </aside>

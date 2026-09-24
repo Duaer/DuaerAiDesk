@@ -1,13 +1,22 @@
 import {
   memo,
+  useEffect,
   useMemo,
   useState,
   type MouseEvent as ReactMouseEvent,
 } from "react";
 import { useTranslation } from "react-i18next";
-import type { UiMessage } from "@pi-desktop/shared";
+import type { UiMessage } from "@duaer-ai-desk/shared";
 import { useOpenChatFileRef } from "../../../hooks/use-preview-target";
 import { splitChatText } from "../../../lib/chat-links";
+import { stripInlineMarkdown } from "../../../lib/choice-options.ts";
+import { confirmArchitectureFromChat, reviseArchitectureFromChat } from "../../../lib/delivery-architecture.ts";
+import { applyDeliveryChat, deliveryChatHasCard, isDeliveryAutoHandleChoice, isDeliveryConfirmArchitectureChoice, isDeliveryGateNote, isDeliveryReviseArchitectureChoice, parseDeliveryChat, parseDeliveryGateChoices, visibleDeliveryText } from "../../../lib/delivery-chat.ts";
+import { maybeRenderArchitectureFromReply } from "../../../lib/delivery-architecture.ts";
+import { maybeApplyDispatchSplitFromReply } from "../../../lib/delivery-dispatch-chat.ts";
+import { maybeApplyVisualDesignFromReply } from "../../../lib/delivery-visual.ts";
+import { runDeliveryAutoHandle } from "../../../lib/delivery-auto-handle.ts";
+import { deliveryProjectPath } from "../../../lib/use-delivery-desk";
 import { useAppStore } from "../../../stores/app-store";
 import { Markdown } from "../../../components/Markdown";
 import {
@@ -50,8 +59,10 @@ export const MessageRow = memo(function MessageRow({
   const openFileRef = useOpenChatFileRef();
   // Slash prompts are stored expanded; editing works on the typed form so the
   // resent turn re-expands the template (D123).
+  const rawVisible = visibleDeliveryText(message.content || "", message.role);
+  const visible = isUser ? stripInlineMarkdown(rawVisible) : rawVisible;
   const editSeed =
-    (editableUserMessage && message.command) || (message.content || "");
+    (editableUserMessage && message.command) || visible;
   const [editing, setEditing] = useState(false);
   const [editValue, setEditValue] = useState(editSeed);
   const [retryingEdit, setRetryingEdit] = useState(false);
@@ -60,8 +71,63 @@ export const MessageRow = memo(function MessageRow({
   const deleteLabel = t("chat.deleteMessage");
   // Runtime chunks are already progressive. Rendering that source directly
   // avoids a second per-frame state loop while Markdown memoizes stable blocks.
-  const displayed = message.content || "";
-  const hasAnswer = Boolean((message.content || "").trim());
+  const displayed = visible;
+  const hasAnswer = Boolean(visible.trim());
+  const deliveryChoices = useMemo(() => {
+    if (isUser) return [];
+    const gate = parseDeliveryGateChoices(message.content || "");
+    if (gate.length) return gate;
+    return parseDeliveryChat(message.content || "")?.options ?? [];
+  }, [isUser, message.content]);
+  const messages = useAppStore((state) => state.messages);
+  const projectPath = useAppStore(deliveryProjectPath);
+  const deliveryChatActive = useAppStore((state) => {
+    if (!state.workPanelOpen) return false;
+    const tab = state.workPanelTabs.find((item) => item.id === state.activeWorkPanelTabId);
+    return tab?.kind === "requirements" || tab?.kind === "architecture";
+  });
+  const sendPrompt = useAppStore((state) => state.sendPrompt);
+  const showChoices = deliveryChatActive && !isUser && deliveryChoices.length > 0 && messages.at(-1)?.id === message.id;
+  const onChoice = (option: string) => {
+    if (isDeliveryAutoHandleChoice(option)) {
+      void runDeliveryAutoHandle();
+      return;
+    }
+    if (isDeliveryConfirmArchitectureChoice(option)) {
+      void confirmArchitectureFromChat();
+      return;
+    }
+    if (isDeliveryReviseArchitectureChoice(option)) {
+      void reviseArchitectureFromChat();
+      return;
+    }
+    void sendPrompt(option);
+  };
+  const choiceLabel = (option: string) => {
+    if (isDeliveryAutoHandleChoice(option)) return t("panel.requirements.autoHandle");
+    if (isDeliveryConfirmArchitectureChoice(option)) return t("panel.architecture.confirmChoice");
+    if (isDeliveryReviseArchitectureChoice(option)) return t("panel.architecture.reviseChoice");
+    return stripInlineMarkdown(option);
+  };
+  useEffect(() => {
+    if (isUser || !deliveryChatActive) return;
+    const parsed = parseDeliveryChat(message.content || "");
+    if (!parsed || !projectPath || !deliveryChatHasCard(parsed)) return;
+    applyDeliveryChat(projectPath, parsed);
+  }, [deliveryChatActive, isUser, message.content, message.id, projectPath]);
+  useEffect(() => {
+    if (isUser || !projectPath) return;
+    maybeApplyDispatchSplitFromReply(projectPath, message.content || "");
+    maybeApplyVisualDesignFromReply(projectPath, message.content || "");
+    if (!deliveryChatActive) return;
+    if (isDeliveryGateNote(message.content || "")) return;
+    const tab = useAppStore.getState().workPanelTabs.find(
+      (item) => item.id === useAppStore.getState().activeWorkPanelTabId,
+    );
+    if (tab?.kind === "architecture") {
+      void maybeRenderArchitectureFromReply(projectPath, message.content || "");
+    }
+  }, [deliveryChatActive, isUser, message.content, message.id, projectPath]);
   const revisionCount = message.revisionCount ?? 0;
   const activeRevision = message.activeRevision ?? revisionCount;
   const showRevisionPager = editableUserMessage && revisionCount > 1;
@@ -227,7 +293,7 @@ export const MessageRow = memo(function MessageRow({
                         {message.command}
                       </code>
                     ) : (
-                      <LinkifiedText text={String(message.content || "")} attachments={message.attachments} />
+                      <LinkifiedText text={visible} attachments={message.attachments} />
                     )}
                   </div>
                 ) : null}
@@ -235,6 +301,21 @@ export const MessageRow = memo(function MessageRow({
             ) : (
               <div className="prose-chat">
                 <Markdown source={displayed} />
+                {showChoices ? (
+                  <div className="choice-options" role="group" aria-label={t("chat.choiceOptions")}>
+                    {deliveryChoices.map((option) => (
+                      <button
+                        key={option}
+                        type="button"
+                        className="choice-chip"
+                        disabled={isRunning}
+                        onClick={() => onChoice(option)}
+                      >
+                        {choiceLabel(option)}
+                      </button>
+                    ))}
+                  </div>
+                ) : null}
               </div>
             )}
           </div>
@@ -276,7 +357,7 @@ export const MessageRow = memo(function MessageRow({
                 </TooltipButton>
               </div>
             ) : null}
-            {hasAnswer ? <CopyButton text={message.content} label={copyLabel} /> : null}
+            {hasAnswer ? <CopyButton text={visible} label={copyLabel} /> : null}
             {editableUserMessage ? (
               <TooltipButton
                 className="copy-btn icon"

@@ -10,15 +10,15 @@
  * and other hop-by-hop or auth keys are rejected so this cannot smash signing.
  *
  * Values are folded to half-width and trimmed before they enter the map (see
- * `@pi-desktop/shared`'s `header-value.ts`), and a value that still cannot be
+ * `@duaer-ai-desk/shared`'s `header-value.ts`), and a value that still cannot be
  * a ByteString is dropped here rather than thrown by `Headers.set` at request
  * time. Host persistence rejects the same rows with a named error, so this
  * path only sees a stale store, a plugin, or an unsaved form value.
  */
 
 import { AsyncLocalStorage } from "node:async_hooks";
-import { HEADER_VALUE_MAX_BYTES, inspectHeaderValue } from "@pi-desktop/shared";
-import type { FetchFunction, ProviderHeaders, SimpleStreamOptions } from "@earendil-works/pi-ai";
+import { HEADER_VALUE_MAX_BYTES, inspectHeaderValue } from "@duaer-ai-desk/shared";
+import type { FetchFunction, ProviderHeaders, SimpleStreamOptions } from "@duaer-ai-desk/upstream-ai";
 
 export const PROVIDER_HEADERS_MAX = 32;
 export const PROVIDER_HEADER_KEY_MAX_BYTES = 256;

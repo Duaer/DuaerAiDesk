@@ -423,6 +423,99 @@
   flex-direction: column;
 }
 
+/* Collapsed sidebar stays a 56px icon rail. Hover reveals the list as an
+   overlay so the dialog column does not resize. */
+.sidebar-slot {
+  display: contents;
+}
+
+.app-shell.sidebar-collapsed .sidebar-slot {
+  position: relative;
+  display: block;
+  flex: 0 0 56px;
+  width: 56px;
+  height: 100%;
+  z-index: 30;
+}
+
+/* Hover reveal paints over later pane surfaces (preview chrome is 200).
+   Window controls (1100), search, and toasts stay above this layer. */
+.app-shell.sidebar-collapsed.sidebar-revealed .sidebar-slot {
+  z-index: 1000;
+}
+
+.app-shell.sidebar-collapsed .sidebar-slot .sidebar {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 56px;
+  flex: none;
+  transition: width var(--motion-duration-fast) var(--motion-ease-out);
+}
+
+.app-shell.sidebar-collapsed.sidebar-revealed .sidebar-slot .sidebar {
+  width: var(--ds-sidebar-width);
+  box-shadow: 12px 0 28px color-mix(in oklab, var(--ds-text-primary) 12%, transparent);
+}
+
+.app-shell.sidebar-collapsed:not(.sidebar-revealed) .sidebar-header,
+.app-shell.sidebar-collapsed:not(.sidebar-revealed) .sidebar-body {
+  min-width: 0;
+}
+
+.app-shell.sidebar-collapsed:not(.sidebar-revealed) .sidebar-header {
+  flex-direction: column;
+  justify-content: flex-start;
+  height: auto;
+  gap: 4px;
+  padding: 8px 0;
+}
+
+.app-shell.sidebar-collapsed:not(.sidebar-revealed) .sidebar-header-actions {
+  flex-direction: column;
+  margin-left: 0;
+}
+
+.app-shell.sidebar-collapsed:not(.sidebar-revealed) .brand span,
+.app-shell.sidebar-collapsed:not(.sidebar-revealed) .sidebar-body > :not(.sidebar-footer),
+.app-shell.sidebar-collapsed:not(.sidebar-revealed) .footer-build-version {
+  display: none;
+}
+
+.app-shell.sidebar-collapsed:not(.sidebar-revealed) .sidebar-body {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.app-shell.sidebar-collapsed:not(.sidebar-revealed) .sidebar-footer {
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding-bottom: 8px;
+}
+
+.app-shell.sidebar-collapsed:not(.sidebar-revealed) .footer-actions {
+  flex-direction: column;
+}
+
+.app-shell.sidebar-collapsed:not(.sidebar-revealed) .footer-build {
+  margin-left: 0;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  justify-content: center;
+}
+
+:root[data-platform="darwin"] .app-shell.sidebar-collapsed:not(.sidebar-revealed) .sidebar-header {
+  padding-top: max(8px, var(--ds-window-lead-inset));
+  padding-left: 0;
+}
+
+:root[data-platform="darwin"] .app-shell.sidebar-collapsed:not(.sidebar-revealed) .sidebar-header > .brand {
+  display: inline-flex;
+}
+
 /*
  * macOS supplies the blur through native sidebar vibrancy. The renderer
  * only adds a thin tint plus sheen on the sidebar, rail, and boot splash —
@@ -446,6 +539,12 @@
 
 :root[data-platform="darwin"] .sidebar-rail {
   position: relative;
+}
+
+/* The hover overlay sits on top of the chat. Glass would show that content
+   through the list, so the revealed dock uses the solid sidebar color. */
+:root[data-platform="darwin"] .app-shell.sidebar-collapsed.sidebar-revealed .sidebar.sidebar-surface {
+  background-color: var(--ds-bg-sidebar, var(--ds-bg-primary));
 }
 
 /* Collapsed-sidebar controls stay in normal flow inside the main drag band so
@@ -483,7 +582,6 @@
 }
 
 .main-titlebar {
-  pointer-events: none;
   position: absolute;
   inset-inline: 0;
   top: 0;
@@ -497,7 +595,10 @@
   /* Keep the shell continuous; titlebar hierarchy comes from spacing and
    * surface color instead of a hard lower rule. */
   border-bottom: 0;
-  -webkit-app-region: drag;
+  /* Toolbars with controls must not be native drag regions — Electron will
+   * swallow clicks. The document itself is no-drag (base.css). */
+  -webkit-app-region: no-drag;
+  app-region: no-drag;
 }
 
 .main-titlebar.work-panel-open {
@@ -531,8 +632,8 @@
    * governs expansion; the .ct-collapsed rule below matches sidebar-out.
    */
   transition: padding-left var(--motion-duration-normal) var(--motion-ease-out);
-  -webkit-app-region: drag;
-  app-region: drag;
+  -webkit-app-region: no-drag;
+  app-region: no-drag;
 }
 
 .conversation-topbar.ct-collapsed {
@@ -544,8 +645,6 @@
 
 .conversation-topbar .ct-left,
 .conversation-topbar .ct-right {
-  -webkit-app-region: no-drag;
-  app-region: no-drag;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -576,8 +675,6 @@
   min-width: 0;
   overflow: hidden;
   white-space: nowrap;
-  -webkit-app-region: drag; /* keep the title area draggable */
-  app-region: drag;
 }
 
 .conversation-topbar .ct-title {
@@ -617,6 +714,11 @@
   background: transparent;
   color: var(--ds-text-secondary);
   cursor: pointer;
+  /* Parent drag bands are not always enough — Electron needs the control itself
+   * to opt out of app-region drag (same as work-panel launcher rows). */
+  pointer-events: auto;
+  -webkit-app-region: no-drag;
+  app-region: no-drag;
   transition: background var(--motion-duration-fast) var(--motion-ease-out),
     color var(--motion-duration-fast) var(--motion-ease-out);
 }
@@ -656,6 +758,9 @@
   padding: 2px;
   border-radius: var(--radius-md);
   background: var(--ds-tile);
+  pointer-events: auto;
+  -webkit-app-region: no-drag;
+  app-region: no-drag;
 }
 
 /* Keep the sole work-panel toggle anchored to the viewport while the in-flow
@@ -705,7 +810,7 @@
 
 /* The macOS traffic lights own the window's top-left corner. Everything below
  * reads `--ds-window-lead-inset`: the cluster's right edge (native geometry,
- * injected at boot from @pi-desktop/shared — see window-chrome.ts) plus the
+ * injected at boot from @duaer-ai-desk/shared — see window-chrome.ts) plus the
  * breathing room kept before the first shell control. Fullscreen hides the
  * buttons, so the reserve falls back to the ordinary 8px gutter; Windows and
  * Linux keep the 0px default from tokens.css and use their renderer-drawn
@@ -781,6 +886,16 @@
 
 .conversation-topbar .ct-lead > .ct-icon-btn {
   flex: 0 0 28px;
+}
+
+/*
+ * `.ct-icon-btn` sets pointer-events: auto, which beats the lead slot's
+ * pointer-events: none. While the sidebar is open the slot hangs into the
+ * sidebar header (opacity 0) and steals those clicks. Turn the control off
+ * until the collapsed state opts back in.
+ */
+.conversation-topbar:not(.ct-collapsed) .ct-lead > .ct-icon-btn {
+  pointer-events: none;
 }
 
 /* Frameless Windows/Linux controls own a 120px band at the conversation pane's
@@ -1154,7 +1269,8 @@
   justify-content: space-between;
   gap: 4px;
   padding: 0 8px;
-  -webkit-app-region: drag;
+  -webkit-app-region: no-drag;
+  app-region: no-drag;
 }
 
 :root[data-platform="darwin"] .sidebar-header {

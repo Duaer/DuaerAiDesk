@@ -29,7 +29,7 @@ const server = createServer({ key, cert }, (_request, response) => {
 server.on("connection", () => { handshakes++; });
 async function run(host, expected, extra) {
   const env = { ...process.env, ELECTRON_RUN_AS_NODE: "1" };
-  for (const name of ["NODE_EXTRA_CA_CERTS", "NODE_OPTIONS", "NODE_USE_ENV_PROXY", "NODE_TLS_REJECT_UNAUTHORIZED", "HTTP_PROXY", "HTTPS_PROXY", "ALL_PROXY", "PI_DESKTOP_PROXY_JSON"])
+  for (const name of ["NODE_EXTRA_CA_CERTS", "NODE_OPTIONS", "NODE_USE_ENV_PROXY", "NODE_TLS_REJECT_UNAUTHORIZED", "HTTP_PROXY", "HTTPS_PROXY", "ALL_PROXY", "DUAER_AI_DESK_PROXY_JSON"])
     delete env[name];
   if (extra) env.NODE_EXTRA_CA_CERTS = join(fixture, "localhost-cert.pem");
   const before = handshakes;
@@ -59,7 +59,7 @@ process.stdout.write(JSON.stringify({jsonrpc:'2.0',method:'test.trust',params:{s
   });
   await build({ entryPoints: [join(root, "scripts/e2e/provider-certificate-sidecar.ts")],
     outfile: join(temp, "parent.mjs"), bundle: true, platform: "node", format: "esm",
-    alias: { "@pi-desktop/host-runtime": join(root, "packages/host-runtime/src/agent-sidecar.ts") },
+    alias: { "@duaer-ai-desk/host-runtime": join(root, "packages/host-runtime/src/agent-sidecar.ts") },
     banner: { js: "import { createRequire } from 'node:module'; import { dirname } from 'node:path'; import { fileURLToPath } from 'node:url'; const require = createRequire(import.meta.url); const __dirname = dirname(fileURLToPath(import.meta.url));" },
   });
   await run("localhost", "DEPTH_ZERO_SELF_SIGNED_CERT", false);

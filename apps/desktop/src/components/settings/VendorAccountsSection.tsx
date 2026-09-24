@@ -6,7 +6,7 @@
  */
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import type { OAuthAccount, OAuthVendor, ProviderPublic } from "@pi-desktop/shared";
+import type { OAuthAccount, OAuthVendor, ProviderPublic } from "@duaer-ai-desk/shared";
 import { useAppStore } from "../../stores/app-store";
 import { api } from "../../lib/api";
 import {

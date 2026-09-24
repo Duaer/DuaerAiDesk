@@ -18,7 +18,7 @@ const { values } = parseArgs({ options: {
 } });
 if (values.help) {
   console.log(`Usage: node scripts/e2e-hosted-search.mjs [--bundle PATH] [--timeout-ms 15000]
-Default: pnpm --filter @pi-desktop/shared build, then @pi-desktop/agent-runtime bundle.
+Default: pnpm --filter @duaer-ai-desk/shared build, then @duaer-ai-desk/agent-runtime bundle.
 --bundle: skip rebuilding and run that explicit artifact, retaining its SHA-256.
 Evidence and isolated homes stay under PI_SCRATCH_DIR or mkdtemp(os.tmpdir()).
 Seven cases: next prompt, Read, instruction change, real Task/TaskWait, persisted restore, two invalid-history cases.
@@ -96,7 +96,7 @@ when the run ends; any change between the two fails the run.`);
     evidence.sourceFingerprintBefore = await fingerprint();
     assert.ok(evidence.head !== "unavailable" && evidence.sourceFingerprintBefore, "build source identity is unavailable");
     if (!values.bundle) {
-      for (const [pkg, script] of [["@pi-desktop/shared", "build"], ["@pi-desktop/agent-runtime", "bundle"]]) {
+      for (const [pkg, script] of [["@duaer-ai-desk/shared", "build"], ["@duaer-ai-desk/agent-runtime", "bundle"]]) {
         const args = ["--filter", pkg, script];
         console.log(`Build: pnpm ${args.join(" ")}`);
         const output = runPnpm(args);

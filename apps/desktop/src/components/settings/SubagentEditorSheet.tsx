@@ -17,12 +17,13 @@ import {
   type SubagentPreset,
   type SubagentThinkingLevel,
   type UserSubagentRecord,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import { useAppStore } from "../../stores/app-store";
 import { Button, Field, HelpIcon, Input, Textarea, TooltipButton, cx, portalOverlay } from "../ui";
 import { IconChevronRight, IconFolderOpen, IconX } from "../icons";
 import {
   groupSubagentModelChoices,
+  judgmentOnlyModelChoices,
   subagentModelChoices,
   subagentModelOrphanPin,
   subagentModelPinParts,
@@ -118,6 +119,8 @@ export const SUBAGENT_PRESET_COPY = {
   "test-runner": { name: "presetTestRunnerName", desc: "presetTestRunnerDesc" },
   fixer: { name: "presetFixerName", desc: "presetFixerDesc" },
   "ui-designer": { name: "presetUiDesignerName", desc: "presetUiDesignerDesc" },
+  coder: { name: "presetCoderName", desc: "presetCoderDesc" },
+  judge: { name: "presetJudgeName", desc: "presetJudgeDesc" },
 } as const satisfies Record<SubagentPreset["id"], { name: string; desc: string }>;
 
 /** Full i18n path for a preset chip, or null when `id` is blank / unknown. */
@@ -235,6 +238,20 @@ export function resetSubagentTemplate(draft: SubagentDraft): SubagentDraft {
   };
 }
 
+/** A pin the picker did not produce, or null when every pin can resolve. */
+export function subagentModelPinError(
+  draft: Pick<SubagentDraft, "model" | "fallbackModels">,
+): string | null {
+  if (
+    [draft.model, ...draft.fallbackModels].some(
+      (pin) => pin.trim() && !subagentModelPinParts(pin.trim()),
+    )
+  ) {
+    return "extensions.subagents.errorModel";
+  }
+  return null;
+}
+
 /** Returns an i18n key for the first problem, or null when the draft can save. */
 export function subagentDraftError(draft: SubagentDraft): string | null {
   if (!draft.name.trim()) return "extensions.subagents.errorName";
@@ -250,9 +267,8 @@ export function subagentDraftError(draft: SubagentDraft): string | null {
   // the picker offers those, so rejecting them here would make a selectable
   // option impossible to save. This shares the picker's own splitter so the two
   // can never disagree.
-  if ([draft.model, ...draft.fallbackModels].some((pin) => pin.trim() && !subagentModelPinParts(pin.trim()))) {
-    return "extensions.subagents.errorModel";
-  }
+  const modelError = subagentModelPinError(draft);
+  if (modelError) return modelError;
   // Cleared (`0`) is a valid state that means "no cap of our own", so only a
   // value outside the accepted range is an error. The field only produces
   // integers, so a fraction cannot reach here from the UI — the check keeps
@@ -402,12 +418,16 @@ function ModelField({
   modelChoices,
   modelGroups,
   orphanModel,
+  hideThinking = false,
+  judgmentOnly = false,
 }: {
   draft: SubagentDraft;
   setDraft: (next: SubagentDraft) => void;
   modelChoices: ReturnType<typeof subagentModelChoices>;
   modelGroups: ReturnType<typeof groupSubagentModelChoices>;
   orphanModel: string | null;
+  hideThinking?: boolean;
+  judgmentOnly?: boolean;
 }) {
   const { t } = useTranslation();
   const modelValue = subagentModelSelectValue(draft.model, modelChoices);
@@ -419,8 +439,8 @@ function ModelField({
           label={t("extensions.subagents.model")}
           hint={
             modelChoices.length > 0
-              ? t("extensions.subagents.modelHint")
-              : t("extensions.subagents.modelPickEmpty")
+              ? t(judgmentOnly ? "extensions.subagents.judgmentModelHint" : "extensions.subagents.modelHint")
+              : t(judgmentOnly ? "extensions.subagents.judgmentModelEmpty" : "extensions.subagents.modelPickEmpty")
           }
         >
           {modelChoices.length === 0 ? (
@@ -440,11 +460,13 @@ function ModelField({
             <SubagentModelPicker
               value={modelValue}
               groups={modelGroups}
-              orphanPin={orphanModel}
-              onChange={(next) => setDraft({ ...draft, model: next })}
+              orphanPin={judgmentOnly ? null : orphanModel}
+              allowInherit={!judgmentOnly}
+              onChange={(next) => setDraft({ ...draft, model: next, ...(judgmentOnly ? { fallbackModels: [] } : {}) })}
             />
           )}
         </Field>
+        {hideThinking ? null : (
         <Field
           label={t("extensions.subagents.thinking")}
           hint={t("extensions.subagents.thinkingHint")}
@@ -468,13 +490,16 @@ function ModelField({
             ]}
           />
         </Field>
+        )}
       </div>
+      {judgmentOnly ? null : (
       <SubagentFallbackModels
         primary={draft.model}
         values={draft.fallbackModels}
         choices={modelChoices}
         onChange={(fallbackModels) => setDraft({ ...draft, fallbackModels })}
       />
+      )}
     </>
   );
 }
@@ -562,6 +587,8 @@ export function SubagentEditorSheet({
   editing,
   saving,
   initialPresetId,
+  modelOnly = false,
+  judgmentOnly = false,
   onClose,
   onSave,
   onReveal,
@@ -572,23 +599,31 @@ export function SubagentEditorSheet({
   saving: boolean;
   /** Template chip to select on create, e.g. after Copy as mine. */
   initialPresetId?: string;
+  /** Built-in edit: the shipped instructions stay, only the model pin changes. */
+  modelOnly?: boolean;
+  /** Built-in judge: the picker lists only the model marked for judgment. */
+  judgmentOnly?: boolean;
   onClose: () => void;
   onSave: () => void;
   onReveal?: () => void;
 }) {
   const { t } = useTranslation();
   const providers = useAppStore((state) => state.providers);
+  const judgmentModel = useAppStore((state) => state.settings?.judgmentModel);
   const copiedPreset = Boolean(initialPresetId && findSubagentPreset(initialPresetId));
   const [nameTouched, setNameTouched] = useState(!!editing || copiedPreset);
   const [presetId, setPresetId] = useState<string | null>(
     copiedPreset && initialPresetId ? initialPresetId : BLANK_SUBAGENT_PRESET_ID,
   );
   const [advancedOpen, setAdvancedOpen] = useState(!!editing);
-  const errorKey = subagentDraftError(draft);
+  const errorKey = modelOnly ? subagentModelPinError(draft) : subagentDraftError(draft);
   const pristine = !editing && !draft.name.trim() && !draft.description.trim();
   const bytes = new TextEncoder().encode(draft.body).length;
   const slug = draft.id || subagentSlug(draft.name);
-  const modelChoices = useMemo(() => subagentModelChoices(providers), [providers]);
+  const modelChoices = useMemo(() => {
+    const choices = subagentModelChoices(providers);
+    return judgmentOnly ? judgmentOnlyModelChoices(choices, judgmentModel) : choices;
+  }, [providers, judgmentOnly, judgmentModel]);
   const modelGroups = useMemo(
     () => groupSubagentModelChoices(modelChoices),
     [modelChoices],
@@ -658,10 +693,13 @@ export function SubagentEditorSheet({
         <div className="ext-sheet-head">
           <div>
             <h3 id="subagent-sheet-title" className="ext-sheet-title">
-              {editing
+              {editing || modelOnly
                 ? t("extensions.subagents.editTitle")
                 : t("extensions.subagents.addTitle")}
             </h3>
+            {modelOnly ? (
+              <p className="ext-sheet-sub">{t("extensions.subagents.builtinModelNote")}</p>
+            ) : null}
           </div>
           <TooltipButton
             type="button"
@@ -675,10 +713,23 @@ export function SubagentEditorSheet({
         </div>
 
         <div className="ext-sheet-body">
-          {!editing ? (
+          {modelOnly ? (
+            <ModelField
+              hideThinking
+              draft={draft}
+              setDraft={setDraft}
+              modelChoices={modelChoices}
+              modelGroups={modelGroups}
+              orphanModel={orphanModel}
+              judgmentOnly={judgmentOnly}
+            />
+          ) : null}
+          {!modelOnly && !editing ? (
             <PresetPicker selectedId={presetId} onSelect={applyPreset} />
           ) : null}
 
+          {modelOnly ? null : (
+          <>
           <Field
             label={t("extensions.subagents.name")}
             hint={slug ? t("extensions.subagents.slugHint", { id: slug }) : undefined}
@@ -789,6 +840,8 @@ export function SubagentEditorSheet({
             modelGroups={modelGroups}
             orphanModel={orphanModel}
           />
+          </>
+          )}
         </div>
 
         {errorKey && !pristine ? (

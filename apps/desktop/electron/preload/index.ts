@@ -1,7 +1,7 @@
 import { contextBridge, ipcRenderer, webUtils } from "electron";
-import { IPC, IPC_WHITELIST } from "@pi-desktop/shared/protocol";
+import { IPC, IPC_WHITELIST } from "@duaer-ai-desk/shared/protocol";
 
-const LOCALE_ARGUMENT_PREFIX = "--pi-desktop-locale=";
+const LOCALE_ARGUMENT_PREFIX = "--duaer-ai-desk-locale=";
 
 function readOsLocale(): string | undefined {
   return process.argv
@@ -46,6 +46,6 @@ const api = {
   },
 };
 
-contextBridge.exposeInMainWorld("piDesktop", api);
+contextBridge.exposeInMainWorld("duaerAiDesk", api);
 
-export type PiDesktopPreloadApi = typeof api;
+export type DuaerAiDeskPreloadApi = typeof api;

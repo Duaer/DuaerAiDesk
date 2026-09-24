@@ -13,7 +13,7 @@ import {
   type SpeechStatus,
   type SpeechSynthesizeResult,
   type SpeechTranscribeResult,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import {
   assertSameOrigin,
   executeSpeechHttp,
@@ -22,7 +22,7 @@ import {
   type SpeechHttpCall,
   type SpeechHttpResult,
   type SpeechJob,
-} from "@pi-desktop/agent-runtime";
+} from "@duaer-ai-desk/agent-runtime";
 import type { HostProcess } from "../host-process";
 import type { Logger } from "../logger";
 import type { PluginRuntime } from "../plugin-runtime";

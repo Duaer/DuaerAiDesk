@@ -15,7 +15,7 @@ const [store, sidebarPreferences, api, app, main, protocol, runtime] = await Pro
 ]);
 
 test("session title summarization is wired through the full desktop path", () => {
-  assert.match(protocol, /sessionSummarizeTitle: "pi-desktop\/session\/summarizeTitle"/);
+  assert.match(protocol, /sessionSummarizeTitle: "duaer-ai-desk\/session\/summarizeTitle"/);
   assert.match(api, /summarizeSessionTitle: \(req: SessionSummarizeTitleRequest\)/);
   assert.match(api, /IPC\.invoke\.sessionSummarizeTitle/);
   assert.match(main, /handle\(IPC\.invoke\.sessionSummarizeTitle/);

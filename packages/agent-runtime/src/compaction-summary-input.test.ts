@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   estimateTokens,
   type AgentMessage,
-} from "@earendil-works/pi-agent-core";
+} from "@duaer-ai-desk/upstream-agent-core";
 import {
   addSummaryUsage,
   compactionSummaryInputLimit,

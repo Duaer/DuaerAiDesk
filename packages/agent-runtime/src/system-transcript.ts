@@ -1,4 +1,4 @@
-import type { AgentMessage } from "@earendil-works/pi-agent-core";
+import type { AgentMessage } from "@duaer-ai-desk/upstream-agent-core";
 import {
   contentText,
   createInitialSystemMessage,
@@ -9,7 +9,7 @@ import {
   type SystemMessage,
   type Tool,
   toToolDeclaration,
-} from "@earendil-works/pi-ai";
+} from "@duaer-ai-desk/upstream-ai";
 
 function systemMessages(messages: readonly AgentMessage[]): SystemMessage[] {
   return messages.filter((message): message is SystemMessage => message.role === "system");

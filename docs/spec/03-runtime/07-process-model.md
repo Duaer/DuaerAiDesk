@@ -5,7 +5,7 @@
 MVP target topology:
 
 ```text
-PI-Desktop.app
+DuaerAiDesk.app
 ├── Electron Main
 │   ├── Renderer (React UI)
 │   ├── Rust host-core sidecar
@@ -33,13 +33,13 @@ focuses its main window from `second-instance`, recreating a window that was
 closed or hidden into the tray, exactly as the tray's Show action does. The lock
 is Electron's, so its scope is `userData` — derived from the application name,
 which is therefore set before the request — rather than the data directory: a
-run pointed at its own `PI_DESKTOP_DATA_DIR` (E2E harnesses, the capture rig, a
+run pointed at its own `DUAER_AI_DESK_DATA_DIR` (E2E harnesses, the capture rig, a
 side-by-side profile) shares no database, outbox, or logs with the default
 installation and stays launchable while one is running (D236, ADR 0094).
 
 A development build is its own installation rather than a second process of
-the same one: it runs under `PI-Desktop Dev` in the OS application-data root
-and reads `~/.pi-desktop-dev`. `pnpm dev` therefore starts while a packaged app
+the same one: it runs under `DuaerAiDesk Dev` in the OS application-data root
+and reads `~/.duaer-ai-desk-dev`. `pnpm dev` therefore starts while a packaged app
 holds its lock, and the two never share a database, an outbox, or a log tree
 (D599, ADR 0094). An explicit `--user-data-dir` is honored instead, because the
 E2E harnesses point a build at a throwaway profile with it.
@@ -69,13 +69,13 @@ as a failure. The watchdog never cancels the startup it watches: a boot that
 finishes replaces the surface with the shell, and the recovery surface replaces
 the splash. The renderer-drawn window controls stay above that surface, so a
 frameless Windows/Linux window can always be closed, and quitting from it goes
-through the renderer quit channel (`pi-desktop/app/quit`), which runs the same
+through the renderer quit channel (`duaer-ai-desk/app/quit`), which runs the same
 ordered shutdown as the Quit menu item.
 
 After host-core is up, Electron main reads `AppSettings.networkProxy` and
 applies it before spawning the agent sidecar (D340). Chromium sessions use
 `session.setProxy`; main-process `fetch` is `net.fetch`; the sidecar receives
-the same config through `sidecar.configure` and `PI_DESKTOP_PROXY_JSON`.
+the same config through `sidecar.configure` and `DUAER_AI_DESK_PROXY_JSON`.
 HTTP(S) provider requests use undici's proxy dispatcher; SOCKS5 provider
 requests use a buffered CONNECT tunnel so a proxy may coalesce the SOCKS
 handshake response without stalling the request. Custom URLs with userinfo
@@ -99,7 +99,7 @@ errors remain readable instead of becoming replacement characters.
 
 Crashpad is started local-only (`uploadToServer: false`) before `ready`, and
 dumps are stored under `<data_dir>/crash-dumps` (D602) so a
-`PI_DESKTOP_DATA_DIR` profile does not share dumps with another installation.
+`DUAER_AI_DESK_DATA_DIR` profile does not share dumps with another installation.
 An unexpected renderer exit records its reason and exit code, then reloads the
 current main window when it is still live. A clean renderer exit and an accepted
 window close do not trigger recovery.
@@ -139,7 +139,7 @@ Two more boot outcomes are named rather than left as a generic outage (D380):
   supported M` on stderr). Electron parses that line from the last stderr
   before exit, stops the restart loop on the first failure, and pushes
   `hostStatus` with `message: "DB_SCHEMA_TOO_NEW"` and both numbers. The banner
-  tells the user to install the newer PI-Desktop that last opened this data.
+  tells the user to install the newer DuaerAiDesk that last opened this data.
   No data is migrated down.
 - **Non-native build.** At boot Electron compares `process.arch` with the CPU
   (on macOS via `sysctl.proc_translated`, which is `1` only under Rosetta 2;
@@ -276,13 +276,13 @@ sidecar/host shutdown sequence runs before the updater replaces the app.
 
 ### Release
 - package Electron app
-- ship Rust host binary in resources (`Resources/bin/pi-desktop-host-core`)
+- ship Rust host binary in resources (`Resources/bin/duaer-ai-desk-host-core`)
 - agent sidecar runs the bundled `agent-runtime/sidecar.js` on the Electron
   binary itself with `ELECTRON_RUN_AS_NODE=1` — no separate Node runtime is
   shipped (resolves **D008**)
 - `Resources/agent-runtime/sidecar.js` is the sidecar's only independent
   release entry. ASAR does not carry a second complete
-  `@pi-desktop/agent-runtime` package tree; Electron Main may inline the
+  `@duaer-ai-desk/agent-runtime` package tree; Electron Main may inline the
   pure-JS helpers it calls without changing process or protocol ownership
 - renderer dependencies ship through Vite output rather than duplicate raw
   package trees; no interactive PTY native module is packaged
@@ -299,7 +299,7 @@ renderer IPC surface. The target Agent Host is a headless module
 (`packages/agent-host`) that owns session and turn admission, the turn queue,
 the approval broker, and the event log, supervised beside the Node pi sidecar
 and Rust host-core, with an authenticated RACP server above it (D374). The
-first remote deployment (D375) runs that module as a headless `pi-host` on a
+first remote deployment (D375) runs that module as a headless `duaer-ai-desk-host` on a
 remote machine, bound to loopback and reached from the desktop through an SSH
 port forward. The unscheduled Gateway topology would add an outbound Host
 link; the Gateway routes authenticated clients and never owns workspace

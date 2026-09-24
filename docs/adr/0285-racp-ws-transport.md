@@ -12,7 +12,7 @@
 R0 froze the RACP contract as typebox schemas and R1 delivered the headless
 Agent Host module. Nothing yet moved a JSON-RPC frame between two processes:
 the module was only driven by Electron IPC. R2 needs the normative `RACP-WS`
-binding on both sides of an SSH tunnel — a server that the `pi-host` bundle
+binding on both sides of an SSH tunnel — a server that the `duaer-ai-desk-host` bundle
 binds on loopback and a client that Electron main runs — and it needs the
 device-token pairing of security §3.4, which the security spec described but
 no code implemented.
@@ -30,7 +30,7 @@ no code implemented.
    session, turn, event, approval, and input operations call the Agent Host
    module directly; the remote-host profile (session catalog mutations,
    projects, workspace reads, terminals) goes through the `RacpHostOperations`
-   interface that `pi-host` implements. The server never touches host-core
+   interface that `duaer-ai-desk-host` implements. The server never touches host-core
    RPC, a filesystem, or a pty (security §7).
 3. **Header-profile authentication with Host-issued device tokens.** The
    upgrade request must carry `Authorization: Bearer`; a token in the URL, a
@@ -62,7 +62,7 @@ no code implemented.
 
 ## Consequences
 
-- `pi-host` composes `RacpServer` + `bindRacpWebSocket` over the module and
+- `duaer-ai-desk-host` composes `RacpServer` + `bindRacpWebSocket` over the module and
   `RuntimeService` (ADR 0284); the desktop adapter composes `RacpClient` +
   `wsClientTransport`.
 - The conformance behaviors of spec §14 that do not need a machine boundary
@@ -79,7 +79,7 @@ no code implemented.
 
 - **Run RACP inside Electron main first (development loopback endpoint).**
   Rejected for this change: the only scheduled client is the desktop, and the
-  first server is `pi-host`; a desktop-side listener would add a network
+  first server is `duaer-ai-desk-host`; a desktop-side listener would add a network
   surface with no consumer.
 - **Cookie profile alongside the header profile.** Rejected: it belongs to
   the unscheduled browser milestone (D375).

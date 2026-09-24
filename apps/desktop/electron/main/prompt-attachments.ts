@@ -24,9 +24,9 @@ import {
   MAX_INLINE_IMAGE_BYTES,
   type AgentPromptAttachment,
   type MessageAttachment,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 
-export { MAX_INLINE_IMAGE_BYTES } from "@pi-desktop/shared";
+export { MAX_INLINE_IMAGE_BYTES } from "@duaer-ai-desk/shared";
 
 const IMAGE_EXTENSIONS = new Set([
   "avif",

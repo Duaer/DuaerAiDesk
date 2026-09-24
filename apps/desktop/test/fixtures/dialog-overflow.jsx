@@ -3,8 +3,8 @@ import { createRoot } from "react-dom/client";
 import { flushSync } from "react-dom";
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
-import { catalogs, flattenCatalog } from "@pi-desktop/i18n";
-import { IPC } from "@pi-desktop/shared";
+import { catalogs, flattenCatalog } from "@duaer-ai-desk/i18n";
+import { IPC } from "@duaer-ai-desk/shared";
 import { ExtensionPromptHost } from "../../src/components/ExtensionPromptDialog";
 import { SessionRenameDialog } from "../../src/components/SessionRenameDialog";
 import { ProjectInstructionsDialog } from "../../src/components/ProjectInstructionsDialog";
@@ -19,7 +19,7 @@ import { newInstallJob } from "../../src/features/plugins/install-progress";
 const listeners = new Map();
 const path = "C:\\Users\\Example\\AppData\\Local\\Temp\\pi-extension-fixture\\plugins\\greet\\src\\greet.ts";
 const long = "Project_" + "abcdefghij".repeat(25);
-window.piDesktop = {
+window.duaerAiDesk = {
   platform: "win32",
   on(channel, listener) {
     const set = listeners.get(channel) ?? new Set();

@@ -24,8 +24,8 @@
  */
 import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
 import { createServer, connect } from "node:net";
-import { ErrorCodes } from "@pi-desktop/shared";
-import { redactBootstrapOutput } from "./pi-host-bootstrap-script.js";
+import { ErrorCodes } from "@duaer-ai-desk/shared";
+import { redactBootstrapOutput } from "./duaer-ai-desk-host-bootstrap-script.js";
 import { createSshAskpass, type SshAskpassMaterial } from "./ssh-askpass.js";
 
 /** Where to reach a machine over SSH. */

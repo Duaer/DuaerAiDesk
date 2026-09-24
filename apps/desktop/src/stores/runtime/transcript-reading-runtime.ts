@@ -1,4 +1,4 @@
-import type { SessionDetail } from "@pi-desktop/shared";
+import type { SessionDetail } from "@duaer-ai-desk/shared";
 import type { SessionHistoryReadOptions } from "../../lib/api";
 import { delegationIdForMessage } from "../../lib/subagent-panel";
 import {

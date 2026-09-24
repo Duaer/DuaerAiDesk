@@ -7,7 +7,7 @@ import test from "node:test";
 import { exportLinuxAsar } from "../../../scripts/export-linux-asar.mjs";
 
 async function createFixture() {
-  const rootDir = await mkdtemp(join(tmpdir(), "pi-desktop-release-asar-"));
+  const rootDir = await mkdtemp(join(tmpdir(), "duaer-ai-desk-release-asar-"));
   const releaseDir = join(rootDir, "apps/desktop/release");
   await mkdir(join(releaseDir, "linux-unpacked/resources"), { recursive: true });
   await writeFile(
@@ -28,7 +28,7 @@ test("exports the exact Linux app.asar with the release asset name", async () =>
     const result = await exportLinuxAsar({ rootDir: fixture.rootDir });
     const destination = join(
       fixture.releaseDir,
-      "PI-Desktop-9.8.7-linux-x64.asar",
+      "DuaerAiDesk-9.8.7-linux-x64.asar",
     );
 
     assert.equal(result.destination, destination);

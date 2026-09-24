@@ -722,7 +722,7 @@ pub(crate) fn capture(
 ) -> Result<LocalSnapshot> {
     let mut snapshot = LocalSnapshot {
         manifest: RevisionManifest {
-            format: "pi-desktop-config-revision".to_string(),
+            format: "duaer-ai-desk-config-revision".to_string(),
             version: 1,
             revision_id: uuid::Uuid::new_v4().to_string(),
             parents: Vec::new(),

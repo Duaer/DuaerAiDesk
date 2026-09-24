@@ -180,12 +180,12 @@ export const ErrorCodes = {
   RATE_LIMITED: "RATE_LIMITED",
   /**
    * Remote Host connection codes (D448 / ADR 0284). The desktop adapter and
-   * the `pi-host` bootstrap classify a remote failure by these, never by
+   * the `duaer-ai-desk-host` bootstrap classify a remote failure by these, never by
    * matching message text.
    */
   /** The transport to a paired Host dropped; the Host itself may still be running. */
   HOST_DISCONNECTED: "HOST_DISCONNECTED",
-  /** Installing or starting `pi-host` over the bootstrap channel failed. */
+  /** Installing or starting `duaer-ai-desk-host` over the bootstrap channel failed. */
   HOST_BOOTSTRAP_FAILED: "HOST_BOOTSTRAP_FAILED",
   /** The paired Host runs a different release than this client. */
   HOST_VERSION_MISMATCH: "HOST_VERSION_MISMATCH",

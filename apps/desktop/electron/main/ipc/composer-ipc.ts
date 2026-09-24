@@ -1,4 +1,4 @@
-import { IPC, trustedExtensionCommandId, type ComposerCommand } from "@pi-desktop/shared";
+import { IPC, trustedExtensionCommandId, type ComposerCommand } from "@duaer-ai-desk/shared";
 import { builtinSkills } from "../builtin-skills";
 import { builtinComposerCommands } from "../builtin-commands";
 import type { AgentExtensionBridge } from "../agent-extensions";

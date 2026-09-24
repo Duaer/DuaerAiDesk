@@ -350,7 +350,7 @@ with `COMMAND_SHELL_CHANGED`; settings writes reject unavailable or
 wrong-platform IDs with `COMMAND_SHELL_INVALID`. No arbitrary executable path
 or executable path hash is accepted as shell identity.
 
-1. `PI_DESKTOP_BASH` env override (path to a bash executable)
+1. `DUAER_AI_DESK_BASH` env override (path to a bash executable)
 2. Unix: well-known locations (`/bin/bash`, `/usr/bin/bash`, `/usr/local/bin/bash`, Homebrew), then PATH
 3. Windows: `bash.exe` from Git for Windows — derived from the `git` on PATH, then standard install dirs, then PATH excluding the WSL launcher in `System32`
 

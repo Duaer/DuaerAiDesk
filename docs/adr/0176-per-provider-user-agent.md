@@ -2,14 +2,14 @@
 
 - Status: Accepted
 - Date: 2026-09-07
-- Deciders: PI-Desktop core
+- Deciders: DuaerAiDesk core
 - Amends ADR 0095 / ADR 0156
 
 ## Context
 
 Some gateways and vendor subscriptions inspect `User-Agent`. pi-ai stamps
 `pi (<platform> …)`, Anthropic OAuth inference sends `claude-cli/<version>`,
-OpenCode Go sends `pi-desktop/<APP_VERSION>`, and Codex overwrites User-Agent
+OpenCode Go sends `duaer-ai-desk/<APP_VERSION>`, and Codex overwrites User-Agent
 after extra headers. Settings had no way to set a per-row value. The provider
 schema listed a `headers` map that was never implemented.
 

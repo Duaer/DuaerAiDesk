@@ -11,7 +11,7 @@ import {
 import type { TFunction } from "i18next";
 import {
   rewriteIdeographicCommaTrigger,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import { useAppStore } from "../../../../stores/app-store";
 import { api } from "../../../../lib/api";
 import type { ComposerDraftSnapshot } from "../../../../lib/composer-smart-stop";

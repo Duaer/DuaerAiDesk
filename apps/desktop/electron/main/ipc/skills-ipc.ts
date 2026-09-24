@@ -1,6 +1,6 @@
 import { dialog, shell } from "electron";
-import { ErrorCodes, IPC, type ActivationScope, type AgentCapabilityMove, type AgentCapabilityQuery, type UserSkillRecord, type UserSubagentRecord } from "@pi-desktop/shared";
-import { loadSubagentDefinitions, type UserSubagentDocument } from "@pi-desktop/agent-runtime";
+import { ErrorCodes, IPC, type ActivationScope, type AgentCapabilityMove, type AgentCapabilityQuery, type UserSkillRecord, type UserSubagentRecord } from "@duaer-ai-desk/shared";
+import { judgmentModelFromSettings, loadSubagentDefinitions, type UserSubagentDocument } from "@duaer-ai-desk/agent-runtime";
 import type { HostProcess } from "../host-process";
 import type { Logger } from "../logger";
 import {
@@ -297,13 +297,27 @@ export function registerSkillsIpc({
    * delegation catalog and never lists one.
    */
   handle(IPC.invoke.subagentCatalog, async () => {
+    const host = getHost();
     const projectPath = (await optionalWorkspaceRoot()) ?? undefined;
     const disabled = await disabledBuiltinSubagents();
+    const builtinModels = host
+      ? await host
+          .call<{ models?: Record<string, { model?: string; fallbackModels?: string[] }> }>(
+            "agents.builtinModels",
+          )
+          .then((result) => result.models ?? {})
+          .catch(() => ({}))
+      : {};
+    const settings = host
+      ? await host.call<{ judgmentModel?: { providerId?: string; modelId?: string } | null }>("settings.get").catch(() => null)
+      : null;
     const { definitions, builtins, diagnostics } = await loadSubagentDefinitions(
       projectPath,
       {
         userDocuments: await activeUserSubagentDocuments(projectPath),
         disabledBuiltins: disabled,
+        builtinModels,
+        judgmentModel: judgmentModelFromSettings(settings),
       },
     );
     const off = new Set(disabled);
@@ -368,6 +382,16 @@ export function registerSkillsIpc({
     async (payload: { id: string; enabled: boolean }) => {
       if (!host) throw new Error("host unavailable");
       const res = await host.call("agents.setBuiltinEnabled", payload);
+      sendToRenderer(IPC.event.pluginChanged, { reason: "subagent" });
+      return res;
+    },
+  );
+
+  handle(
+    IPC.invoke.subagentSetBuiltinModel,
+    async (payload: { id: string; model?: string; fallbackModels?: string[] }) => {
+      if (!host) throw new Error("host unavailable");
+      const res = await host.call("agents.setBuiltinModel", payload);
       sendToRenderer(IPC.event.pluginChanged, { reason: "subagent" });
       return res;
     },

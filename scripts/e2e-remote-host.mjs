@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Headless remote Host E2E (E2E-231 host half): boots a real `pi-host` with
+ * Headless remote Host E2E (E2E-231 host half): boots a real `duaer-ai-desk-host` with
  * the debug host-core and the bundled sidecar on a throwaway data dir, pairs
  * a device over the loopback RACP-WS socket, registers a project, creates a
  * session, reads the workspace, drops the connection, and reconnects by
@@ -8,7 +8,7 @@
  * fail closed with `MODEL_NOT_CONFIGURED` rather than hang.
  *
  * Prereqs: `pnpm build:js`, `pnpm -C packages/agent-runtime bundle`, and a
- * host-core binary (target/debug or PI_DESKTOP_HOST_BIN).
+ * host-core binary (target/debug or DUAER_AI_DESK_HOST_BIN).
  */
 import { spawn } from "node:child_process";
 import { mkdtempSync, mkdirSync, rmSync, writeFileSync, existsSync } from "node:fs";
@@ -21,16 +21,16 @@ import { assert, errorCodeOf, shortJson } from "./e2e/assert.mjs";
 import { resolveHostBinary } from "./e2e/host.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const cli = join(root, "apps/pi-host/dist/cli.js");
+const cli = join(root, "apps/duaer-ai-desk-host/dist/cli.js");
 const sidecar = join(root, "packages/agent-runtime/dist-bundle/sidecar.js");
-for (const [label, path] of [["pi-host cli", cli], ["sidecar bundle", sidecar]]) {
+for (const [label, path] of [["duaer-ai-desk-host cli", cli], ["sidecar bundle", sidecar]]) {
   if (!existsSync(path)) {
     console.error(`${label} missing: ${path}`);
     process.exit(1);
   }
 }
 const hostBin = resolveHostBinary();
-const dataDir = mkdtempSync(join(tmpdir(), "pi-host-e2e-"));
+const dataDir = mkdtempSync(join(tmpdir(), "duaer-ai-desk-host-e2e-"));
 const project = join(dataDir, "project");
 mkdirSync(project, { recursive: true });
 writeFileSync(join(project, "README.md"), "# remote project\n");
@@ -55,7 +55,7 @@ function startHost(extraArgs = []) {
   return new Promise((resolveReady, reject) => {
     let out = "";
     const ready = {};
-    const timer = setTimeout(() => reject(new Error("pi-host did not become ready\n" + stderr.slice(-2000))), 60_000);
+    const timer = setTimeout(() => reject(new Error("duaer-ai-desk-host did not become ready\n" + stderr.slice(-2000))), 60_000);
     child.stdout.on("data", (chunk) => {
       out += String(chunk);
       for (const line of out.split("\n")) {
@@ -63,7 +63,7 @@ function startHost(extraArgs = []) {
         if (line.startsWith("PI_HOST_PAIRING_TOKEN ")) ready.pairing = JSON.parse(line.slice("PI_HOST_PAIRING_TOKEN ".length));
         if (line.startsWith("PI_HOST_FAILED ")) {
           clearTimeout(timer);
-          reject(new Error("pi-host failed: " + line + "\n" + stderr.slice(-2000)));
+          reject(new Error("duaer-ai-desk-host failed: " + line + "\n" + stderr.slice(-2000)));
         }
       }
       if (ready.info && (!extraArgs.includes("--pair") || ready.pairing)) {
@@ -73,7 +73,7 @@ function startHost(extraArgs = []) {
     });
     child.once("exit", (code) => {
       clearTimeout(timer);
-      reject(new Error(`pi-host exited early code=${code}\n${stderr.slice(-2000)}`));
+      reject(new Error(`duaer-ai-desk-host exited early code=${code}\n${stderr.slice(-2000)}`));
     });
   });
 }
@@ -92,7 +92,7 @@ function client(url, token, options = {}) {
   const events = [];
   const instance = new RacpClient({
     transport: wsClientTransport({ url, token }),
-    client: { name: "pi-host-e2e", version: "0.15.0" },
+    client: { name: "duaer-ai-desk-host-e2e", version: "0.15.0" },
     onEvent: (envelope) => events.push(envelope),
     requestTimeoutMs: 30_000,
     ...options,

@@ -61,7 +61,7 @@ import {
   type PluginSettingContrib,
   type PluginSkillContrib,
   type PluginThemeVariableContrib,
-} from "@pi-desktop/plugin-sdk";
+} from "@duaer-ai-desk/plugin-sdk";
 import {
   isAllowedKeybinding,
   isReservedKeybinding,
@@ -70,13 +70,13 @@ import {
   type PluginSettingDefinition,
   type PluginWorkspaceInfo,
   BUILTIN_SPEECH_PROTOCOL_IDS,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import {
   previewFile,
   resolveRealPathForCreateWithinRoot,
   resolveRealPathWithinRoot,
   resolveWithinRoot,
-} from "@pi-desktop/host-runtime";
+} from "@duaer-ai-desk/host-runtime";
 import { pluginChildEnv } from "./child-process-env";
 import { desktopDataDir } from "./data-paths";
 import { McpServerClient, type McpServerClientOptions } from "./plugin-mcp";
@@ -4069,7 +4069,7 @@ export class PluginRuntime {
    * Per-plugin data directory. Host-owned; the fs API cannot reach it.
    *
    * Electron main publishes the resolved data directory to
-   * `PI_DESKTOP_DATA_DIR` at boot, so this reads the installation's own root
+   * `DUAER_AI_DESK_DATA_DIR` at boot, so this reads the installation's own root
    * and a development host never writes plugin data into the packaged
    * profile's tree (D236).
    */

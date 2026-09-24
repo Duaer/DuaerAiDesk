@@ -34,7 +34,7 @@ export async function runSessionListProbe({
 }) {
   const profile = await realpath(dataDir);
   if (
-    !basename(profile).startsWith("pi-desktop-boot-") ||
+    !basename(profile).startsWith("duaer-ai-desk-boot-") ||
     dirname(profile) !== await realpath(tmpdir())
   ) {
     throw new Error("session-list probe requires its own temporary boot profile");
@@ -94,7 +94,7 @@ export async function runSessionListProbe({
   try {
     const measurements: RendererMeasurements = await window.webContents.executeJavaScript(`
       (async () => {
-        const api = window.piDesktop;
+        const api = window.duaerAiDesk;
         const fixtures = ${JSON.stringify(fixtures)};
         const listDurationsMs = [];
         const heartbeatDurationsMs = [];

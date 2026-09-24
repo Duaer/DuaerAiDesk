@@ -2,7 +2,7 @@
 
 ## 1. Goal
 
-PI-Desktop must support **all major market model vendors and models** that users commonly need, without hardcoding a tiny allowlist as product ceiling.
+DuaerAiDesk must support **all major market model vendors and models** that users commonly need, without hardcoding a tiny allowlist as product ceiling.
 
 Strategy:
 
@@ -71,8 +71,8 @@ allowlist. Agent-runtime injects OpenCode routing headers on every LLM
 request (session turns, subagents, context-compaction summaries, prompt
 enhancement, and plugin one-shots): `x-opencode-session` is the durable
 conversation id (or a per-call UUID when the caller has no session),
-`x-opencode-client` is `pi-desktop`, and `User-Agent` is
-`pi-desktop/<APP_VERSION>` unless the row sets `headers["User-Agent"]`. A custom OpenAI-compatible row whose base URL
+`x-opencode-client` is `duaer-ai-desk`, and `User-Agent` is
+`duaer-ai-desk/<APP_VERSION>` unless the row sets `headers["User-Agent"]`. A custom OpenAI-compatible row whose base URL
 host is `opencode.ai` receives the same headers. pi-ai is not relied on to
 emit `x-opencode-session`. Each provider row (AI service or OAuth account)
 may set optional `headers`; empty keeps adapter defaults. A fetch wrapper is
@@ -98,7 +98,7 @@ Completions requests use `thinkingFormat: "zai"` and `zaiToolStream: true`.
 DeepSeek-family Completions requests set
 `requiresReasoningContentOnAssistantMessages: true` when the row's `vendorKey`,
 base URL, model id, or catalog `family` identifies DeepSeek. pi-ai only
-auto-detects `provider === "deepseek"` or a `deepseek.com` URL, and PI-Desktop
+auto-detects `provider === "deepseek"` or a `deepseek.com` URL, and DuaerAiDesk
 stores a UUID as `model.provider`, so aggregators and custom gateways would
 otherwise omit `reasoning_content` on assistant turns that produced no thinking.
 Non-official DeepSeek endpoints also set `requiresNonEmptyReasoningReplay` so
@@ -152,7 +152,7 @@ Any vendor not listed but reachable by:
 ## 6. Model support policy
 
 ### 6.1 No hard model allowlist ceiling
-PI-Desktop must not permanently restrict users to a short fixed model list.
+DuaerAiDesk must not permanently restrict users to a short fixed model list.
 
 ### 6.2 Catalog responsibilities
 1. **models.dev** (`https://models.dev/api.json`) is the sole model metadata
@@ -371,7 +371,7 @@ type ThinkingLevel =
 ```
 
 The compatibility fields above are retained as a persisted-schema compatibility
-surface for older clients. PI-Desktop no longer reads them as runtime model
+surface for older clients. DuaerAiDesk no longer reads them as runtime model
 overrides. `ModelInfo` reasoning support and supported thinking levels describe
 the resolved models.dev record; effective provider/session capability comes from
 the exact `ModelBinding`. Unknown free-form ids start with the generic shape and

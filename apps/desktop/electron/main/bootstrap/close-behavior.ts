@@ -1,6 +1,6 @@
 import { dialog, type BrowserWindow } from "electron";
-import { catalogs, resolveLocale } from "@pi-desktop/i18n";
-import type { CloseBehavior } from "@pi-desktop/shared";
+import { catalogs, resolveLocale } from "@duaer-ai-desk/i18n";
+import type { CloseBehavior } from "@duaer-ai-desk/shared";
 import {
   readCloseBehavior,
   writeCloseBehavior,

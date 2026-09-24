@@ -132,6 +132,20 @@
   color: var(--ds-text-muted);
 }
 
+.project-create-dialog-background {
+  width: 100%;
+  min-height: 72px;
+  resize: vertical;
+  padding: 8px 12px;
+  font-size: var(--text-base);
+  font-weight: var(--font-weight-normal);
+  line-height: var(--leading-normal);
+}
+
+.project-create-dialog-background::placeholder {
+  color: var(--ds-text-muted);
+}
+
 .project-create-dialog-source {
   display: inline-flex;
   align-items: center;

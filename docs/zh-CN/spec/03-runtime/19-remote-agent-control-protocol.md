@@ -13,7 +13,7 @@
 
 RACP 控制 Agent Host，不是 Electron IPC、`host.proxy`、Rust host-core
 协议、provider proxy、本地 MCP 或子代理 A2A/Peer 协议。RACP v1 是桌面本地
-能力的严格子集；§3 的远端 Host profile 是让桌面本身成为另一台机器上 `pi-host`
+能力的严格子集；§3 的远端 Host profile 是让桌面本身成为另一台机器上 `duaer-ai-desk-host`
 的客户端所需的 v1.1 扩展（D375），仍推迟的操作在保留表中列名。
 
 | Term | Meaning |
@@ -194,14 +194,14 @@ Host 队列；持久事件使用每 epoch 递增且不复用的 `sequence`；附
 | `session/revoke` | owner | 撤销客户端或会话成员资格 |
 | `session/archive` | owner | 归档空闲会话 |
 
-远端 Host profile（v1.1，rollout R2 必需）：当桌面是另一台机器上 `pi-host` 的
+远端 Host profile（v1.1，rollout R2 必需）：当桌面是另一台机器上 `duaer-ai-desk-host` 的
 客户端时，renderer 期望本地拥有的会话控制。这些操作从 v1.1 起属于契约，通过
 `remoteHostProfile` 能力公布，各自保持本地规则：配置与 fork 仅限空闲，删除仅限
 owner，工作区读取都按会话持久根、Host 忽略规则和 `PATH_OUTSIDE_WORKSPACE` 边界解析。
 
 | Operation | Role | Behavior |
 |---|---|---|
-| `session/configure` | controller | 空闲时修改模式、provider/模型、思考等级或权限模式，规则同 `pi-desktop/session/configure` |
+| `session/configure` | controller | 空闲时修改模式、provider/模型、思考等级或权限模式，规则同 `duaer-ai-desk/session/configure` |
 | `session/fork` | controller | 将空闲会话（可指定消息 id）fork 为新的空闲会话 |
 | `session/rename` | controller | 重命名会话 |
 | `session/delete` | owner | 删除会话及其在 Host 上的 transcript |
@@ -287,7 +287,7 @@ Plan/Goal 审批为带显式 `permissionMode` 的 `approve` 或 `reject`，且�
 | Resolve input | `POST /v1/inputs/{inputId}:respond` |
 
 `RACP-WS` 是 v1 唯一规范绑定，首个部署（rollout R2）是远端机器上只绑定 loopback
-的 `pi-host`，桌面经 SSH 端口转发以 header profile 和 SSH 引导配对得到的设备 token
+的 `duaer-ai-desk-host`，桌面经 SSH 端口转发以 header profile 和 SSH 引导配对得到的设备 token
 连接，绑定与对端都是 loopback 时才接受明文 `ws://`；`RACP-HTTP` 是浏览器 profile，
 在任何浏览器客户端发布前必须交付，但浏览器里程碑不排期（D375），映射保留以免
 契约漂移；`RACP-GRPC` 保留，若采用则 `.proto` 由 typebox 来源生成。Host link 属于

@@ -20,6 +20,8 @@ import { useTranslation } from "react-i18next";
 import { api } from "../lib/api";
 import { SessionHoverCard } from "../features/sessions/SessionHoverCard";
 import { useSessionHoverCard } from "../features/sessions/useSessionHoverCard";
+import { toolWorkPanelTab } from "../lib/work-panel-tabs";
+import { useDeliveryDesk } from "../lib/use-delivery-desk";
 import { isDefaultSessionTitle, useAppStore } from "../stores/app-store";
 import {
   getGlobalPinnedSessions,
@@ -42,8 +44,8 @@ import {
   sidebarSessionStatus,
   type SidebarSessionStatus,
 } from "../lib/sidebar-session-status";
-import { ErrorCodes } from "@pi-desktop/shared";
-import type { SessionSummary } from "@pi-desktop/shared";
+import { ErrorCodes } from "@duaer-ai-desk/shared";
+import type { SessionSummary } from "@duaer-ai-desk/shared";
 import type {
   ProjectMeta,
   ProjectSort,
@@ -77,6 +79,7 @@ import {
   IconCopy,
   IconCircleAlert,
   IconNewSession,
+  IconFileText,
   IconFolder,
   IconMore,
   IconNewProject,
@@ -88,6 +91,17 @@ import {
   IconTrash,
   IconX,
 } from "./icons";
+
+function ProjectStageChip({ path }: { path: string }) {
+  const { t } = useTranslation();
+  const desk = useDeliveryDesk(path);
+  if (!desk) return null;
+  return (
+    <span className={`sidebar-project-stage is-${desk.stage}`}>
+      {t(`panel.requirements.stage.${desk.stage}`)}
+    </span>
+  );
+}
 
 type ProjectEntry = {
   path: string;
@@ -104,7 +118,7 @@ type ProjectEntry = {
 const VIEWPORT_PADDING = 8;
 
 /** Private MIME so a sidebar session drag is never mistaken for an OS file drop. */
-const SESSION_DRAG_MIME = "application/x-pi-desktop-session";
+const SESSION_DRAG_MIME = "application/x-duaer-ai-desk-session";
 
 type SidebarResizeState = {
   pointerId: number;
@@ -281,7 +295,7 @@ export function Sidebar({
   // Which row menu item is armed for its second, confirming click.
   const { armed: armedDelete, setArmed: setArmedDelete } = useArmedDelete();
   const [projectMenu, setProjectMenu] = useState<string | null>(null);
-  const [sectionMenu, setSectionMenu] = useState<"sessions" | "projects" | null>(null);
+  const [sectionMenu, setSectionMenu] = useState<"projects" | null>(null);
   const [menuPosition, setMenuPosition] = useState<{
     top: number;
     left: number;
@@ -523,7 +537,7 @@ export function Sidebar({
   );
 
   const openSectionMenu = useCallback(
-    (section: "sessions" | "projects", x: number, y: number) => {
+    (section: "projects", x: number, y: number) => {
       menuTriggerRef.current = null;
       setSortOpen(false);
       setSessionMenu(null);
@@ -961,10 +975,6 @@ export function Sidebar({
       .sort(compareSessions),
     [filtered, compareSessions],
   );
-  const temporarySessionHistory = useMemo(
-    () => temporarySessions.filter((session) => !pinnedSessionIds.has(session.id)),
-    [temporarySessions, pinnedSessionIds],
-  );
   const renderSessionStatus = (status: SidebarSessionStatus) => {
     const labelKey =
       status === "running"
@@ -1339,6 +1349,22 @@ export function Sidebar({
 
   const createProjectSession = async (path: string) => {
     await createSession({ projectPath: path });
+  };
+
+  const openProjectRequirements = async (path: string) => {
+    if (!(await selectProject(path))) return;
+    const store = useAppStore.getState();
+    const normalized = normalizeProjectPath(path);
+    const active = store.sessions.find((session) => session.id === store.activeSessionId);
+    const activeMatches = normalizeProjectPath(active?.projectPath) === normalized;
+    if (!activeMatches) {
+      const existing = store.sessions.find(
+        (session) => normalizeProjectPath(session.projectPath) === normalized,
+      );
+      if (existing) await store.selectSession(existing.id);
+      else await store.newSession({ projectPath: path });
+    }
+    useAppStore.getState().openWorkPanelTab(toolWorkPanelTab("requirements"));
   };
 
   const openProjectPicker = async () => {
@@ -1776,7 +1802,8 @@ export function Sidebar({
             ) : (
               <IconFolder size={13} aria-hidden />
             )}
-            <span>{entry.name}</span>
+            <span className="sidebar-project-name">{entry.name}</span>
+            <ProjectStageChip path={entry.path} />
             {entry.active ? <span className="sidebar-project-active-dot" aria-label={t("project.active", { defaultValue: "Active" })} /> : null}
           </TooltipButton>
           <span id={`${projectId}-path-description`} className="sr-only">
@@ -1805,6 +1832,15 @@ export function Sidebar({
               <IconMore size={14} />
             </TooltipButton>
           </div>
+          <TooltipButton
+            type="button"
+            className="sidebar-session-group-add"
+            tooltip={t("panel.requirements.open")}
+            ariaLabel={t("panel.requirements.open")}
+            onClick={() => void openProjectRequirements(entry.path)}
+          >
+            <IconFileText size={13} />
+          </TooltipButton>
           <TooltipButton
             type="button"
             className="sidebar-session-group-add"
@@ -1843,12 +1879,6 @@ export function Sidebar({
       return null;
     }
     if (sectionMenu) {
-      const isSessions = sectionMenu === "sessions";
-      const action = isSessions ? "new-standalone-session" : "new-project";
-      const label = isSessions
-        ? t("nav.newTemporarySession")
-        : t("nav.newProject");
-      const Icon = isSessions ? IconNewSession : IconNewProject;
       return portalToBody(
         <div
           className="sidebar-row-menu sidebar-floating-menu sidebar-section-menu"
@@ -1864,15 +1894,14 @@ export function Sidebar({
             ref={menuFirstItemRef}
             type="button"
             role="menuitem"
-            data-action={action}
+            data-action="new-project"
             onClick={() => {
               closeMenus(false);
-              if (isSessions) void createSession({ projectPath: null });
-              else void openProjectPicker();
+              void openProjectPicker();
             }}
           >
-            <Icon size={14} />
-            <span>{label}</span>
+            <IconNewProject size={14} />
+            <span>{t("nav.newProject")}</span>
           </button>
         </div>,
       );
@@ -2115,6 +2144,16 @@ export function Sidebar({
           <TooltipButton
             type="button"
             className="icon-btn icon-btn-square"
+            data-nav="new-task"
+            tooltip={t("nav.newTask")}
+            ariaLabel={t("nav.newTask")}
+            onClick={() => void createSession()}
+          >
+            <IconNewSession size={15} />
+          </TooltipButton>
+          <TooltipButton
+            type="button"
+            className="icon-btn icon-btn-square"
             tooltip={
               sidebarToggleShortcut
                 ? `${t("nav.collapseSidebar")} (${sidebarToggleShortcut})`
@@ -2149,85 +2188,6 @@ export function Sidebar({
           </section>
         ) : null}
 
-        <section
-          className="sidebar-standalone-sessions"
-          aria-labelledby="sidebar-standalone-sessions-label"
-          data-sidebar-session-section="temporary"
-        >
-          <div
-            className="sidebar-list-toolbar sidebar-list-toolbar-secondary"
-            data-sidebar-section="sessions"
-            onContextMenu={(event) => {
-              event.preventDefault();
-              event.stopPropagation();
-              openSectionMenu("sessions", event.clientX, event.clientY);
-            }}
-            onPointerDown={(event) => {
-              // Keep native drag/text selection from eating the secondary click path.
-              if (event.button === 2) event.preventDefault();
-            }}
-          >
-            <span id="sidebar-standalone-sessions-label" className="sidebar-list-label">
-              {t("nav.sessions", { defaultValue: "Sessions" })}
-            </span>
-            <div className="sidebar-toolbar-actions">
-              <div className="sidebar-menu-wrap">
-                <TooltipButton
-                  type="button"
-                  className={`sidebar-toolbar-button ${sortOpen ? "active" : ""}`}
-                  data-action="session-sort"
-                  ariaLabel={t("nav.sortSessions", { defaultValue: "Sort sessions" })}
-                  tooltip={t("nav.sortSessions", { defaultValue: "Sort sessions" })}
-                  aria-haspopup="menu"
-                  aria-expanded={sortOpen}
-                  onClick={(event) => {
-                    if (sortOpen) {
-                      closeMenus();
-                      return;
-                    }
-                    placeMenu(event);
-                    menuTriggerRef.current = event.currentTarget;
-                    setSessionMenu(null);
-                    setProjectMenu(null);
-                    setSectionMenu(null);
-                    setSortOpen(true);
-                  }}
-                >
-                  <IconArrowUpDown size={14} />
-                </TooltipButton>
-              </div>
-              <TooltipButton
-                type="button"
-                className="sidebar-toolbar-button"
-                data-action="new-standalone-session"
-                tooltip={t("nav.newTemporarySession")}
-                ariaLabel={t("nav.newTemporarySession")}
-                onClick={() => void createSession({ projectPath: null })}
-              >
-                <IconNewSession size={14} />
-              </TooltipButton>
-            </div>
-          </div>
-          <div
-            className="sidebar-session-group-body standalone"
-            onScroll={() => {
-              if (sessionMenu || projectMenu || sectionMenu || sortOpen) closeMenus(false);
-            }}
-            onContextMenu={(event) => {
-              if ((event.target as Element).closest?.("[data-sidebar-session-row]")) return;
-              event.preventDefault();
-              event.stopPropagation();
-              openSectionMenu("sessions", event.clientX, event.clientY);
-            }}
-          >
-            {temporarySessionHistory.length > 0 ? (
-              renderSessionRows(temporarySessionHistory, { temporary: true })
-            ) : temporarySessions.length === 0 ? (
-              <div className="sidebar-session-empty">{t("nav.noTemporarySessions")}</div>
-            ) : null}
-          </div>
-        </section>
-
         <div
           className="sidebar-list-toolbar"
           data-sidebar-section="projects"
@@ -2241,16 +2201,43 @@ export function Sidebar({
           }}
         >
           <span className="sidebar-list-label">{t("nav.projects")}</span>
-          <TooltipButton
-            type="button"
-            className="sidebar-toolbar-button"
-            data-action="new-project"
-            tooltip={t("nav.newProject")}
-            ariaLabel={t("nav.newProject")}
-            onClick={() => void openProjectPicker()}
-          >
-            <IconNewProject size={14} />
-          </TooltipButton>
+          <div className="sidebar-toolbar-actions">
+            <div className="sidebar-menu-wrap">
+              <TooltipButton
+                type="button"
+                className={`sidebar-toolbar-button ${sortOpen ? "active" : ""}`}
+                data-action="session-sort"
+                ariaLabel={t("nav.sortSessions", { defaultValue: "Sort sessions" })}
+                tooltip={t("nav.sortSessions", { defaultValue: "Sort sessions" })}
+                aria-haspopup="menu"
+                aria-expanded={sortOpen}
+                onClick={(event) => {
+                  if (sortOpen) {
+                    closeMenus();
+                    return;
+                  }
+                  placeMenu(event);
+                  menuTriggerRef.current = event.currentTarget;
+                  setSessionMenu(null);
+                  setProjectMenu(null);
+                  setSectionMenu(null);
+                  setSortOpen(true);
+                }}
+              >
+                <IconArrowUpDown size={14} />
+              </TooltipButton>
+            </div>
+            <TooltipButton
+              type="button"
+              className="sidebar-toolbar-button"
+              data-action="new-project"
+              tooltip={t("nav.newProject")}
+              ariaLabel={t("nav.newProject")}
+              onClick={() => void openProjectPicker()}
+            >
+              <IconNewProject size={14} />
+            </TooltipButton>
+          </div>
         </div>
 
         <div

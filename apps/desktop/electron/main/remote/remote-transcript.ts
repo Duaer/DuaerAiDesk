@@ -14,7 +14,7 @@ import type {
   SessionDetail,
   SessionSummary,
   UiMessage,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 
 /** Build the flat summary a session list / header row renders. */
 export function racpSessionToSummary(

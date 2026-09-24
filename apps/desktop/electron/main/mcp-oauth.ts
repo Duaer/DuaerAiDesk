@@ -6,7 +6,7 @@ import {
   type McpOAuthLoginEvent,
   type McpServerRecord,
   type McpServerStatus,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import { allowInsecureUserEndpointsEnabled } from "./endpoint-policy.ts";
 export type StoredMcpOAuthToken = {
   clientId: string;
@@ -219,7 +219,7 @@ export class McpOAuthManager {
           params: {
             protocolVersion: "2025-06-18",
             capabilities: {},
-            clientInfo: { name: "PI-Desktop", version: "1" },
+            clientInfo: { name: "DuaerAiDesk", version: "1" },
           },
         }),
       });
@@ -335,7 +335,7 @@ export class McpOAuthManager {
     registrationEndpoint: string,
     redirectUris: string | string[],
     trustedUrl?: string,
-    clientName = "PI-Desktop",
+    clientName = "DuaerAiDesk",
   ): Promise<{ clientId: string; clientSecret?: string }> {
     assertTlsProtectedUrl(registrationEndpoint, "registration_endpoint", trustedUrl);
     const uris = Array.isArray(redirectUris) ? redirectUris : [redirectUris];
@@ -627,7 +627,7 @@ export class McpOAuthManager {
             res.end(
               this.renderHtml(
                 true,
-                "Authorization successful! You can close this tab and return to PI-Desktop.",
+                "Authorization successful! You can close this tab and return to DuaerAiDesk.",
               ),
             );
 
@@ -685,7 +685,7 @@ export class McpOAuthManager {
               clientSecret = registered.clientSecret;
               redirectUrisToStore = registered.redirectUris;
             } else {
-              clientId = "pi-desktop";
+              clientId = "duaer-ai-desk";
             }
 
             const authUrl = new URL(metadata.authorizationEndpoint);

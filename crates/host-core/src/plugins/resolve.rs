@@ -219,7 +219,7 @@ fn post_json(url: &str, body: &str) -> Result<(u16, Vec<u8>, String)> {
         "--post302".into(),
         "--post303".into(),
         "--user-agent".into(),
-        "pi-desktop-host-core".into(),
+        "duaer-ai-desk-host-core".into(),
     ];
     args.extend(crate::network_proxy::curl_proxy_args());
     if url.starts_with("https://") {

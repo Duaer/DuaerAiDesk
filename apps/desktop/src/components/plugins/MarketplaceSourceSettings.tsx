@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import type { AppSettings, PluginMarketSource } from "@pi-desktop/shared";
+import type { AppSettings, PluginMarketSource } from "@duaer-ai-desk/shared";
 import { api } from "../../lib/api";
 import { useAppStore } from "../../stores/app-store";
 import { HelpIcon, Input } from "../ui";

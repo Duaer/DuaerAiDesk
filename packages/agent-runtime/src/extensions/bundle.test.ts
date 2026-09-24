@@ -102,7 +102,7 @@ describe("packaged sidecar extension loader", () => {
     "..",
     "..",
     "node_modules",
-    "@earendil-works/pi-coding-agent",
+    "@duaer-ai-desk/upstream-coding-agent",
     "dist",
     "core",
     "extensions",

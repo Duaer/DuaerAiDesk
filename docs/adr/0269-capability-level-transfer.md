@@ -123,8 +123,8 @@ action redundantly can never rewrite the file.
 
 ### 5. The global `.agents` root has a redirect seam
 
-`PI_DESKTOP_AGENTS_DIR` repoints the global capability root, the way
-`PI_DESKTOP_DATA_DIR` repoints the app-local data directory; an empty value
+`DUAER_AI_DESK_AGENTS_DIR` repoints the global capability root, the way
+`DUAER_AI_DESK_DATA_DIR` repoints the app-local data directory; an empty value
 falls back to the home directory (`AGENTS_DIR_ENV`, `global_agents_dir`). A
 cross-level move spans the real home directory and a project, so without the
 seam the global half of the feature can only be tested against the developer's

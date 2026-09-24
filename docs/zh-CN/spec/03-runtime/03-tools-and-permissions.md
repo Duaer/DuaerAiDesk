@@ -326,7 +326,7 @@ tool/protocol 名称，请求中单独携带固定的 shell ID。
 `COMMAND_SHELL_INVALID` 的平台 ID 错误。没有任意可执行路径
 或可执行路径哈希被接受作为 shell 标识。
 
-1. `PI_DESKTOP_BASH` env 覆盖（bash 可执行文件的路径）
+1. `DUAER_AI_DESK_BASH` env 覆盖（bash 可执行文件的路径）
 2. Unix：众所周知的位置（`/bin/bash`、`/usr/bin/bash`、`/usr/local/bin/bash`、Homebrew），然后是 PATH
 3. Windows：来自 Git 的 Windows 的 `bash.exe` — 派生自 PATH 上的 `git`，然后是标准安装目录，然后是排除 `System32` 中的 WSL 启动器的 PATH
 

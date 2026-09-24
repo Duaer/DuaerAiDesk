@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import type { PullRequestSummary } from "@pi-desktop/shared";
+import type { PullRequestSummary } from "@duaer-ai-desk/shared";
 import { useAppStore } from "../stores/app-store";
 import { api } from "../lib/api";
 import { Badge, Button, TooltipButton, Panel } from "../components/ui";

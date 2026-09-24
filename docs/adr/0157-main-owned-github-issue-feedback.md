@@ -2,7 +2,7 @@
 
 - Status: Accepted
 - Date: 2026-09-05
-- Deciders: PI-Desktop core
+- Deciders: DuaerAiDesk core
 - Related: D120, D313, ADR 0022
 
 ## Context
@@ -20,11 +20,11 @@ those triage fields as optional.
    and a proposed change. English is the source label language; Chinese
    remains on the same fields.
 2. Settings → Info exposes one **Report a problem** row. Its action invokes
-   the allowlisted `pi-desktop/app/openFeedback` channel. Electron Main builds
+   the allowlisted `duaer-ai-desk/app/openFeedback` channel. Electron Main builds
    a fixed GitHub bug-form URL, prefills `app-version`, `os`, and
    `environment` from Main-owned version info, and opens it with
    `shell.openExternal`. The renderer cannot supply a URL.
-3. The constructed URL must stay on `https://github.com/vastsa/PI-Desktop/issues/new`
+3. The constructed URL must stay on `https://github.com/Duaer/DuaerAiDesk/issues/new`
    with `template=bug_report.yml`. Feature requests remain available from
    GitHub's template picker, not from a second Settings action.
 

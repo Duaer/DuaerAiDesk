@@ -6,8 +6,9 @@ import type {
   SessionSummary,
   UiMessage,
   QueuedTurnSummary,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import { api } from "../../lib/api";
+import { applyDeliveryUtterance, modelContentForDelivery } from "../../lib/delivery-chat.ts";
 import {
   enqueueQueuedPrompt,
   isPendingQueuedPrompt,
@@ -30,6 +31,24 @@ import {
   type SubmittedComposerDraft,
 } from "../runtime/session-runtime";
 import type { StoreAccess } from "./types";
+
+function outboundPrompt(get: () => AppState, content: string): string {
+  const state = get();
+  const tab = state.workPanelTabs.find((item) => item.id === state.activeWorkPanelTabId);
+  const session = state.sessions.find((item) => item.id === state.activeSessionId);
+  const projectPath = session?.projectPath || state.activeProjectPath;
+  if (state.workPanelOpen && tab?.kind === "requirements" && projectPath) {
+    applyDeliveryUtterance(projectPath, content);
+  }
+  return modelContentForDelivery(
+    {
+      workPanelOpen: state.workPanelOpen,
+      activeWorkPanelTabKind: tab?.kind,
+      projectPath,
+    },
+    content,
+  );
+}
 
 type PromptAttachmentConverter = (
   references: ComposerDraftSnapshot["fileReferences"],
@@ -160,7 +179,7 @@ export function createQueueSlice({
       return api
         .queuePrompt({
           sessionId,
-          content,
+          content: outboundPrompt(get, content),
           ...(attachments.length ? { attachments } : {}),
         })
         .then((entry) => {
@@ -318,7 +337,7 @@ export function createQueueSlice({
       runtime.insertOptimisticUserMessage(sessionId, message);
       try {
         await api.steer({
-          sessionId, expectedTurnId, content, messageId: message.id,
+          sessionId, expectedTurnId, content: outboundPrompt(get, content), messageId: message.id,
           attachments: draft ? promptAttachmentsFromDraft(draft.fileReferences) : [],
         });
         return true;
@@ -434,7 +453,7 @@ export function createQueueSlice({
           }
           await api.prompt({
             sessionId,
-            content,
+            content: outboundPrompt(get, content),
             messageId: optimisticMessage.id,
             viewingSessionId: viewingSessionIdForPrompt(get(), sessionId),
             attachments: draft ? promptAttachmentsFromDraft(draft.fileReferences) : [],

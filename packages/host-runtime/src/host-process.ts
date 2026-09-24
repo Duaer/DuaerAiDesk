@@ -7,7 +7,7 @@ import {
   readNdjsonLines,
   rpcTimeoutMs,
   stripProxyEnv,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 
 const HOST_DISPOSE_GRACE_MS = 3_000;
 const HOST_FORCE_KILL_GRACE_MS = 1_000;
@@ -27,9 +27,9 @@ export type StderrHandler = (text: string) => void;
 export type DiagnosedHostFailure = Error & { errorCode: string };
 
 export type HostProcessOptions = {
-  /** Absolute path of the `pi-desktop-host-core` binary to spawn. */
+  /** Absolute path of the `duaer-ai-desk-host-core` binary to spawn. */
   binaryPath: string;
-  /** Data directory handed to host-core as `PI_DESKTOP_DATA_DIR`. */
+  /** Data directory handed to host-core as `DUAER_AI_DESK_DATA_DIR`. */
   dataDir: string;
   /**
    * Extra environment for the child. The inherited environment is copied with
@@ -63,7 +63,7 @@ function isHostOverloaded(error: unknown): boolean {
  * The Rust host-core child over stdio NDJSON JSON-RPC. This class knows how to
  * spawn, call, observe, and dispose the process; it does not know where the
  * binary lives or which host embeds it, so Electron Main and the headless
- * `pi-host` drive the same transport.
+ * `duaer-ai-desk-host` drive the same transport.
  */
 export class HostProcess {
   private child: ChildProcessWithoutNullStreams;
@@ -102,7 +102,7 @@ export class HostProcess {
       stdio: ["pipe", "pipe", "pipe"],
       env: {
         ...stripProxyEnv(process.env),
-        PI_DESKTOP_DATA_DIR: options.dataDir,
+        DUAER_AI_DESK_DATA_DIR: options.dataDir,
         ...(options.env ?? {}),
       },
     });

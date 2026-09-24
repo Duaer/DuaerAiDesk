@@ -2,7 +2,7 @@
 
 ## 1. Policy
 
-PI-Desktop is a global product.
+DuaerAiDesk is a global product.
 
 - **Default locale:** `en`
 - **Source language:** English

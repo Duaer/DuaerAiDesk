@@ -1,14 +1,14 @@
 import { createRequire } from "node:module";
 import { pathToFileURL } from "node:url";
 import { describe, expect, it } from "vitest";
-import type { AssistantMessage, Model, Api } from "@earendil-works/pi-ai";
-import { estimateContextTokens, estimateMessageTokens } from "@earendil-works/pi-ai/utils/estimate";
-import { convertResponsesMessages } from "@earendil-works/pi-ai/api/openai-responses-shared";
-import { LocalRequestError, localRequestErrorDetails, normalizeHostedSearchContent, normalizeContext } from "@earendil-works/pi-ai";
-import type { HostedSearchContent, AssistantMessageEvent } from "@earendil-works/pi-ai";
+import type { AssistantMessage, Model, Api } from "@duaer-ai-desk/upstream-ai";
+import { estimateContextTokens, estimateMessageTokens } from "@duaer-ai-desk/upstream-ai/utils/estimate";
+import { convertResponsesMessages } from "@duaer-ai-desk/upstream-ai/api/openai-responses-shared";
+import { LocalRequestError, localRequestErrorDetails, normalizeHostedSearchContent, normalizeContext } from "@duaer-ai-desk/upstream-ai";
+import type { HostedSearchContent, AssistantMessageEvent } from "@duaer-ai-desk/upstream-ai";
 
 const require = createRequire(import.meta.url);
-const compaction = await import(pathToFileURL(require.resolve("@earendil-works/pi-agent-core/package.json").replace(/package\.json$/, "dist/harness/compaction/compaction.js")).href);
+const compaction = await import(pathToFileURL(require.resolve("@duaer-ai-desk/upstream-agent-core/package.json").replace(/package\.json$/, "dist/harness/compaction/compaction.js")).href);
 const apis = ["openai-responses", "azure-openai-responses", "anthropic-messages"] as const;
 function model<TApi extends Api>(api: TApi): Model<TApi> {
   return { id: "test-model", name: "test", api, provider: api === "anthropic-messages" ? "anthropic" : "openai", baseUrl: "http://localhost", reasoning: false, input: ["text"], contextWindow: 100_000, maxTokens: 1000, cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 } };
@@ -28,7 +28,7 @@ function sse(api: Api): string {
     : 'event: response.completed\ndata: {"type":"response.completed","response":{"id":"r","status":"completed","output":[],"usage":{"input_tokens":1,"output_tokens":1,"total_tokens":2}}}\n\n';
 }
 async function run(api: typeof apis[number], content: unknown[], options: Record<string, unknown> = {}) {
-  const adapter = await import(`@earendil-works/pi-ai/api/${api}`);
+  const adapter = await import(`@duaer-ai-desk/upstream-ai/api/${api}`);
   let fetches = 0;
   let body: Record<string, unknown> | undefined;
   const stream = adapter.streamSimple(model(api), { messages: [assistant(content, api)] }, {
@@ -121,7 +121,7 @@ describe("real dependency hosted-search estimation and requests", () => {
       expect(result.errorDetails).toBeUndefined();
     });
     it(`${api}: valid usage cannot hide invalid blocks; direct stream fails before fetch`, async () => {
-      const adapter = await import(`@earendil-works/pi-ai/api/${api}`);
+      const adapter = await import(`@duaer-ai-desk/upstream-ai/api/${api}`);
       const invalid = assistant([{ type: "hostedSearch", phase: "unknown", blockId: "secret" }], api, 100);
       expect(() => estimateContextTokens([invalid])).toThrow(expect.objectContaining({ code: "LOCAL_REQUEST_ERROR" }));
       expect(() => compaction.estimateContextTokens([invalid])).toThrow(expect.objectContaining({ code: "LOCAL_REQUEST_ERROR" }));
@@ -131,7 +131,7 @@ describe("real dependency hosted-search estimation and requests", () => {
       expect(result.errorDetails?.phase).toBe("context-validation");
     });
     it(`${api}: preserves actual buildBaseOptions estimation failures before fetch`, async () => {
-      const adapter = await import(`@earendil-works/pi-ai/api/${api}`);
+      const adapter = await import(`@duaer-ai-desk/upstream-ai/api/${api}`);
       let fetches = 0;
       const result = await adapter.streamSimple(model(api), { messages: [{ role: "user", content: null, timestamp: 1 }] }, {
         apiKey: "test", fetch: async () => { fetches++; throw new Error("must not fetch"); },
@@ -170,7 +170,7 @@ describe("real dependency hosted-search estimation and requests", () => {
     expect(estimateMessageTokens(assistant([block]))).toBe(Math.ceil(JSON.stringify(replay[0]).length / 4));
   });
   it("matches Anthropic replay estimates across models and search toggles", async () => {
-    const adapter = await import("@earendil-works/pi-ai/api/anthropic-messages");
+    const adapter = await import("@duaer-ai-desk/upstream-ai/api/anthropic-messages");
     for (const webSearch of [true, false]) {
       const msg = assistant(search("anthropic-messages", 400), "anthropic-messages");
       let body: { messages: { role: string; content: unknown[] }[]; tools?: { type: string }[] } | undefined;
@@ -209,8 +209,8 @@ describe("real dependency hosted-search estimation and requests", () => {
     expect(localRequestErrorDetails({ code: "LOCAL_REQUEST_ERROR", phase: "network" })).toBeUndefined();
   });
   it("pi-agent-core preserves streamed and thrown local error details", async () => {
-    const { Agent } = await import("@earendil-works/pi-agent-core");
-    const adapter = await import("@earendil-works/pi-ai/api/openai-responses");
+    const { Agent } = await import("@duaer-ai-desk/upstream-agent-core");
+    const adapter = await import("@duaer-ai-desk/upstream-ai/api/openai-responses");
     for (const streamFn of [
       () => { throw new LocalRequestError("context-estimation", { cause: new TypeError("private") }); },
       () => adapter.streamSimple(model("openai-responses"), normalizeContext({ messages: [assistant([{ type: "hostedSearch", phase: "unknown" }])] }), {

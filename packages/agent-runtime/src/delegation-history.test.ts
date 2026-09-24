@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { estimateTokens } from "@earendil-works/pi-agent-core";
-import type { Message } from "@earendil-works/pi-ai";
-import { MAX_RESUMABLE_READ_LINES, type UiMessage } from "@pi-desktop/shared";
+import { estimateTokens } from "@duaer-ai-desk/upstream-agent-core";
+import type { Message } from "@duaer-ai-desk/upstream-ai";
+import { MAX_RESUMABLE_READ_LINES, type UiMessage } from "@duaer-ai-desk/shared";
 import {
   contextBudgetLimitsFor,
   type ContextBudgetLimits,

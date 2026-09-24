@@ -36,7 +36,7 @@ async function tool(name, args = {}) {
   if (result?.isError) throw new Error(`${name}: ${text}`);
   try { return JSON.parse(text); } catch { return text; }
 }
-const invoke = (channel, ...args) => tool("pi_desktop_invoke", { operation: channel, args }).then((r) => (r && typeof r === "object" && "result" in r ? r.result : r));
+const invoke = (channel, ...args) => tool("duaer_ai_desk_invoke", { operation: channel, args }).then((r) => (r && typeof r === "object" && "result" in r ? r.result : r));
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 async function waitForTurn(sessionId, timeoutMs = 60_000) {
@@ -139,7 +139,7 @@ for (let i = 0; i < 60 && answeredNow() < 3; i++) {
     if (!m || answered.has(m[1])) continue;
     answered.add(m[1]);
     await invoke("extensions/ui/respond", { promptId: m[1], value: answers[m[2]], confirm: true }).catch(async () => {
-      await tool("pi_desktop_invoke", { operation: "extensions/ui/respond", args: [{ promptId: m[1], value: answers[m[2]] }], confirm: true });
+      await tool("duaer_ai_desk_invoke", { operation: "extensions/ui/respond", args: [{ promptId: m[1], value: answers[m[2]] }], confirm: true });
     });
   }
 }

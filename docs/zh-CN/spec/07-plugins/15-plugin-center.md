@@ -3,7 +3,7 @@
 > **翻译说明：** 本页是与 [英文源规格](/spec/07-plugins/15-plugin-center) 一一对应的机器辅助翻译。代码、协议字段和标识符保持原文；如翻译与英文源事实有歧义，以英文版本为准。
 
 > 管理仓库：[vastsa/pi-plugin-center](https://github.com/vastsa/pi-plugin-center)
-> 分发仓库：[vastsa/pi-desktop-plugins](https://github.com/vastsa/pi-desktop-plugins)
+> 分发仓库：[vastsa/duaer-ai-desk-plugins](https://github.com/vastsa/duaer-ai-desk-plugins)
 > 决策记录：[ADR 0102](../../../adr/0102-publisher-owned-plugin-source-and-git-hosted-artifacts.md)
 > 客户端契约：[07-plugin-marketplace.md](07-plugin-marketplace.md)
 
@@ -28,12 +28,12 @@
 | 插件源码 | 发布者 | 发布者自己的 GitHub 仓库 |
 | 构建输入（commit、tree、path） | 插件中心（固定副本） | 中心数据库 + 快照存储 |
 | registry 与审查证据 | 插件中心 | `vastsa/pi-plugin-center` |
-| `.piplug` 制品 | 插件中心（发布） | `vastsa/pi-desktop-plugins/packages/` |
-| 目录 | 插件中心（生成） | `vastsa/pi-desktop-plugins/catalog.json` |
+| `.piplug` 制品 | 插件中心（发布） | `vastsa/duaer-ai-desk-plugins/packages/` |
+| 目录 | 插件中心（生成） | `vastsa/duaer-ai-desk-plugins/catalog.json` |
 | 分发镜像 | 插件中心 | 分发仓库的 CNB Git 镜像 |
 | 安装决定 | 用户 | 桌面端权限审查 |
 
-插件源码绝不会被复制进 PI-Desktop 拥有的 Git 仓库。中心为构建和审查证据保留固定
+插件源码绝不会被复制进 DuaerAiDesk 拥有的 Git 仓库。中心为构建和审查证据保留固定
 commit 的不可变快照；该快照是存储，不是 Git 镜像，也不对外发布。
 
 ## 3. 仓库划分与制品托管
@@ -50,7 +50,7 @@ vastsa/pi-plugin-center                 # 管理面
 ├─ scripts/                             # 目录生成与校验
 └─ api/ db/                             # 服务契约与迁移
 
-vastsa/pi-desktop-plugins               # 分发面，地址完全不变
+vastsa/duaer-ai-desk-plugins               # 分发面，地址完全不变
 ├─ catalog.json                         # 由插件中心生成
 ├─ packages/<pluginId>-<version>.piplug # 由插件中心发布
 └─ plugins/                             # 第一方源码，历史遗留
@@ -63,15 +63,15 @@ vastsa/pi-desktop-plugins               # 分发面，地址完全不变
 ### 3.2 制品 URL
 
 ```text
-https://raw.githubusercontent.com/vastsa/pi-desktop-plugins/main/packages/<pluginId>-<version>.piplug
+https://raw.githubusercontent.com/vastsa/duaer-ai-desk-plugins/main/packages/<pluginId>-<version>.piplug
 ```
 
 目录条目的 `url` 保持为相对路径 `packages/<pluginId>-<version>.piplug`，因此它按
 承载该目录的主机解析：
 
 ```text
-GitHub  raw.githubusercontent.com/vastsa/pi-desktop-plugins/main/…
-CNB     cnb.cool/aixk/pi-desktop-plugins/-/git/raw/main/…
+GitHub  raw.githubusercontent.com/vastsa/duaer-ai-desk-plugins/main/…
+CNB     cnb.cool/aixk/duaer-ai-desk-plugins/-/git/raw/main/…
 ```
 
 由于镜像是 Git 镜像，安装包与目录一起移动并保持逐字节一致。会话中途切换源既不会跨
@@ -274,7 +274,7 @@ evaluator 失败、证据缺失或依赖服务不可用时，只能进入 `needs
 1. 提交把 release 标记为已发布并写入制品摘要的数据库事务。
 2. 发出 outbox 事件。
 3. 在 `pi-plugin-center` 写入 registry 条目，并据此重建目录。
-4. 把安装包与重建后的 `catalog.json` 以**同一个** commit 提交进 `pi-desktop-plugins`。
+4. 把安装包与重建后的 `catalog.json` 以**同一个** commit 提交进 `duaer-ai-desk-plugins`。
 5. 由 CNB Git 镜像复制该 commit。
 
 第 4 步刻意合成一个 commit：否则在两个 commit 之间抓取目录的客户端，会看到一条
@@ -365,7 +365,7 @@ POST /v2/webhooks/github
 - registry entry、catalog、submission 和 review report 的 JSON Schema。
 - 插件中心仓库脚手架：schema、目录生成器、校验脚本、发布工作流、API 契约、
   数据库迁移。
-- 客户端：目录 v2 解析、下载域名白名单、撤回强制、`minPiDesktop` 强制、溯源采集与
+- 客户端：目录 v2 解析、下载域名白名单、撤回强制、`minDuaerAiDesk` 强制、溯源采集与
   展示、`pi-plugin publish`。
 
 验收：客户端能从分发仓库提供的 v2 目录完成安装，并拒绝白名单之外主机提供的安装包。
@@ -396,7 +396,7 @@ policy evaluator、签名密钥、目录版次与回滚、客户端签名校验�
 
 ## 14. 明确不做
 
-- 把发布者源码复制进 PI-Desktop 的仓库。
+- 把发布者源码复制进 DuaerAiDesk 的仓库。
 - 把个人访问令牌当作发布凭证。
 - 在 API 进程中执行插件代码、安装依赖或运行测试。
 - 让前端、普通管理路由或模型输出把状态置为 `published`。

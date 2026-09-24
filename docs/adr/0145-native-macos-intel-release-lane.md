@@ -2,7 +2,7 @@
 
 - Status: Accepted (amended by D353, ADR 0191, D450 / ADR 0289)
 - Date: 2026-09-01
-- Deciders: PI-Desktop core
+- Deciders: DuaerAiDesk core
 - Related: D126, D285, D353, D354, D450, ADR 0022, ADR 0191, ADR 0289, E2E-092
 
 ## Context
@@ -22,15 +22,15 @@ unless the sidecar architecture is independently managed and verified.
 2. The static macOS electron-builder targets remain DMG and ZIP without a
    fixed `arch`. The workflow passes the explicit matching `--arm64` or
    `--x64` flag to electron-builder.
-3. Each macOS runner builds `pi-desktop-host-core` locally and packages that
+3. Each macOS runner builds `duaer-ai-desk-host-core` locally and packages that
    same native output. The local signed release script defaults to the host
    architecture and rejects a `MAC_ARCH` override that does not match it.
 4. Each macOS job renames its generated `latest-mac.yml` before uploading. The
    publish job validates both feeds, merges their files, and publishes one
    combined `latest-mac.yml` alongside both architectures' installers.
 5. D353 originally gave the Intel x64 job target-specific artifact patterns,
-   publishing `PI-Desktop-<version>-Intel.dmg` and
-   `PI-Desktop-<version>-Intel-mac.zip`, while arm64 kept generic names. ADR 0191
+   publishing `DuaerAiDesk-<version>-Intel.dmg` and
+   `DuaerAiDesk-<version>-Intel-mac.zip`, while arm64 kept generic names. ADR 0191
    supersedes that suffix convention: both lanes now use their standard
    architecture labels, `-arm64` and `-x64`, with updater URLs and checksums
    generated from those final names.

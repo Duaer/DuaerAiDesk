@@ -136,6 +136,11 @@ test("unknown retained tabs are discarded without losing a known selection", () 
 test("only plugin views are launchable tools", () => {
   assert.equal(isToolWorkPanelTab(browserPluginTab()), true);
   assert.equal(isToolWorkPanelTab(toolWorkPanelTab("review")), false);
+  assert.equal(isKnownWorkPanelTab(toolWorkPanelTab("requirements")), true);
+  assert.equal(isKnownWorkPanelTab(toolWorkPanelTab("architecture")), true);
+  assert.equal(isKnownWorkPanelTab(toolWorkPanelTab("dispatch")), true);
+  assert.equal(toolWorkPanelTab("requirements").id, "requirements");
+  assert.equal(isToolWorkPanelTab(toolWorkPanelTab("requirements")), false);
   assert.equal(isToolWorkPanelTab(fileWorkPanelTab("README.md")), false);
   assert.equal(isToolWorkPanelTab(pluginWorkPanelTab("pi.file-manager", "manager")), true);
   assert.equal(isKnownWorkPanelTab({ id: "browser", kind: "browser" }), false);
@@ -207,6 +212,20 @@ test("switching work panel contexts isolates session tabs and visible state", ()
   assert.deepEqual(backToA.contexts["session-b"], sessionB);
   assert.deepEqual(backToA.visible, sessionA);
   assert.notEqual(backToA.visible.tabs, toB.visible.tabs);
+});
+
+test("the first session keeps the project-home tab the user is looking at", () => {
+  const home = {
+    open: true,
+    tabs: [toolWorkPanelTab("dispatch")],
+    activeTabId: "dispatch",
+    fileRequest: null,
+  };
+  const switched = switchWorkPanelContextState({}, undefined, home, "session-new");
+  assert.equal(switched.visible.activeTabId, "dispatch");
+  assert.equal(switched.contexts["session-new"].activeTabId, "dispatch");
+  switched.visible.tabs.push(toolWorkPanelTab("requirements"));
+  assert.equal(switched.contexts["session-new"].tabs.length, 1);
 });
 
 test("switching to a session without context returns an isolated empty state", () => {

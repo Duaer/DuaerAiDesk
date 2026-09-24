@@ -1080,6 +1080,20 @@
   pointer-events: none;
 }
 
+.sidebar-project-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sidebar-project-stage {
+  flex: 0 0 auto;
+  margin-left: 4px;
+  color: var(--ds-text-secondary);
+  font-size: var(--text-xs, 11px);
+}
+
 .sidebar-project-active-dot {
   width: 5px;
   height: 5px;

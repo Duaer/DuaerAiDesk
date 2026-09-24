@@ -2,7 +2,7 @@
  * Project pi session entries into the model context.
  *
  * pi 0.85 moved `buildSessionContext` off the public package export and made
- * the remaining helper async for custom-entry projectors. PI-Desktop
+ * the remaining helper async for custom-entry projectors. DuaerAiDesk
  * synthesizes only message and compaction entries, so the projection stays
  * synchronous and keeps the `{ messages }` shape the runtime already uses.
  *
@@ -17,7 +17,7 @@ import {
   createCompactionSummaryMessage,
   type AgentMessage,
   type Entry,
-} from "@earendil-works/pi-agent-core";
+} from "@duaer-ai-desk/upstream-agent-core";
 import {
   retainedReasoningFromDetails,
   retainedReasoningToMessages,

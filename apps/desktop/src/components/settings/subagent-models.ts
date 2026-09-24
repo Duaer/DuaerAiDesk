@@ -5,7 +5,13 @@
  * session). The sheet lists the same configured, runnable models as the
  * Composer rather than asking the user to type that string.
  */
-import { modelIdsMatch, type ProviderPublic } from "@pi-desktop/shared";
+import {
+  fallbackBuiltinDefinitions,
+  JUDGE_SUBAGENT_NAME,
+  modelIdsMatch,
+  type ProviderPublic,
+  type SubagentDefinition,
+} from "@duaer-ai-desk/shared";
 import { defaultModelOptions } from "./default-model";
 
 export type SubagentModelChoice = {
@@ -185,6 +191,40 @@ export function subagentModelSelectValue(
  * A pin that is not in the configured list, so the select must keep it as an
  * extra option instead of snapping to inherit on edit.
  */
+type JudgeBuiltinRow = SubagentDefinition & { enabled: boolean };
+
+/**
+ * Settings lists one extra builtin: the judge employee.
+ * A stale catalog can omit him. His model pin stays whatever the catalog
+ * already stored; this does not rewrite it.
+ */
+export function withJudgeEmployee<T extends JudgeBuiltinRow>(builtins: readonly T[]): T[] {
+  if (builtins.some((row) => row.name === JUDGE_SUBAGENT_NAME)) return [...builtins];
+  const fallback = fallbackBuiltinDefinitions().find((row) => row.name === JUDGE_SUBAGENT_NAME);
+  const judge = {
+    name: JUDGE_SUBAGENT_NAME,
+    description: fallback?.description ?? "",
+    prompt: fallback?.prompt ?? "",
+    tools: fallback?.tools ? [...fallback.tools] : ["Read", "Glob", "Grep"],
+    source: "builtin" as const,
+    enabled: true,
+  } as T;
+  return [...builtins, judge];
+}
+
+/** The judge employee may pin only the model marked for judgment. */
+export function judgmentOnlyModelChoices(
+  choices: readonly SubagentModelChoice[],
+  binding: { providerId?: string; modelId?: string } | null | undefined,
+): SubagentModelChoice[] {
+  const providerId = binding?.providerId?.trim() ?? "";
+  const modelId = binding?.modelId?.trim() ?? "";
+  if (!providerId || !modelId) return [];
+  return choices.filter(
+    (choice) => choice.providerId === providerId && modelIdsMatch(choice.modelId, modelId),
+  );
+}
+
 export function subagentModelOrphanPin(
   pin: string,
   choices: readonly SubagentModelChoice[],

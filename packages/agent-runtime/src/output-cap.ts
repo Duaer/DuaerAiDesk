@@ -1,5 +1,5 @@
 /**
- * Output-token capping enforced at the pi-desktop stream layer (issue B).
+ * Output-token capping enforced at the duaer-ai-desk stream layer (issue B).
  *
  * pi-ai only clamps `max_tokens` on the `streamSimple` path
  * (`buildBaseOptions` → `clampMaxTokensToContext`). The low-level stream
@@ -11,7 +11,7 @@
  * `maximum context length` 400/413/503.
  *
  * This module re-clamps the effective output budget for *both* routes at the
- * pi-desktop layer, using a CJK-aware input estimate (a CJK character runs
+ * duaer-ai-desk layer, using a CJK-aware input estimate (a CJK character runs
  * ~1 token, not the 0.25 the chars/4 baseline charges) and a safety margin
  * that scales with the window instead of pi-ai's fixed 4096. It is applied
  * in `runtime.ts` and `subagent-model-binding.ts` before either adapter
@@ -24,11 +24,11 @@
  * passes none and keeps the conservative block-protocol estimate.
  */
 
-import type { Api } from "@earendil-works/pi-ai";
+import type { Api } from "@duaer-ai-desk/upstream-ai";
 import {
   hostedSearchReplayProjection,
   type HostedSearchReplayOptions,
-} from "@earendil-works/pi-ai/utils/hosted-search";
+} from "@duaer-ai-desk/upstream-ai/utils/hosted-search";
 
 /** Structural view of the request context; assignable from pi-ai's `Context`. */
 export type OutputCapContext = {

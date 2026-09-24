@@ -5,7 +5,7 @@
 - Related: [04-ux/06-settings-ia](../spec/04-ux/06-settings-ia.md) ·
   [04-ux/02-i18n-english-first](../spec/04-ux/02-i18n-english-first.md) ·
   [04-e2e-test-plan](../spec/06-delivery/04-e2e-test-plan.md) · E2E-091
-- Updates: the `window.piDesktop` preload contract in
+- Updates: the `window.duaerAiDesk` preload contract in
   [api.ts](../..//apps/desktop/src/lib/api.ts)
 
 ## Context
@@ -28,14 +28,14 @@ them synchronously before first paint.
 ## Decision
 
 1. Expose the authoritative OS locale from the preload bridge as a synchronous
-   field `window.piDesktop.locale`. The main process resolves `app.getLocale()`
+   field `window.duaerAiDesk.locale`. The main process resolves `app.getLocale()`
    while creating the window and passes it through `webPreferences.additionalArguments`;
    sandboxed preload code reads that argument rather than importing Electron's
    main-only `app` module (alongside the existing `platform` field).
-2. Add optional `locale?: string` to the `window.piDesktop` type in `api.ts`;
+2. Add optional `locale?: string` to the `window.duaerAiDesk` type in `api.ts`;
    non-Electron contexts do not receive a window creation argument.
 3. Resolve "auto" language through a new `resolveOsLocale()` helper in
-   `lib/app-language.ts` that prefers `window.piDesktop.locale` and falls back to
+   `lib/app-language.ts` that prefers `window.duaerAiDesk.locale` and falls back to
    `navigator.language` / `userLanguage` for non-Electron contexts (e.g. tests).
 4. Seed the initial i18n `lng` in `main.tsx` from `resolveOsLocale()` instead of
    `navigator.language`.
@@ -49,7 +49,7 @@ channel (the value is available before first paint, like `platform`).
   Chinese on a Chinese system), and the Auto card shows the detected language
   inline ("当前：简体中文").
 - Initial i18n language on first paint is correct for the OS locale.
-- The `window.piDesktop` preload contract grows one read-only string field.
+- The `window.duaerAiDesk` preload contract grows one read-only string field.
 - Non-Electron contexts (unit tests, potential web builds) fall back to
   `navigator.language` and remain functional.
 
@@ -72,7 +72,7 @@ Surfacing the value synchronously from the bridge is simpler and sufficient.
   `additionalArguments`)
 - `apps/desktop/electron/preload/index.ts` (reads the locale argument without
   importing `app`)
-- `apps/desktop/src/lib/api.ts` (`window.piDesktop.locale` type)
+- `apps/desktop/src/lib/api.ts` (`window.duaerAiDesk.locale` type)
 - `apps/desktop/src/lib/app-language.ts` (`resolveOsLocale`, `resolveAppLanguage`)
 - `apps/desktop/src/main.tsx` (initial `lng` from `resolveOsLocale`)
 - `apps/desktop/src/pages/SettingsPage.tsx` (Auto card shows detected language)

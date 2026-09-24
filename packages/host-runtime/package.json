@@ -1,5 +1,5 @@
 {
-  "name": "@pi-desktop/host-runtime",
+  "name": "@duaer-ai-desk/host-runtime",
   "version": "0.15.6",
   "private": true,
   "type": "module",
@@ -18,9 +18,9 @@
     "clean": "node -e \"fs.rmSync('dist',{recursive:true,force:true})\""
   },
   "dependencies": {
-    "@pi-desktop/agent-host": "workspace:*",
-    "@pi-desktop/agent-runtime": "workspace:*",
-    "@pi-desktop/shared": "workspace:*"
+    "@duaer-ai-desk/agent-host": "workspace:*",
+    "@duaer-ai-desk/agent-runtime": "workspace:*",
+    "@duaer-ai-desk/shared": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^24.13.3",

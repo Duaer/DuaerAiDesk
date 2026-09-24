@@ -2,9 +2,9 @@
 
 - Status: Accepted
 - Date: 2026-09-20
-- Deciders: PI-Desktop UX and desktop maintainers
+- Deciders: DuaerAiDesk UX and desktop maintainers
 - Baseline: `0.15.1-beta.7` (frozen baseline `0.4.18`)
-- Protocol: v11 (unchanged; the `pi-desktop/app/systemFonts` channel is untouched)
+- Protocol: v11 (unchanged; the `duaer-ai-desk/app/systemFonts` channel is untouched)
 - Storage schema: v19 (unchanged; `AppSettings.fontFamily` keeps its shape and semantics)
 - Amends: [ADR 0083](0083-custom-global-ui-font.md) — its §2 bundled families, its
   `@font-face`/offline-rendering clauses, and its installer-size consequence — and D232
@@ -52,7 +52,7 @@ installs. The product wants the picker, not the payload.
    Electron main uses platform tooling only (`osascript` JXA CoreText on macOS
    with `system_profiler` as a fallback, PowerShell on Windows, `fc-list` on
    Linux), deduplicated, filtered, sorted, cached 60 s, and reached through the
-   additive allowlisted channel `pi-desktop/app/systemFonts`. A stored stack
+   additive allowlisted channel `duaer-ai-desk/app/systemFonts`. A stored stack
    that matches no option is still re-added first under the existing **Saved**
    (`custom`) group.
 

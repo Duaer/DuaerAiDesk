@@ -1,5 +1,5 @@
 /**
- * A live remote host: one desktop-side coordinator per paired `pi-host`. Owns
+ * A live remote host: one desktop-side coordinator per paired `duaer-ai-desk-host`. Owns
  * the {@link BackendRouter} registrations for that host's sessions, subscribes
  * to the host's RACP event streams, and pipes them through the event bridge
  * onto the renderer's IPC events. Ownership of the transport itself stays
@@ -12,7 +12,7 @@
  * mismatch — never escalates into a local regression: `close()` unregisters
  * every session and the fallback route resumes.
  */
-import type { RacpEventEnvelope, RacpSession } from "@pi-desktop/shared";
+import type { RacpEventEnvelope, RacpSession } from "@duaer-ai-desk/shared";
 import type { BackendRouter, RemoteBackend } from "./backend-router.js";
 import { makeRemoteSessionId } from "./backend-router.js";
 import { createRemoteBackend, type RemoteRacpClient } from "./remote-backend.js";

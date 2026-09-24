@@ -14,8 +14,8 @@
  *     closes;
  *   - a manual reopen spends work-panel width first, otherwise targeting 460px.
  *
- * Prereqs: `pnpm --filter @pi-desktop/desktop build` (or `pnpm build:js`) and a
- * host-core binary (target/debug, target/release, or PI_DESKTOP_HOST_BIN).
+ * Prereqs: `pnpm --filter @duaer-ai-desk/desktop build` (or `pnpm build:js`) and a
+ * host-core binary (target/debug, target/release, or DUAER_AI_DESK_HOST_BIN).
  */
 import { spawn } from "node:child_process";
 import { existsSync, mkdirSync, mkdtempSync, realpathSync, rmSync } from "node:fs";
@@ -36,22 +36,22 @@ const electronBin =
   process.platform === "win32"
     ? join(appDir, "node_modules/electron/dist/electron.exe")
     : join(appDir, "node_modules/.bin/electron");
-const cdpPort = Number(process.env.PI_DESKTOP_LAYOUT_CDP_PORT || 9336);
+const cdpPort = Number(process.env.DUAER_AI_DESK_LAYOUT_CDP_PORT || 9336);
 const MAIN_PANE_MIN_WIDTH = 450;
 const MAIN_PANE_REOPEN_TARGET_WIDTH = 460;
 
 function resolveHostBinary() {
   const candidates = [
-    process.env.PI_DESKTOP_HOST_BIN?.trim(),
-    join(root, "target", "debug", "pi-desktop-host-core"),
-    join(root, "target", "debug", "pi-desktop-host-core.exe"),
-    join(root, "target", "release", "pi-desktop-host-core"),
-    join(root, "target", "release", "pi-desktop-host-core.exe"),
+    process.env.DUAER_AI_DESK_HOST_BIN?.trim(),
+    join(root, "target", "debug", "duaer-ai-desk-host-core"),
+    join(root, "target", "debug", "duaer-ai-desk-host-core.exe"),
+    join(root, "target", "release", "duaer-ai-desk-host-core"),
+    join(root, "target", "release", "duaer-ai-desk-host-core.exe"),
   ].filter(Boolean);
   const found = candidates.find((candidate) => existsSync(candidate));
   if (!found) {
     throw new Error(
-      `host-core binary not found; run cargo build -p host-core or set PI_DESKTOP_HOST_BIN\nchecked: ${candidates.join(", ")}`,
+      `host-core binary not found; run cargo build -p host-core or set DUAER_AI_DESK_HOST_BIN\nchecked: ${candidates.join(", ")}`,
     );
   }
   return found;
@@ -297,7 +297,7 @@ function check(ok, label, detail = "") {
 
 async function main() {
   if (!existsSync(join(appDir, "out/main/index.js"))) {
-    console.error("desktop app not built. Run: pnpm --filter @pi-desktop/desktop build");
+    console.error("desktop app not built. Run: pnpm --filter @duaer-ai-desk/desktop build");
     process.exit(1);
   }
   if (!existsSync(electronBin)) {
@@ -332,9 +332,9 @@ async function main() {
       cwd: appDir,
       env: {
         ...process.env,
-        PI_DESKTOP_DATA_DIR: dataDir,
-        PI_DESKTOP_HOST_BIN: hostBinary,
-        PI_DESKTOP_START_MAXIMIZED: "0",
+        DUAER_AI_DESK_DATA_DIR: dataDir,
+        DUAER_AI_DESK_HOST_BIN: hostBinary,
+        DUAER_AI_DESK_START_MAXIMIZED: "0",
         ELECTRON_RENDERER_URL: "",
       },
       detached: process.platform !== "win32",
@@ -445,12 +445,12 @@ async function main() {
       () => cdp.evaluate(`!document.querySelector(".startup-splash")`),
       "startup splash cleared",
     );
-    await rig(`window.__PI_DESKTOP__.ensureVisualFixtures()`);
+    await rig(`window.__DUAER_AI_DESK__.ensureVisualFixtures()`);
     // The seeded workspace already holds more sessions than the capture fixture
     // is willing to add, so activate a seeded one: the shell needs an active
     // session before the work panel can open.
     await rig(
-      `window.__PI_DESKTOP__.selectSession(${JSON.stringify(sidebarSeed.alphaSessionIds[0])})`,
+      `window.__DUAER_AI_DESK__.selectSession(${JSON.stringify(sidebarSeed.alphaSessionIds[0])})`,
     );
     await waitFor(
       () =>
@@ -505,8 +505,8 @@ async function main() {
     );
 
     // 1. Opening the panel may not touch the native window.
-    await rig(`window.__PI_DESKTOP__.openWorkPanel()`);
-    await rig(`window.__PI_DESKTOP__.setWorkPanelWidth(720)`);
+    await rig(`window.__DUAER_AI_DESK__.openWorkPanel()`);
+    await rig(`window.__DUAER_AI_DESK__.setWorkPanelWidth(720)`);
     const opened = await measure();
     check(
       opened.windowWidth === baseline.windowWidth,
@@ -525,13 +525,13 @@ async function main() {
     );
 
     // 2. Divider drag with the sidebar expanded: floor holds mid-drag.
-    await rig(`window.__PI_DESKTOP__.collapseWorkPanel()`);
+    await rig(`window.__DUAER_AI_DESK__.collapseWorkPanel()`);
     await delay(700);
     if ((await measure()).sidebarKind !== "sidebar") {
       await clickSidebarToggle();
     }
-    await rig(`window.__PI_DESKTOP__.setWorkPanelWidth(244)`);
-    await rig(`window.__PI_DESKTOP__.openWorkPanel()`);
+    await rig(`window.__DUAER_AI_DESK__.setWorkPanelWidth(244)`);
+    await rig(`window.__DUAER_AI_DESK__.openWorkPanel()`);
     const dragStart = await measure();
     const drag = await dragDivider(26);
     check(
@@ -562,7 +562,7 @@ async function main() {
     );
 
     // 3. Reopen spends panel width first, otherwise targeting 460px.
-    await rig(`window.__PI_DESKTOP__.setWorkPanelWidth(720)`);
+    await rig(`window.__DUAER_AI_DESK__.setWorkPanelWidth(720)`);
     if ((await measure()).sidebarKind === "sidebar") {
       await clickSidebarToggle();
     }
@@ -591,9 +591,9 @@ async function main() {
     );
 
     // 4. Closing the panel restores a layout-collapsed sidebar only.
-    await rig(`window.__PI_DESKTOP__.setWorkPanelWidth(720)`);
+    await rig(`window.__DUAER_AI_DESK__.setWorkPanelWidth(720)`);
     const pressed = await measure();
-    await rig(`window.__PI_DESKTOP__.collapseWorkPanel()`);
+    await rig(`window.__DUAER_AI_DESK__.collapseWorkPanel()`);
     await delay(700);
     const restored = await measure();
     check(
@@ -647,12 +647,12 @@ async function main() {
     );
 
     // 5. Preview (maximize) mode: MainChat yields its width to the panel.
-    await rig(`window.__PI_DESKTOP__.openWorkPanel()`);
+    await rig(`window.__DUAER_AI_DESK__.openWorkPanel()`);
     await waitFor(
       () => cdp.evaluate(`!!document.querySelector('[data-testid="work-panel"]')`),
       "work panel mounted for preview mode",
     );
-    await rig(`window.__PI_DESKTOP__.setWorkPanelWidth(500)`);
+    await rig(`window.__DUAER_AI_DESK__.setWorkPanelWidth(500)`);
     await waitFor(
       () => cdp.evaluate(`!!document.querySelector(".work-panel-new-tab")`),
       "work panel new-tab action",
@@ -778,7 +778,7 @@ async function main() {
         document.querySelector('.window-chrome-row [data-nav="new-task"]');
       const firstActionBox = firstAction?.getBoundingClientRect();
       return {
-        platform: window.piDesktop?.platform ?? "unknown",
+        platform: window.duaerAiDesk?.platform ?? "unknown",
         fullscreen: document.documentElement.dataset.fullscreen === "true",
         firstActionLeft: firstActionBox ? Math.round(firstActionBox.left) : null,
         // Read the reserve as the layout resolved it instead of restating the
@@ -964,12 +964,12 @@ async function main() {
         ),
       "home route returns after preview navigation",
     );
-    await rig(`window.__PI_DESKTOP__.openWorkPanel()`);
+    await rig(`window.__DUAER_AI_DESK__.openWorkPanel()`);
     await waitFor(
       () => cdp.evaluate(`!!document.querySelector('[data-testid="work-panel"]')`),
       "work panel remounted after preview navigation",
     );
-    await rig(`window.__PI_DESKTOP__.setWorkPanelWidth(500)`);
+    await rig(`window.__DUAER_AI_DESK__.setWorkPanelWidth(500)`);
 
     // 6. Preview-mode details: inert divider, sidebar interop, persistence.
     const storedBefore = await cdp.evaluate(
@@ -1058,7 +1058,7 @@ async function main() {
       "reopening the sidebar from preview mode preserves the preferred width",
       `${storedAfterPreview} -> ${storedAfterReopen}`,
     );
-    await rig(`window.__PI_DESKTOP__.collapseWorkPanel()`);
+    await rig(`window.__DUAER_AI_DESK__.collapseWorkPanel()`);
     await delay(900);
     const closedFromPreview = await measure();
     check(
@@ -1101,7 +1101,7 @@ async function main() {
         bandZ: band ? Number(getComputedStyle(band).zIndex) : null,
         bandHeight: band ? Math.round(band.getBoundingClientRect().height) : null,
         bandPointerEvents: band ? getComputedStyle(band).pointerEvents : null,
-        platform: window.piDesktop?.platform ?? "unknown",
+        platform: window.duaerAiDesk?.platform ?? "unknown",
         fullscreen: document.documentElement.dataset.fullscreen === "true",
         firstActionLeft: firstActionBox ? Math.round(firstActionBox.left) : null,
         bandInset,
@@ -1203,7 +1203,7 @@ async function main() {
     await cdp.evaluate(`document.querySelector(".work-panel-maximize")?.click?.()`);
     await e2eChromeSettle(900);
 
-    await rig(`window.__PI_DESKTOP__.collapseWorkPanel()`);
+    await rig(`window.__DUAER_AI_DESK__.collapseWorkPanel()`);
     const originalTheme = await cdp.evaluate(`document.documentElement.dataset.theme`);
     const routeActionSelector = ".main-titlebar .title-nav-btn";
     const readChromeAction = (selector) => cdp.evaluate(`(() => {
@@ -1227,7 +1227,7 @@ async function main() {
     };
     for (const route of ["plugins", "pulls", "scheduled"]) {
       if ((await measure()).sidebarKind !== "sidebar") await clickSidebarToggle();
-      await rig(`window.__PI_DESKTOP__.setPage(${JSON.stringify(route)})`);
+      await rig(`window.__DUAER_AI_DESK__.setPage(${JSON.stringify(route)})`);
       await waitFor(
         () => cdp.evaluate(`!!document.querySelector(".route-page .page-frame") && !!document.querySelector(".main-titlebar")`),
         `${route} route mounted`,
@@ -1242,7 +1242,7 @@ async function main() {
         `${route} exercises the ordinary titlebar, not preview chrome`,
       );
       for (const theme of ["light", "dark"]) {
-        await cdp.evaluate(`window.__PI_DESKTOP__.setThemeAttr(${JSON.stringify(theme)})`);
+        await cdp.evaluate(`window.__DUAER_AI_DESK__.setThemeAttr(${JSON.stringify(theme)})`);
         await movePointer(500, 300);
         const reference = await readChromeAction(".app-work-panel-toggle");
         await movePointer(reference.x, reference.y);
@@ -1748,7 +1748,7 @@ async function main() {
     await cdp.evaluate(`document.documentElement.dataset.theme = ${JSON.stringify(originalTheme)}`);
 
     await checkSidebarSettings({
-      cdp, check, waitFor, artifactDir: process.env.PI_DESKTOP_LAYOUT_ARTIFACT_DIR,
+      cdp, check, waitFor, artifactDir: process.env.DUAER_AI_DESK_LAYOUT_ARTIFACT_DIR,
     });
 
     const crashSentinel = `renderer-crash-${Date.now()}`;

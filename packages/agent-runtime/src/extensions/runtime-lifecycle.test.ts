@@ -3,7 +3,7 @@ import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import type { AgentEventEnvelope } from "@pi-desktop/shared";
+import type { AgentEventEnvelope } from "@duaer-ai-desk/shared";
 import { DesktopAgentRuntime } from "../runtime.js";
 import { clearTrustedExtensionCache } from "./runner.js";
 

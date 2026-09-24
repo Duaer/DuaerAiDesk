@@ -21,7 +21,7 @@ const [composer, api, main, protocol, runtime, oneShot, en, zh] = await Promise.
 ]);
 
 test("prompt enhancement uses the typed main-process bridge", () => {
-  assert.match(protocol, /promptEnhance: "pi-desktop\/prompt\/enhance"/);
+  assert.match(protocol, /promptEnhance: "duaer-ai-desk\/prompt\/enhance"/);
   assert.match(api, /enhancePrompt: \(req: PromptEnhancementRequest\)/);
   assert.match(api, /IPC\.invoke\.promptEnhance/);
   assert.match(main, /handle\(IPC\.invoke\.promptEnhance/);

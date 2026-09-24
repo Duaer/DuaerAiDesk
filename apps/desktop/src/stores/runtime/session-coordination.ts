@@ -3,13 +3,13 @@ import type {
   SessionDetail,
   SessionSummary,
   UiMessage,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import {
   contextCompactionMark,
   initialThinkingLevelForBinding,
   modelIdsMatch,
   normalizeMode,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import { api } from "../../lib/api";
 import { scheduleHomeDraftAdopt } from "../../lib/composer-draft-cache";
 import {

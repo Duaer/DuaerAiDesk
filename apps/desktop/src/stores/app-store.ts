@@ -31,7 +31,7 @@ import type {
   SessionSummary,
   ThinkingLevel,
   UiMessage,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import {
   contextCompactionMark,
   ErrorCodes as SharedErrorCodes,
@@ -42,7 +42,7 @@ import {
   normalizeMode,
   normalizeProposalKind,
   PROTOCOL_VERSION,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import { api } from "../lib/api";
 import type { SettingsTabId } from "../lib/settings-search";
 import { createNavigationIntentController } from "../lib/navigation-intent";
@@ -143,7 +143,7 @@ import {
   type QueuedPrompt,
   type QueuedPrompts,
 } from "../lib/queued-prompts";
-import type { AgentQueueChangedEvent, QueuedTurnSummary } from "@pi-desktop/shared";
+import type { AgentQueueChangedEvent, QueuedTurnSummary } from "@duaer-ai-desk/shared";
 import { settleBootstrapRequests } from "../lib/bootstrap-result";
 import type { SubagentPanelSelection } from "../lib/subagent-panel";
 import {

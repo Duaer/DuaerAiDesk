@@ -239,8 +239,8 @@ claim availability or freshness against a malicious server.
 - Unsigned macOS distributions keep a narrow first-launch fallback for trusted
   sources. The DMG is a two-icon install and does not include that note. The ZIP
   package includes a text note and the executable helper, which searches only
-  `/Applications/PI-Desktop.app` and `~/Applications/PI-Desktop.app`,
-  verifies `CFBundleIdentifier` is `net.aiuo.pi-desktop`, removes only
+  `/Applications/DuaerAiDesk.app` and `~/Applications/DuaerAiDesk.app`,
+  verifies `CFBundleIdentifier` is `net.aiuo.duaer-ai-desk`, removes only
   `com.apple.quarantine` recursively when present, and opens the app. It accepts
   no arbitrary path, uses no privilege escalation, and is not a substitute for
   Developer ID signing or notarization. The note gives the manual
@@ -258,7 +258,7 @@ The local MCP control server is an explicit automation boundary, not a general
 remote-control listener:
 
 - It is disabled by default and only starts with
-  `PI_DESKTOP_MCP_CONTROL=1`.
+  `DUAER_AI_DESK_MCP_CONTROL=1`.
 - It binds `127.0.0.1` only and refuses to start if the listen address is not
   loopback. There is no configuration path for a LAN or public interface, and
   the feature does not revive the deferred remote Gateway / WebUI scope.
@@ -345,7 +345,7 @@ hashes of canonical path plus verified header id. Every discovery/open resolves
 the real path below the configured Pi session root and revalidates header id and
 cwd; path traversal and symlink escape are rejected.
 
-Writable continuation requires a mode-0600 cooperative PI-Desktop lease beside
+Writable continuation requires a mode-0600 cooperative DuaerAiDesk lease beside
 the session and full-byte identity checks before each SDK append. After an
 append, the adapter accepts only the unchanged prior prefix plus exactly one
 entry whose id and parent match the SDK operation. Any foreign/interleaved

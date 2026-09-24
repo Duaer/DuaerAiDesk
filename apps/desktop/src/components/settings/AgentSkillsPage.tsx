@@ -4,7 +4,7 @@ import {
   GLOBAL_SCOPE,
   type AgentCapabilityLevel,
   type UserSkillRecord,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import { api } from "../../lib/api";
 import { useAppStore } from "../../stores/app-store";
 import { useHostCollection } from "../../hooks/use-host-collection";

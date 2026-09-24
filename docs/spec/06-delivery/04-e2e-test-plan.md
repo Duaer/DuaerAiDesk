@@ -1,6 +1,6 @@
 # 04. E2E Test Plan
 
-> Scope: MVP acceptance scenarios plus current shipped product increments for PI-Desktop
+> Scope: MVP acceptance scenarios plus current shipped product increments for DuaerAiDesk
 > Status: Accepted (protocol/Electron automation is active; full desktop Playwright remains planned)
 > Cross-references: [acceptance-criteria](02-acceptance-criteria.md) · [milestones](01-mvp-milestones.md) · [ai-development-workflow](03-ai-development-workflow.md) · [change-checklist](05-change-checklist.md)
 
@@ -206,7 +206,7 @@ levels does not waive the relevant E2E gate.
 | Requirement | Detail |
 |---|---|
 | Platform | macOS arm64 and Intel x64, Windows x64, and Linux x64 release targets (D126/D285) |
-| Profile | Clean `~/.pi-desktop` profile (no prior config) |
+| Profile | Clean `~/.duaer-ai-desk` profile (no prior config) |
 | Fixtures | Sample project directory (`examples/fixtures/sample-project/`) |
 | Sample plugin | `examples/plugins/hello` loaded from local path |
 | Provider | At least one provider with a valid key (test account) |
@@ -352,12 +352,12 @@ identify the platform validation still needed.
   available for repackaging validation.
 - **Steps**: 1) Run the tag release workflow. 2) Inspect the published GitHub
   Release assets. 3) Confirm the versioned
-  `PI-Desktop-X.Y.Z-linux-x64.asar` asset is present. 4) Place that archive in
+  `DuaerAiDesk-X.Y.Z-linux-x64.asar` asset is present. 4) Place that archive in
   the target Electron resources layout with the target package's native host
   and other resources, then launch it with `electron <archive>.asar`.
 - **Expected**: The ASAR is copied byte-for-byte from
   `linux-unpacked/resources/app.asar`, is uploaded alongside the Linux
-  AppImage, deb, and rpm, and the system Electron opens the PI-Desktop application
+  AppImage, deb, and rpm, and the system Electron opens the DuaerAiDesk application
   archive without requiring the bundled Electron executable.
 - **Specs linked**: `06-delivery/06-release-runbook.md`, `03-runtime/07-process-model.md`
 - **Acceptance**: Quality (release artifact and packaging compatibility)
@@ -372,14 +372,14 @@ identify the platform validation still needed.
   for installation and launch.
 - **Steps**: 1) Build the Linux targets and inspect the RPM with `rpm -qip` and
   `rpm -qpl`. 2) Confirm the package contains the application archive,
-  host-core, `pi-desktop.desktop`, and the 512px `pi-desktop` icon. 3) Confirm
+  host-core, `duaer-ai-desk.desktop`, and the 512px `duaer-ai-desk` icon. 3) Confirm
   the RPM has no global `/usr/lib/.build-id` links. 4) Install the RPM on the
-  Fedora KDE/Wayland machine and launch PI-Desktop from its desktop entry.
+  Fedora KDE/Wayland machine and launch DuaerAiDesk from its desktop entry.
   5) Inspect the taskbar grouping and the installed desktop entry.
 - **Expected**: The x64 RPM is produced with the documented name and uploads
-  with the release artifacts. Its desktop entry contains `Icon=pi-desktop` and
-  `StartupWMClass=pi-desktop`; the running Wayland window groups with the
-  PI-Desktop launcher and shows its icon instead of a generic Electron icon.
+  with the release artifacts. Its desktop entry contains `Icon=duaer-ai-desk` and
+  `StartupWMClass=duaer-ai-desk`; the running Wayland window groups with the
+  DuaerAiDesk launcher and shows its icon instead of a generic Electron icon.
   The package remains notify-and-link for updates, and the bundled Electron
   binaries do not create global build-id links.
 - **Specs linked**: `01-product/01-product-scope.md`,
@@ -417,20 +417,20 @@ identify the platform validation still needed.
   app and Applications link are the only items in the window. 3) Confirm the
   DMG has no command helper and no `If app won't open, read this.txt`. 4) Inspect
   the ZIP root without extracting the application contents and confirm it has
-  both `PI-Desktop-macOS-opening-help.txt` and the executable
-  `PI-Desktop-macOS-open.command`. 5) Read the note, move the app to
+  both `DuaerAiDesk-macOS-opening-help.txt` and the executable
+  `DuaerAiDesk-macOS-open.command`. 5) Read the note, move the app to
   `/Applications`, and double-click the ZIP helper.
 - **Expected**: The DMG contains the branded 720×440 background, the app, and
   the Applications link only; it does not contain or expose the command helper
   or the opening-help note. The ZIP contains the helper and the opening note at
   its root. The note includes
-  `xattr -r -d com.apple.quarantine /Applications/PI-Desktop.app`, explains
+  `xattr -r -d com.apple.quarantine /Applications/DuaerAiDesk.app`, explains
   that the fallback is only for a trusted unsigned artifact when macOS reports
   that the app is damaged or does not open, and says signed/notarized builds do
-  not need it. The ZIP helper searches only `/Applications/PI-Desktop.app` and
-  `~/Applications/PI-Desktop.app`, removes only `com.apple.quarantine` when
+  not need it. The ZIP helper searches only `/Applications/DuaerAiDesk.app` and
+  `~/Applications/DuaerAiDesk.app`, removes only `com.apple.quarantine` when
   present, and opens the app without `sudo` or an arbitrary path argument. It
-  validates `CFBundleIdentifier=net.aiuo.pi-desktop` before changing attributes.
+  validates `CFBundleIdentifier=net.aiuo.duaer-ai-desk` before changing attributes.
   The guidance does not claim that an unsigned artifact has passed Gatekeeper
   qualification.
 - **Specs linked**: `06-delivery/06-release-runbook.md`,
@@ -452,7 +452,7 @@ identify the platform validation still needed.
   `Developer ID Application: XingYu Liu (DUV63RKYTW)`. 3) Run
   `codesign --verify --deep --strict --verbose=2`,
   `spctl --assess --type execute --verbose=4`, and `xcrun stapler validate`
-  against the app, including `Contents/Resources/bin/pi-desktop-host-core`.
+  against the app, including `Contents/Resources/bin/duaer-ai-desk-host-core`.
   4) Confirm the workflow's DMG step reported an Apple notary status of
   `Accepted` and then run `xcrun stapler validate` against the matching DMG.
   5) Download the DMG on a clean macOS profile, move the app to
@@ -474,14 +474,14 @@ identify the platform validation still needed.
 #### E2E-212: GitHub Release starts the CNB mirror pipeline
 
 - **Preconditions**: Repository secret `CNB_MIRROR_TOKEN` is configured on
-  `vastsa/PI-Desktop`; the CNB pipeline at `aixk/Pi-Desktop` listens for
+  `Duaer/DuaerAiDesk`; the CNB pipeline at `aixk/DuaerAiDesk` listens for
   `api_trigger_mirror`; a GitHub Release tag such as `vX.Y.Z` exists with
   uploaded artifacts.
 - **Steps**: 1) Publish or edit that GitHub Release, or dispatch
   `mirror-to-cnb.yml` with the same tag. 2) Inspect the Actions log for the
   resolved tag and the POST to `api.cnb.cool`. 3) Confirm the CNB pipeline
   starts with `MIRROR_TAGS` equal to that tag.
-- **Expected**: The job runs only on `vastsa/PI-Desktop`. Manual dispatch
+- **Expected**: The job runs only on `Duaer/DuaerAiDesk`. Manual dispatch
   without a `vX.Y.Z` tag fails before calling CNB. A missing
   `CNB_MIRROR_TOKEN` fails closed. The JSON body is built with `jq` (not
   YAML string interpolation). GitHub Release artifacts and updater feeds are
@@ -496,10 +496,10 @@ identify the platform validation still needed.
 
 #### E2E-001: App launches and shows main window
 
-- **Preconditions**: macOS arm64 or Intel x64; no prior `~/.pi-desktop` profile. For the
+- **Preconditions**: macOS arm64 or Intel x64; no prior `~/.duaer-ai-desk` profile. For the
   development lane, workspace package build outputs are absent or older than
   their TypeScript sources.
-- **Steps**: 1) Launch PI-Desktop. In the development lane, use `pnpm dev`.
+- **Steps**: 1) Launch DuaerAiDesk. In the development lane, use `pnpm dev`.
   2) Observe main window appears.
 - **Expected**: Development launch rebuilds all workspace dependencies before
   host-core and Electron startup. Window first shows the branded startup splash
@@ -546,7 +546,7 @@ identify the platform validation still needed.
 
 #### E2E-004: First-run inline checklist appears
 
-- **Preconditions**: Fresh profile (no `~/.pi-desktop`).
+- **Preconditions**: Fresh profile (no `~/.duaer-ai-desk`).
 - **Steps**: 1) Launch app on fresh profile. 2) Observe onboarding checklist.
 - **Expected**: Inline checklist is displayed; provider/key items open Settings
   → Agent, and the optional plugin item opens the app-shell Plugins
@@ -684,8 +684,8 @@ identify the platform validation still needed.
   OpenAI-compatible provider.
 - **Expected**: Every OpenCode Go LLM request includes `x-opencode-session`
   equal to the conversation id (or a stable per-call id when no session
-  exists), `x-opencode-client: pi-desktop`, and a `User-Agent` identifying
-  PI-Desktop. Follow-up turns reuse the same session header, and so does the
+  exists), `x-opencode-client: duaer-ai-desk`, and a `User-Agent` identifying
+  DuaerAiDesk. Follow-up turns reuse the same session header, and so does the
   compaction summary request, which the harness would otherwise send with no
   headers at all. The generic OpenAI-compatible provider does not receive
   these headers. The gateway does
@@ -1019,7 +1019,7 @@ identify the platform validation still needed.
 - **Specs linked**: `03-runtime/02-agent-runtime.md`, `03-runtime/10-session-state-machine.md`
 - **Acceptance**: C (new session, send message)
 - **Milestone**: M2
-- **Status**: Automated (protocol smoke, live-model lane; requires PI_DESKTOP_TEST_API_KEY)
+- **Status**: Automated (protocol smoke, live-model lane; requires DUAER_AI_DESK_TEST_API_KEY)
 
 #### E2E-008d: Composer Enter-to-send and modifier send
 
@@ -2516,7 +2516,7 @@ identify the platform validation still needed.
 #### E2E-024F: Refresh official remote marketplace repository
 
 - **Preconditions**: Network available to GitHub raw content.
-- **Steps**: 1) Open Extensions → Marketplace. 2) Use the header Refresh marketplace action. 3) Confirm the source line points at `vastsa/pi-desktop-plugins`.
+- **Steps**: 1) Open Extensions → Marketplace. 2) Use the header Refresh marketplace action. 3) Confirm the source line points at `vastsa/duaer-ai-desk-plugins`.
 - **Expected**: Catalog refreshes from the remote official repo; card grid updates; offline fallback still works if fetch fails.
 - **Specs linked**: `07-plugins/07-plugin-marketplace.md`
 - **Acceptance**: G (remote marketplace source)
@@ -2585,8 +2585,8 @@ identify the platform validation still needed.
 
 #### E2E-024U: Trust tier and host version bound are enforced by the client
 
-- **Preconditions**: A custom-source catalog claiming `trust: "verified"`, a catalog with an unrecognised tier, and a version whose `minPiDesktop` exceeds the running host.
-- **Steps**: 1) Point the marketplace at the custom source. 2) Inspect the card and detail sheet badges. 3) Attempt to install the version pinned to a newer host. 4) Repeat with a `minPiDesktop` that is a range expression rather than a version.
+- **Preconditions**: A custom-source catalog claiming `trust: "verified"`, a catalog with an unrecognised tier, and a version whose `minDuaerAiDesk` exceeds the running host.
+- **Steps**: 1) Point the marketplace at the custom source. 2) Inspect the card and detail sheet badges. 3) Attempt to install the version pinned to a newer host. 4) Repeat with a `minDuaerAiDesk` that is a range expression rather than a version.
 - **Expected**: A `verified` claim from a non-official source renders as community with no shield; an unrecognised tier renders as unknown; the version requiring a newer host is not offered and an explicit install fails with `PLUGIN_HOST_TOO_OLD` naming both versions; an unparseable bound is ignored rather than making the plugin uninstallable.
 - **Specs linked**: `07-plugins/07-plugin-marketplace.md`, `07-plugins/15-plugin-center.md`
 - **Acceptance**: G (trust presentation)
@@ -2953,7 +2953,7 @@ identify the platform validation still needed.
 #### E2E-034: NDJSON log files are written and redacted
 
 - **Preconditions**: Fresh profile; provider configured; one chat turn completed.
-- **Steps**: 1) Run a prompt with a tool call. 2) Open `~/.pi-desktop/logs/`. 3) Inspect the categorized files under `app/`, `host/`, and `agent/`.
+- **Steps**: 1) Run a prompt with a tool call. 2) Open `~/.duaer-ai-desk/logs/`. 3) Inspect the categorized files under `app/`, `host/`, and `agent/`.
 - **Expected**: NDJSON records exist with `ts/level/channel/category/event/message`; a normal tool call produces one completion or failure record carrying `sessionId`/`toolCallId`, safe tool metadata, and bounded result/duration information; an interrupted tool remains traceable by the same id; no API key, authorization value, raw command output, or local absolute path appears; each category file rotates at 5 MB; lifecycle, permission, tool, provider, plugin, persistence, updater, and error records remain available without creating dedicated timing category files.
 - **Specs linked**: `03-runtime/09-logging-and-observability.md`
 - **Acceptance**: H (diagnostics)
@@ -2988,7 +2988,7 @@ identify the platform validation still needed.
 - **Steps**: 1) Launch so the auto-updater check or model discovery issues a
   main-process `net.fetch` / Electron-updater request. 2) Confirm the native
   exception dialog does not appear. 3) Dismiss nothing; wait for a later
-  updater or discovery request. 4) Open `~/.pi-desktop/logs/app/runtime.log`.
+  updater or discovery request. 4) Open `~/.duaer-ai-desk/logs/app/runtime.log`.
 - **Expected**: No Electron "A JavaScript error occurred in the main process"
   dialog. The app stays running and does not quit. `runtime.log` contains an
   error record with `code: "NON_ASCII_HTTP_HEADER"` and `recoverable: true`.
@@ -3029,11 +3029,11 @@ identify the platform validation still needed.
 - **Milestone**: M5
 - **Status**: Unit-covered (`tools::shell::tests`); scenario Documented
 
-#### E2E-044: Development launch uses PI-Desktop Dock branding
+#### E2E-044: Development launch uses DuaerAiDesk Dock branding
 
 - **Preconditions**: macOS development checkout with canonical `build/icon_1024.png`.
 - **Steps**: 1) Run `pnpm dev`. 2) Inspect the running application's Dock icon.
-- **Expected**: The Dock shows the PI-Desktop brand icon, not Electron's default icon; packaged builds continue to use `build/icon.icns`.
+- **Expected**: The Dock shows the DuaerAiDesk brand icon, not Electron's default icon; packaged builds continue to use `build/icon.icns`.
 - **Specs linked**: `06-delivery/06-release-runbook.md`
 - **Acceptance**: Quality (development shell matches release branding)
 - **Milestone**: M5
@@ -3058,7 +3058,7 @@ identify the platform validation still needed.
 - **Milestone**: M5
 - **Status**: Unit-covered (`user-select.test.mjs`); scenario Documented
 
-#### E2E-046: PI-Desktop renderer branding and composer icon boundary
+#### E2E-046: DuaerAiDesk renderer branding and composer icon boundary
 
 - **Preconditions**: App running in both English and zh-CN locales, with an
   empty home and a docked transcript available.
@@ -3069,7 +3069,7 @@ identify the platform validation still needed.
   frame is shown. 4) Focus the footer Settings and Plugins icons, then each
   project/Temporary session create control. 5) Open Settings and the composer
   input.
-- **Expected**: Visible shell identity reads `PI-Desktop`; the empty-home hero
+- **Expected**: Visible shell identity reads `DuaerAiDesk`; the empty-home hero
   renders the theme-matching 100px `HomeMascotLogo` GIF with a short idle hold
   and a looping wave. Pointer hover does not alter the cadence or geometry,
   and reduced motion shows the matching still first frame.
@@ -4135,7 +4135,7 @@ must keep splitting are covered by `markdown-blocks.test.mjs`.
   notification has moved to Windows Action Center; no event opens the wrong
   currently selected session. Abort shows neither surface. OS suppression does
   not lose the durable row or surface a misleading app error. Every inspected
-  Windows system surface identifies `PI-Desktop`; no stock Electron application
+  Windows system surface identifies `DuaerAiDesk`; no stock Electron application
   name or identity is exposed.
 - **Specs linked**: `03-runtime/01-ipc-protocol.md`,
   `04-ux/07-ui-design-system.md`, `04-ux/09-interaction-patterns.md`,
@@ -4217,10 +4217,10 @@ must keep splitting are covered by `markdown-blocks.test.mjs`.
 
 - **Preconditions**: Native macOS, Windows, and Linux runners; built desktop
   app; English and zh-CN locales available. The Windows/Linux harness can set
-  `PI_DESKTOP_START_MAXIMIZED=1` before launch so Main maximizes the hidden
+  `DUAER_AI_DESK_START_MAXIMIZED=1` before launch so Main maximizes the hidden
   native window before renderer mount.
 - **Steps**: 1) On macOS, launch both `pnpm dev` and a packaged build. Confirm
-  the application-menu title is PI-Desktop, open About PI-Desktop, and inspect
+  the application-menu title is DuaerAiDesk, open About DuaerAiDesk, and inspect
   its name, version, and icon. Then open every system menu and invoke New Task, Open
   Project, Settings, global search, sidebar toggle, editing,
   zoom/fullscreen, Window, Help, Logs, and Check for Updates actions. Verify
@@ -4252,9 +4252,9 @@ must keep splitting are covered by `markdown-blocks.test.mjs`.
   while a window exists and after it closes. 7) Build each target on its
   native runner from a clean release-host directory. On Windows, inspect the
   installed app's taskbar button and Start menu shortcut icon.
-- **Expected**: macOS development and packaged launches show PI-Desktop as the
+- **Expected**: macOS development and packaged launches show DuaerAiDesk as the
   native application identity, and the About panel uses the canonical
-  PI-Desktop icon; neither surface exposes the stock Electron name or icon.
+  DuaerAiDesk icon; neither surface exposes the stock Electron name or icon.
   macOS follows native menu conventions and accelerators.
   Windows/Linux show no application menu inside the window; navigation and
   right-side controls do not collide with drag regions, keyboard shortcuts
@@ -4279,7 +4279,7 @@ must keep splitting are covered by `markdown-blocks.test.mjs`.
   share one continuous 1px `border-subtle` separator; the control band's
   leading divider uses the same token and its bottom edge does not disappear
   under the window buttons. Unknown actions fail closed. The installed Windows
-  taskbar button and Start menu shortcut use the PI-Desktop icon, never
+  taskbar button and Start menu shortcut use the DuaerAiDesk icon, never
   Electron's default icon. Each package contains the target-native host binary
   (`.exe` only on Windows). Passing this scenario on Windows/Linux proves
   shell readiness, not first-release qualification.
@@ -4318,7 +4318,7 @@ must keep splitting are covered by `markdown-blocks.test.mjs`.
   entry remains available and restores the same window; on macOS verify its
   native minimize still hides to the tray. The Windows taskbar toggle is
   covered separately by E2E-124. 7) Invoke unknown values and `"ask"` on
-  `pi-desktop/window/closeBehavior/set` and verify they fail closed, and
+  `duaer-ai-desk/window/closeBehavior/set` and verify they fail closed, and
   verify the channel is rejected outright on macOS.
 - **Expected**: The first close prompts exactly once per unset state and
   Cancel never persists a choice. Tray mode keeps the app alive with a
@@ -4348,7 +4348,7 @@ must keep splitting are covered by `markdown-blocks.test.mjs`.
   window, tray, host-core, and sidecar remain. 3) Repeat and confirm Quit;
   confirm the ordered shutdown runs. 4) On Windows/Linux with close behavior
   unset, close the window and choose Quit on the D230 dialog; confirm no
-  second warning. 5) Launch with `PI_DESKTOP_BOOT_PROBE=1` (and the
+  second warning. 5) Launch with `DUAER_AI_DESK_BOOT_PROBE=1` (and the
   supervision/capture equivalents) and confirm `app.quit()` exits without a
   dialog. 6) On a packaged Windows NSIS or Linux AppImage install, download an
   update and choose Restart to update; confirm the quit warning never appears
@@ -4592,7 +4592,7 @@ must keep splitting are covered by `markdown-blocks.test.mjs`.
 - **Acceptance**: C (sessions), Quality
 - **Milestone**: M6+
 - **Status**: Automated (`scripts/e2e-electron-boot.mjs` via
-  `pnpm test:e2e:boot`, using the existing `PI_DESKTOP_BOOT_PROBE` entry point).
+  `pnpm test:e2e:boot`, using the existing `DUAER_AI_DESK_BOOT_PROBE` entry point).
 
 #### E2E-071e: Regenerating from a paged-back transcript replaces the right turn
 
@@ -4734,10 +4734,10 @@ must keep splitting are covered by `markdown-blocks.test.mjs`.
 
 #### E2E-069: Platform-specific sidebar header behavior
 
-- **Preconditions**: PI-Desktop is open with the expanded sidebar and a chat
+- **Preconditions**: DuaerAiDesk is open with the expanded sidebar and a chat
   session is active.
 - **Steps**: 1) Open Extensions on macOS windowed mode. 2) Inspect the expanded
-  sidebar titlebar. 3) Confirm no PI-Desktop logo/title is visible and Collapse
+  sidebar titlebar. 3) Confirm no DuaerAiDesk logo/title is visible and Collapse
   sidebar appears at the right of the traffic lights. 4) Enter
   fullscreen and inspect the same row. 5) On Windows/Linux, confirm the brand
   remains visible; activate it with a pointer, then with keyboard focus and
@@ -4762,7 +4762,7 @@ must keep splitting are covered by `markdown-blocks.test.mjs`.
 
 #### E2E-098: Sidebar collapse and expand animate as a docked transition
 
-- **Preconditions**: PI-Desktop is open with the expanded sidebar and an active
+- **Preconditions**: DuaerAiDesk is open with the expanded sidebar and an active
   chat session; `prefers-reduced-motion` is off.
 - **Steps**: 1) Click Collapse sidebar in the expanded sidebar header (or press
   the sidebar toggle shortcut). 2) Watch the sidebar during collapse. 3) Confirm
@@ -4788,7 +4788,7 @@ must keep splitting are covered by `markdown-blocks.test.mjs`.
 
 #### E2E-208: Collapsed sidebar does not force a 640px chat band
 
-- **Preconditions**: PI-Desktop is open with an active chat session at a
+- **Preconditions**: DuaerAiDesk is open with an active chat session at a
   viewport wide enough for the default 760px chat content band; reduced
   motion is off; the user has not resized the band.
 - **Steps**: 1) Record the width of the centered transcript or empty-home
@@ -4808,7 +4808,7 @@ must keep splitting are covered by `markdown-blocks.test.mjs`.
 
 #### E2E-CHAT-content-width-handles: Dual edge handles resize the centered chat band
 
-- **Preconditions**: PI-Desktop is open on chat (empty home or a transcript)
+- **Preconditions**: DuaerAiDesk is open on chat (empty home or a transcript)
   at a viewport wider than 760px. Reduced motion off.
 - **Steps**: 1) Confirm no divider is visible at rest. 2) Hover the left
   content edge and confirm a short faint capsule, then the right edge. 3) Drag
@@ -4830,7 +4830,7 @@ must keep splitting are covered by `markdown-blocks.test.mjs`.
 
 #### E2E-UI-tooltip-never-outlives-its-trigger: A themed tooltip always retreats
 
-- **Preconditions**: PI-Desktop is open on a session with at least one message
+- **Preconditions**: DuaerAiDesk is open on a session with at least one message
   toolbar, a sidebar with two retained projects, and a window that can lose
   focus (another application or an OS dialog).
 - **Steps**: 1) Hover an icon-only action and wait for its tooltip. 2) With the
@@ -4839,7 +4839,7 @@ must keep splitting are covered by `markdown-blocks.test.mjs`.
   a row of adjacent actions. 4) Hover an action, then trigger a sidebar
   re-order or a project expand/collapse that moves its row in the DOM. 5) Hover an
   action, then press Escape. 6) Hover an action, switch to another application,
-  then return to PI-Desktop. 7) Repeat step 1 for the project path tooltip
+  then return to DuaerAiDesk. 7) Repeat step 1 for the project path tooltip
   (long absolute path), a session row's overflow control, and a message-toolbar
   chip.
 - **Expected**: Each tooltip appears after its delay (300ms, 500ms for the
@@ -4858,7 +4858,7 @@ must keep splitting are covered by `markdown-blocks.test.mjs`.
 
 #### E2E-UI-row-actions-do-not-swallow-the-row-click: A hidden row action is inert
 
-- **Preconditions**: PI-Desktop is open with two retained projects, each with
+- **Preconditions**: DuaerAiDesk is open with two retained projects, each with
   at least three sessions, and one active conversation.
 - **Steps**: 1) Without hovering it, click the right-hand gutter of an idle
   session row where its overflow control will appear, and note which
@@ -4888,7 +4888,7 @@ must keep splitting are covered by `markdown-blocks.test.mjs`.
 
 #### E2E-070: Native select menus follow the Windows theme across the app
 
-- **Preconditions**: PI-Desktop is running on Windows with light and dark
+- **Preconditions**: DuaerAiDesk is running on Windows with light and dark
   themes available.
 - **Steps**: 1) In light theme, open remaining native selects (scheduled-task
   form) and confirm Settings pickers on General, 全局 AI, Model configuration,
@@ -5093,7 +5093,7 @@ must keep splitting are covered by `markdown-blocks.test.mjs`.
 - **Covers**: A, Quality / US-UI shell polish
 - **Preconditions**: App launch path available (dev or packaged).
 - **Steps**:
-  1. Launch PI-Desktop.
+  1. Launch DuaerAiDesk.
   2. Observe the first painted renderer surface before bootstrap completes.
   3. Wait until sessions/settings bootstrap finishes.
   4. Repeat with OS `prefers-reduced-motion: reduce` when available.
@@ -5102,7 +5102,7 @@ must keep splitting are covered by `markdown-blocks.test.mjs`.
 - **Expected**:
   - Before ready: full-window splash with brand mark, shell name, tagline, and accessible starting status (`data-testid="startup-splash"`).
   - After ready: splash exits with a short fade (or instantly under reduced motion) and the main shell (or settings page) is interactive underneath.
-  - If the initial state never arrives, the splash is replaced rather than held: the boot surface gains logs, diagnostics, and quit at 30s (`STARTUP_SLOW_HINT_MS`) without reporting a failure, and at 180s (`STARTUP_STALLED_MS`) becomes the recovery surface, which also offers a retry (`data-testid="startup-recovery"`); every action works without a backend, the renderer-drawn window controls stay above the surface on Windows/Linux, and quit goes through `pi-desktop/app/quit`.
+  - If the initial state never arrives, the splash is replaced rather than held: the boot surface gains logs, diagnostics, and quit at 30s (`STARTUP_SLOW_HINT_MS`) without reporting a failure, and at 180s (`STARTUP_STALLED_MS`) becomes the recovery surface, which also offers a retry (`data-testid="startup-recovery"`); every action works without a backend, the renderer-drawn window controls stay above the surface on Windows/Linux, and quit goes through `duaer-ai-desk/app/quit`.
   - On macOS the splash uses the same glass tint and sheen as the sidebar over native `sidebar` vibrancy; the mounted shell stays hidden until the splash exit fade, then cross-fades in. Other platforms keep the opaque `--ds-bg-primary` fill.
   - No plain unbranded “Starting…” centered text as the only boot UI.
   - Overlay/dialog enter motion uses shared tokens; reduced motion keeps state changes without decorative duration.
@@ -5569,7 +5569,7 @@ must keep splitting are covered by `markdown-blocks.test.mjs`.
 
 #### E2E-AGENTS-002: Global settings and project menus manage instruction files
 
-- **Preconditions**: PI-Desktop is running; a project can be opened.
+- **Preconditions**: DuaerAiDesk is running; a project can be opened.
 - **Steps**:
   1. Open Settings -> Instructions without an active project and save global
      content.
@@ -5667,13 +5667,13 @@ must keep splitting are covered by `markdown-blocks.test.mjs`.
      modules, source maps, tests/examples/declarations, Chromium locales, and
      native prebuild targets.
   3. On each macOS package, run `file` (or `lipo -info`) against the app
-     executable and `Resources/bin/pi-desktop-host-core`; confirm arm64 and
+     executable and `Resources/bin/duaer-ai-desk-host-core`; confirm arm64 and
      x86_64 packages contain only their declared architecture and that the
      Rust host matches the Electron app. Confirm the shared
      `apps/desktop/package.json` macOS configuration produces arm64 assets named
-     `PI-Desktop-X.Y.Z-arm64.dmg` and `PI-Desktop-X.Y.Z-arm64-mac.zip`, while
-     the Intel assets use `PI-Desktop-X.Y.Z-x64.dmg` and
-     `PI-Desktop-X.Y.Z-x64-mac.zip`; confirm the release directory has both
+     `DuaerAiDesk-X.Y.Z-arm64.dmg` and `DuaerAiDesk-X.Y.Z-arm64-mac.zip`, while
+     the Intel assets use `DuaerAiDesk-X.Y.Z-x64.dmg` and
+     `DuaerAiDesk-X.Y.Z-x64-mac.zip`; confirm the release directory has both
      DMG and ZIP artifacts and one merged `latest-mac.yml` feed whose URLs and
      checksums match those generated assets.
   4. Inspect the renderer output for its size controls: emitted JS is minified,
@@ -7396,7 +7396,7 @@ must keep splitting are covered by `markdown-blocks.test.mjs`.
 #### E2E-CAPABILITY-move-across-levels: MCP servers and skills move between the global and project `.agents` levels
 
 - **Preconditions**: The app runs against a disposable global `.agents` root
-  (an isolated HOME, or `PI_DESKTOP_AGENTS_DIR` when the bare host is driven
+  (an isolated HOME, or `DUAER_AI_DESK_AGENTS_DIR` when the bare host is driven
   directly). Projects A and B are registered. The global root owns
   `~/.agents/servers/echo.json` (id `echo`, label `Echo`),
   `~/.agents/skills/review.md` (frontmatter name `Review`), and nothing else
@@ -7479,7 +7479,7 @@ must keep splitting are covered by `markdown-blocks.test.mjs`.
   Configure a provider that streams slowly enough to stop a partial answer. Run
   once on macOS and once on Windows.
 - **Steps**:
-  1. Immediately after PI-Desktop finishes booting, leave it unfocused and press
+  1. Immediately after DuaerAiDesk finishes booting, leave it unfocused and press
      Option+Space on macOS or Alt+Space on Windows while another application
      owns the foreground window. Confirm the first invocation promptly reveals
      a fully rendered, centered launcher on the pointer's display without a
@@ -8518,7 +8518,7 @@ This test plan spec is accepted when:
   macOS sidebar places Collapse sidebar at the right in that same
   row, with no Logo/Home brand or back/forward buttons.
 
-### US-UI-17 PI-Desktop home hero logo
+### US-UI-17 DuaerAiDesk home hero logo
 - On empty chat home, the 100px `HomeMascotLogo` GIF renders above the title
   as an eight-frame waving mascot with a short idle hold. Light and dark
   themes each use a dedicated GIF and still PNG.
@@ -8542,7 +8542,7 @@ This test plan spec is accepted when:
 ### US-UI-19 Permanent Stage Manager bounds restore (macOS only)
 - On macOS with Stage Manager, shrink or unfocus the PI window until width < 1040 or height < 700.
 - Expect the shell to re-assert a Codex-like footprint (~1200×800, min 1040×700) and keep restoring while still collapsed (not only during the first 20s after launch).
-- The recovery watchdog is macOS-only (D447). On Windows/Linux it must not run at all: the app must never re-layer or re-raise its own window unprompted. Focus another window, then confirm PI-Desktop stays behind it instead of jumping back to the top of the stack, and that a stacking check (`xprop -root _NET_CLIENT_LIST_STACKING`) never shows it returning to the top periodically.
+- The recovery watchdog is macOS-only (D447). On Windows/Linux it must not run at all: the app must never re-layer or re-raise its own window unprompted. Focus another window, then confirm DuaerAiDesk stays behind it instead of jumping back to the top of the stack, and that a stacking check (`xprop -root _NET_CLIENT_LIST_STACKING`) never shows it returning to the top periodically.
 
 ### US-UI-20 Dark floating composer box
 - Switch to dark theme on chat home.
@@ -8681,8 +8681,8 @@ This test plan spec is accepted when:
 - Placeholder and approval chip remain legible on light and dark plates.
 
 ### US-UI-39 Home mark + hero title optical
-- Empty-home PI-Desktop mark is visible (not near-invisible); stroke density remains readable without a decorative ghost effect.
-- Empty-home title with a project uses a readable project label span (short basenames may display as `PI-Desktop` for optical parity).
+- Empty-home DuaerAiDesk mark is visible (not near-invisible); stroke density remains readable without a decorative ghost effect.
+- Empty-home title with a project uses a readable project label span (short basenames may display as `DuaerAiDesk` for optical parity).
 
 ### US-UI-40 Home content width vs rem root
 - At 1200×690 light empty home, composer plate outer width is ~744–760px (not ~640px).
@@ -8774,7 +8774,7 @@ This test plan spec is accepted when:
 ### US-UI-46 Home-with-project composer chrome
 - Open a project on empty home (no transcript).
 - Expect no workspace controls attached to the plate; there is no legacy draft
-  mark, and the placeholder uses the PI-Desktop copy.
+  mark, and the placeholder uses the DuaerAiDesk copy.
 - Model chip shows the active model ID; the footer uses the circular local-user
   glyph, two-line Custom / Local profile identity, disclosure chevron, and
   separate Help → Settings Info control.
@@ -8991,7 +8991,7 @@ This test plan spec is accepted when:
   (project row, owned sessions, on-disk transcripts and scratch, project
   memory, isolation from other projects, the running-task refusal, the
   group-root refusal, and the idempotent unknown path), and
-  `pnpm test:e2e:boot` round-trips `pi-desktop/project/remove` through the
+  `pnpm test:e2e:boot` round-trips `duaer-ai-desk/project/remove` through the
   sandboxed preload; the Settings archive → dialog → sidebar journey remains
   Draft
 
@@ -9338,9 +9338,9 @@ This test plan spec is accepted when:
 - **Preconditions**: Built desktop app on macOS, Windows, and Linux; English
   and zh-CN locales are available; a normal main window is open.
 - **Steps**: 1) On Windows, leave the focused main window visible and click its
-  taskbar button; confirm it minimizes while the PI-Desktop taskbar entry
+  taskbar button; confirm it minimizes while the DuaerAiDesk taskbar entry
   remains. Click the same taskbar button again and confirm the window restores
-  and focuses. Cover the window with another app, click the PI-Desktop taskbar
+  and focuses. Cover the window with another app, click the DuaerAiDesk taskbar
   entry, and confirm it comes to the front without entering the tray. 2) On
 -  macOS, click the traffic-light minimize control and confirm it hides the
   window to the tray. On Windows/Linux, use the renderer minimize control and
@@ -9357,8 +9357,8 @@ This test plan spec is accepted when:
   while Quit exits. On macOS the menu bar icon is a readable transparent
   monochrome PI mark without the rounded application tile, and native minimize
   remains tray-resident. Show/click/double-click/app activation restores the
-  existing window; the localized menu contains Show PI-Desktop and Quit
-  PI-Desktop. Quit runs the normal shutdown sequence and leaves no orphan host,
+  existing window; the localized menu contains Show DuaerAiDesk and Quit
+  DuaerAiDesk. Quit runs the normal shutdown sequence and leaves no orphan host,
   sidecar, or tray process.
 - **Specs linked**: `03-runtime/01-ipc-protocol.md`,
   `03-runtime/07-process-model.md`,
@@ -9380,16 +9380,16 @@ This test plan spec is accepted when:
   both the window and the process list. 2) Minimize the window into the tray,
   then launch again. 3) On Windows/Linux with close behavior `tray`, close the
   window, then launch again. 4) While the app is running, launch a build with
-  `PI_DESKTOP_DATA_DIR` set to an empty directory. 5) Still while the packaged
+  `DUAER_AI_DESK_DATA_DIR` set to an empty directory. 5) Still while the packaged
   app is running, start a development build (the `dev` script, with no
-  `PI_DESKTOP_DATA_DIR`). 6) Quit the app, confirm no process remains, and
+  `DUAER_AI_DESK_DATA_DIR`). 6) Quit the app, confirm no process remains, and
   launch once more.
 - **Expected**: Steps 1–3 never create a second window, tray icon, host-core,
   agent sidecar, or log file: the existing window is restored and focused, the
   duplicate process exits, and the running instance's session list, in-flight
   turn, and `pi.sqlite` are untouched. Step 4 starts normally as an independent
   instance against its own data directory. Step 5 also starts normally: the
-  development build takes its own `userData` and `~/.pi-desktop-dev`, so it
+  development build takes its own `userData` and `~/.duaer-ai-desk-dev`, so it
   neither waits for nor disturbs the running packaged app. Step 6 starts a clean
   single instance, proving the lock is released on exit and never leaves a stale
   block.
@@ -9434,7 +9434,7 @@ This test plan spec is accepted when:
 
 - **Preconditions**: App running on macOS with an installed system font
   distinct from the built-in token stack (for example PingFang SC); a clean
-  `~/.pi-desktop` profile.
+  `~/.duaer-ai-desk` profile.
 - **Steps**:
   1) Open Settings → Basics and confirm the Appearance card shows a Font row
      below Theme and Language with a trigger labeled "System default".
@@ -9463,7 +9463,7 @@ This test plan spec is accepted when:
 - **Expected**: The Font row is a searchable picker whose trigger previews the
   current family in that face; options are System default and the installed
   system families enumerated by Electron main via
-  `pi-desktop/app/systemFonts` (cached 60 s, hidden `.`-prefixed families
+  `duaer-ai-desk/app/systemFonts` (cached 60 s, hidden `.`-prefixed families
   excluded); the app ships no font files, so no bundled group and no license
   badge appear, and a stored stack that matches no option stays listed first
   under Saved; selection persists as a CSS stack in `AppSettings.fontFamily` and
@@ -9483,7 +9483,7 @@ This test plan spec is accepted when:
 
 #### E2E-193: Appearance card sets a global type scale
 
-- **Preconditions**: App running with a clean `~/.pi-desktop` profile and an
+- **Preconditions**: App running with a clean `~/.duaer-ai-desk` profile and an
   open conversation that shows transcript text, the composer, and the sidebar.
 - **Steps**:
   1) Open Settings → General and confirm the Appearance card shows a Font
@@ -9531,7 +9531,7 @@ This test plan spec is accepted when:
   4) Switch to a second regular Space and confirm Option+Space shows the panel
      there.
   5) Minimize the main window into the tray, switch to another app, then Cmd+Tab
-     back to PI-Desktop and confirm the window returns focused; repeat with a
+     back to DuaerAiDesk and confirm the window returns focused; repeat with a
      Dock click and with the tray Show item.
   6) With the main window hidden, press Option+Space and confirm only the
      launcher appears — the main window stays hidden until it is restored.
@@ -9539,7 +9539,7 @@ This test plan spec is accepted when:
   Dock and Cmd+Tab presence survives launcher warm-up and every launcher
   invocation; the launcher stays focusable, covers all regular Spaces and the
   app's own fullscreen window (overlaying another app's fullscreen Space is
-  out of scope and activates PI-Desktop instead); activation from Cmd+Tab, App
+  out of scope and activates DuaerAiDesk instead); activation from Cmd+Tab, App
   Exposé, the Dock, or the tray restores a tray-hidden window, while launcher
   and plugin-panel activation leaves it hidden.
 - **Specs linked**: `03-runtime/07-process-model.md`, ADR 0086, ADR 0078,
@@ -10524,7 +10524,7 @@ This test plan spec is accepted when:
 
 #### E2E-157: Global scrollbars stay quiet while remaining discoverable
 
-- **Preconditions**: PI-Desktop is open with the expanded sidebar, more
+- **Preconditions**: DuaerAiDesk is open with the expanded sidebar, more
   temporary sessions than the five-row cap, and enough retained project
   sessions to overflow the Projects region.
 - **Steps**: 1) Inspect the idle Sessions and Projects scrollbars in light and
@@ -10553,7 +10553,7 @@ This test plan spec is accepted when:
 
 #### E2E-158: Temporary sessions use isolated scratch workspaces
 
-- **Preconditions**: PI-Desktop has a project open, a temporary session can be
+- **Preconditions**: DuaerAiDesk has a project open, a temporary session can be
   created, and the host data directory is known. The temporary session starts
   with an empty transcript.
 - **Steps**:
@@ -10587,7 +10587,7 @@ This test plan spec is accepted when:
 
 #### E2E-159: A long transcript keeps a bounded mounted window
 
-- **Preconditions**: PI-Desktop is open on a session whose transcript is
+- **Preconditions**: DuaerAiDesk is open on a session whose transcript is
   substantially longer than one `session.get` page (several hundred messages,
   including fenced code blocks and expanded tool activity), on a memory-
   constrained Windows machine where the regression was reported.
@@ -10637,7 +10637,7 @@ This test plan spec is accepted when:
 
 #### E2E-160: Dragging the window across displays keeps the dropped position
 
-- **Preconditions**: PI-Desktop is open on a machine with two displays arranged
+- **Preconditions**: DuaerAiDesk is open on a machine with two displays arranged
   side by side, ideally with different work areas (a menu bar or taskbar on one
   only, or different resolutions). Run the case once with the work panel closed
   and once with it open at a committed width.
@@ -10673,7 +10673,7 @@ This test plan spec is accepted when:
 
 #### E2E-167: Native edge resize stays smooth and persists the settled bounds
 
-- **Preconditions**: PI-Desktop is open in a normal, non-maximized window on
+- **Preconditions**: DuaerAiDesk is open in a normal, non-maximized window on
   macOS, Windows, or Linux. Run the case with the work panel closed and once
   with it open at a committed width.
 - **Steps**:
@@ -10703,7 +10703,7 @@ This test plan spec is accepted when:
 
 #### E2E-168: Expanded sidebar width follows an anchored resize gesture
 
-- **Preconditions**: PI-Desktop is open in the chat shell with the sidebar
+- **Preconditions**: DuaerAiDesk is open in the chat shell with the sidebar
   expanded and a retained project/session visible.
 - **Steps**:
   1. Drag the sidebar's right-edge handle from its default width toward both
@@ -10965,7 +10965,7 @@ are withdrawn with ADR 0165.
 
 #### E2E-170: Shell titlebars use borderless chrome
 
-- **Preconditions**: PI-Desktop is open in chat, at least one destination page,
+- **Preconditions**: DuaerAiDesk is open in chat, at least one destination page,
   and Settings on a supported light or dark theme. On Windows/Linux, renderer-
   drawn window controls are visible.
 - **Steps**: 1) Inspect the top band on the chat, destination, and Settings
@@ -11066,8 +11066,8 @@ are withdrawn with ADR 0165.
   current app version. 3) Search settings for the Report a problem label.
   4) Activate Open GitHub.
 - **Expected**: The row is indexed by Settings search and stays on Info. The
-  action calls `pi-desktop/app/openFeedback` with no URL from the renderer.
-  Main opens `https://github.com/vastsa/PI-Desktop/issues/new` with
+  action calls `duaer-ai-desk/app/openFeedback` with no URL from the renderer.
+  Main opens `https://github.com/Duaer/DuaerAiDesk/issues/new` with
   `template=bug_report.yml` and prefills `app-version`, `os`, and
   `environment`. The GitHub bug form still requires description, reproduction
   steps, expected, actual, version, and OS; blank issues remain disabled.
@@ -11462,7 +11462,7 @@ are withdrawn with ADR 0165.
   - The assistant chip under the transcript still shows parent-only provider
     usage.
   - Token Insights is the heatmap / KPI dashboard. When the plugin is
-    installed, PI-Desktop remainders from the host turns table appear there
+    installed, DuaerAiDesk remainders from the host turns table appear there
     without rewriting `message.usage`.
 - **Specs linked**: `04-ux/06-settings-ia.md`,
   `03-runtime/01-ipc-protocol.md`, `03-runtime/06-host-rpc-protocol.md`,
@@ -11471,7 +11471,7 @@ are withdrawn with ADR 0165.
 - **Milestone**: M5
 - **Status**: Unit-covered (agent-runtime usage split, host-core history
   aggregation, settings-search / i18n catalogs); plugin remainder merge
-  covered in `pi-desktop-plugins`; full UI journey Draft (run only in a capable environment when this surface changes)
+  covered in `duaer-ai-desk-plugins`; full UI journey Draft (run only in a capable environment when this surface changes)
 
 #### E2E-187: History attachments and local markdown images render inline
 
@@ -11535,7 +11535,7 @@ are withdrawn with ADR 0165.
 
 #### E2E-189: Bundled Advisor plugin is temporarily unavailable
 
-- **Preconditions**: A packaged or development build of PI-Desktop.
+- **Preconditions**: A packaged or development build of DuaerAiDesk.
 - **Steps**:
   1. Inspect the bundled plugin resources and confirm `pi.advisor` is absent.
   2. Open the command palette and plugin settings. Confirm `/advisor`, the
@@ -11620,7 +11620,7 @@ are withdrawn with ADR 0165.
   `~/.config/opencode/opencode.json`, `~/.pi/agent/models.json`, or
   `~/.cc-switch/cc-switch.db`, including two API-key profiles with the same
   endpoint and different keys, and optionally one OAuth-only vendor.
-  PI-Desktop may already have an equivalent provider.
+  DuaerAiDesk may already have an equivalent provider.
 - **Steps**:
   1. Open Settings → Import. Confirm a Sessions card and a Model
      configuration card, each with its own Scan.
@@ -11871,22 +11871,22 @@ are withdrawn with ADR 0165.
 #### E2E-211: Windows portable ZIP launches after extraction (D603)
 
 - **Preconditions**: A Windows x64 tag or `dist:win` package has produced both
-  `PI-Desktop-Setup-<version>.exe` and `PI-Desktop-Portable-<version>.zip` from
+  `DuaerAiDesk-Setup-<version>.exe` and `DuaerAiDesk-Portable-<version>.zip` from
   the shared electron-builder config; a clean user profile is available; the
   account is a standard user without administrator elevation.
 - **Steps**: 1) Inspect the release directory and `latest.yml`. 2) Extract the
   portable ZIP to a user-writable directory without running the NSIS installer.
-  3) Launch the extracted `PI-Desktop.exe`. 4) Confirm there is no
-  administrator prompt and that the running app has the PI-Desktop icon and
+  3) Launch the extracted `DuaerAiDesk.exe`. 4) Confirm there is no
+  administrator prompt and that the running app has the DuaerAiDesk icon and
   taskbar entry. 5) Invoke Check for Updates. 6) Confirm Settings → Info offers
   the releases page rather than Restart to update. 7) Quit and relaunch the
   extracted executable.
 - **Expected**: Both Windows artifacts are space-free and uploaded. `latest.yml`
   points at the NSIS installer only. The extracted ZIP app starts without a
-  setup wizard or administrator prompt, keeps the normal PI-Desktop taskbar
+  setup wizard or administrator prompt, keeps the normal DuaerAiDesk taskbar
   identity/icon, uses the existing application data directory, and reports
   update mode `manual`. An available update does not download or run
-  `PI-Desktop-Setup-<version>.exe`. Relaunch restores sessions from that same
+  `DuaerAiDesk-Setup-<version>.exe`. Relaunch restores sessions from that same
   profile.
 - **Specs linked**: `01-product/01-product-scope.md`,
   `06-delivery/06-release-runbook.md`, `03-runtime/07-process-model.md`,
@@ -11996,7 +11996,7 @@ are withdrawn with ADR 0165.
   replacing the current workspace. Only the import with an explicit id has an
   active project binding; an omitted id stays unbound and its `projectPath` is
   history only. Each successful write causes one host-owned
-  `pi-desktop/session/event/changed`, the renderer refreshes through
+  `duaer-ai-desk/session/event/changed`, the renderer refreshes through
   `refreshSessions()`, and the sidebar does not require a plugin-emitted event.
   Skipped imports do not trigger a redundant refresh, and closed project tabs
   are not reopened merely because their session list was refreshed.
@@ -12012,10 +12012,10 @@ are withdrawn with ADR 0165.
 - **Preconditions**: A clean Windows 11 x64 or ARM64 machine/profile without a
   separately installed Visual C++ Redistributable, Node.js, or another local
   agent runtime; the x64 NSIS installer is available.
-- **Steps**: 1) Install PI-Desktop. 2) Launch it for the first time. 3) Wait
+- **Steps**: 1) Install DuaerAiDesk. 2) Launch it for the first time. 3) Wait
   for the startup splash to yield to the main shell. 4) Inspect the runtime
   logs, then open Settings → Info.
-- **Expected**: The bundled x64 `pi-desktop-host-core.exe` starts and completes
+- **Expected**: The bundled x64 `duaer-ai-desk-host-core.exe` starts and completes
   `app.handshake` without `0xC0000135` (`STATUS_DLL_NOT_FOUND`), the shell does
   not remain on “Can't reach the local service”, host status is healthy, and
   Settings → Info reports the host version instead of `host unknown`. The
@@ -12108,8 +12108,8 @@ are withdrawn with ADR 0165.
 
 #### E2E-220: Local MCP control drives a running desktop
 
-- **Preconditions**: Start PI-Desktop with
-  `PI_DESKTOP_MCP_CONTROL=1` and a clean profile. A local project directory is
+- **Preconditions**: Start DuaerAiDesk with
+  `DUAER_AI_DESK_MCP_CONTROL=1` and a clean profile. A local project directory is
   available, the Electron user-data directory is writable, and the desktop
   has completed backend boot.
 - **Steps**: 1) Read `mcp-control.json` and use its URL and bearer token. 2)
@@ -12117,7 +12117,7 @@ are withdrawn with ADR 0165.
   `pi_project_open` with the fixture project. 4) Call `pi_session_create`,
   `pi_session_get`, and `pi_agent_status`. 5) Call `pi_agent_prompt` and
   observe the existing desktop session-change event select the target session.
-  6) Call `pi_desktop_invoke` for a reviewed read operation. 7) Attempt
+  6) Call `duaer_ai_desk_invoke` for a reviewed read operation. 7) Attempt
   `pi_session_delete` and `pi_session_configure` without confirmation, then
   repeat with `confirm: true`. 8) Stop the app and inspect the manifest.
 - **Expected**: An unauthenticated request receives 401; `initialize` with an
@@ -12144,14 +12144,14 @@ are withdrawn with ADR 0165.
 
 - **Preconditions**: A project containing `.env`, `.env.example`,
   `server.pem`, `keys/id_rsa`, `notes.txt`, `node_modules/pkg/index.js`,
-  `generated/out.txt`, `debug.log`, and a root `.pi-desktopignore` with
+  `generated/out.txt`, `debug.log`, and a root `.duaer-ai-deskignore` with
   `generated/`. Every file contains the word `needle`. The session is Agent
   in `auto` permission mode.
 - **Steps**: 1) Ask for `Read` of `.env`, then of `.env.example`. 2) Ask for
   `Write` to `keys/id_rsa`. 3) Run an unscoped `Grep` and `Glob` for `needle`.
   4) Run `Grep` with `path: node_modules/pkg` and with `path: generated`.
   5) Repeat step 1 with a system `rg` installed and with
-  `PI_DESKTOP_DISABLE_RG=1`.
+  `DUAER_AI_DESK_DISABLE_RG=1`.
 - **Expected**: Steps 1 and 2 fail with `WORKSPACE_PATH_DENIED`, the
   `.env.example` read succeeds, and no `keys/id_rsa` file is created. The
   unscoped search lists `notes.txt` and `.env.example` only: `.env`,
@@ -12412,12 +12412,12 @@ are withdrawn with ADR 0165.
 
 #### E2E-239: An older build names the newer data schema instead of looping
 
-- **Preconditions**: a data directory last opened by a newer PI-Desktop whose
+- **Preconditions**: a data directory last opened by a newer DuaerAiDesk whose
   host-core migrated it past the schema this build supports.
 - **Steps**: 1) Launch the older packaged app on that data directory.
   2) Observe the banner and `logs/app/runtime.log`.
 - **Expected**: host-core exits once; no further restart attempts are logged.
-  The fatal banner says this PI-Desktop is older than the local data, shows
+  The fatal banner says this DuaerAiDesk is older than the local data, shows
   both schema numbers, and tells the user to install the newer version. The
   data directory is not modified.
 - **Specs linked**: `03-runtime/07-process-model.md` (boot outcomes)
@@ -12705,12 +12705,12 @@ browser milestones are scheduled.
 
 - **Preconditions**: A Linux test machine runs `sshd` and holds a project
   the desktop can reach with the user's SSH key. A GitHub Releases fixture
-  serves the `pi-host` bundle for that platform at the desktop's version, a
+  serves the `duaer-ai-desk-host` bundle for that platform at the desktop's version, a
   bundle at another version, and a tampered bundle with a wrong checksum.
   The desktop has one local session open, one user MCP server configured,
   and one installed plugin whose tool requires workspace access.
 - **Steps**: 1) Add the remote machine from the desktop and let the uploaded
-  bootstrap script download, verify, and start `pi-host` over SSH.
+  bootstrap script download, verify, and start `duaer-ai-desk-host` over SSH.
   2) Observe the pairing exchange and the resulting device token. 3) Create a
   session under a remote project through `project/list` and
   `session/create`. 4) Start a turn whose fixture reads, edits, and runs a
@@ -12756,7 +12756,7 @@ browser milestones are scheduled.
   so the Remote Hosts destination exists. A Linux test machine runs `sshd` with
   `PasswordAuthentication yes` and `PubkeyAuthentication no`, so the login is
   only reachable with a password; the user's local SSH agent holds no usable key
-  for it. A GitHub Releases fixture serves the `pi-host` bundle for that platform
+  for it. A GitHub Releases fixture serves the `duaer-ai-desk-host` bundle for that platform
   at the desktop's version. A second machine accepts the user's key only.
 - **Steps**: 1) In Settings → Remote Hosts, open the Add form's SSH tab and install over SSH with key
   authentication and confirm the form shows the identity-file field.
@@ -13173,7 +13173,7 @@ plugin-form fixtures in an isolated temporary directory at runtime.
 
 #### E2E-PLAN-005: Plan-mode plugin tools with `planSafeActions` are read-only (D384)
 
-- **Preconditions**: PI-Desktop is built with the bundled Browser
+- **Preconditions**: DuaerAiDesk is built with the bundled Browser
   plugin (`pi.browser`) enabled and a workspace that exposes one
   http(s) URL the planner can reach. The catalog list is the default
   bundled one; no third-party plugin needs to be installed for this
@@ -13704,7 +13704,7 @@ plugin-form fixtures in an isolated temporary directory at runtime.
   window is occluded; otherwise Chromium can freeze CSS motion and hover input.
   Platform branches and palettes are renderer emulation, not native
   Windows/Linux or OS material/theme validation. Optional
-  `PI_DESKTOP_LAYOUT_ARTIFACT_DIR` captures renderer screenshots. State tests in
+  `DUAER_AI_DESK_LAYOUT_ARTIFACT_DIR` captures renderer screenshots. State tests in
   `sidebar-settings-return.test.mjs` cover initial presentation, both interrupted
   phases, hidden-state changes and reversals. The CDP layout journey verifies
   that Settings preserves the same chat surface node across round trips.
@@ -14026,7 +14026,7 @@ plugin-form fixtures in an isolated temporary directory at runtime.
   `session_start`, contributes a skill through `resources_discover`, and uses
   the 0.87 `turn_end` boundary to propose a `context_edit` for the settled
   assistant entry.
-- **Steps:** Start PI-Desktop with fixture-only agent/session directories;
+- **Steps:** Start DuaerAiDesk with fixture-only agent/session directories;
   refresh sessions; open the native row beside a Desktop row; submit one text
   prompt; stop or let the faux response settle; send the same text again with
   a retryable response before success; reselect/refresh repeatedly; reopen through
@@ -14326,7 +14326,7 @@ plugin-form fixtures in an isolated temporary directory at runtime.
 
 - **Preconditions**: A host whose machine identifier is readable (Windows `MachineGuid`, the macOS platform UUID, or `/etc/machine-id`), a second environment where it is not readable, and a request-logging stub for `POST /api/v1/download/resolve`.
 - **Steps**: 1) Trigger two installs in one session and compare the recorded `deviceId` values. 2) Restart the app and trigger a third install. 3) Compare the value with the raw machine identifier of the host. 4) Search the settings, the Marketplace surface, and the installed-plugin detail view for the value. 5) Repeat steps 1 and 2 where no machine identifier is readable, then inspect the application data directory.
-- **Expected**: Every resolve request from one installation carries the same 64-character lowercase hex value, including after a restart and after an app reinstall while the machine identifier is unchanged; the value is neither the machine code nor a prefix of it, and it equals `sha256("pi-desktop.device.v1:" + <machine identifier>)`; the identifier never appears in the UI and no setting can reveal or reset it; in the unreadable case the value is a different 64-hex string that is generated once and persisted under `plugins/market/device.json`, then repeated across restarts.
+- **Expected**: Every resolve request from one installation carries the same 64-character lowercase hex value, including after a restart and after an app reinstall while the machine identifier is unchanged; the value is neither the machine code nor a prefix of it, and it equals `sha256("duaer-ai-desk.device.v1:" + <machine identifier>)`; the identifier never appears in the UI and no setting can reveal or reset it; in the unreadable case the value is a different 64-hex string that is generated once and persisted under `plugins/market/device.json`, then repeated across restarts.
 - **Specs linked**: `07-plugins/07-plugin-marketplace.md` §2, ADR 0276
 - **Acceptance**: G (remote marketplace source) + Security
 - **Milestone**: M6+
@@ -14467,7 +14467,7 @@ the latest destination. These assertions measure work counts, not device FPS.
   also has `apps/desktop/test/traffic-light-reserve.test.mjs` contract coverage.
 - **Status:** Automated for the executing native platform; run on macOS/Linux
   runners for native qualification. Optional screenshots are written only to
-  `PI_DESKTOP_CHROME_ARTIFACT_DIR`.
+  `DUAER_AI_DESK_CHROME_ARTIFACT_DIR`.
 
 ### E2E-PLUGIN-slow-tool-is-not-cut-off-by-host-dispatch
 
@@ -14839,7 +14839,7 @@ the latest destination. These assertions measure work counts, not device FPS.
 Task delegation, and saved-history recovery. No real model or search service.
 
 **Entry:** `pnpm test:e2e:hosted-search`, which rebuilds the shared
-package and `@pi-desktop/agent-runtime` sidecar bundle. The test starts that
+package and `@duaer-ai-desk/agent-runtime` sidecar bundle. The test starts that
 bundle over its ordinary stdio RPC interface, with an isolated data root,
 a synthetic Host and a loopback-only Responses endpoint. Source-only mocks
 or an already installed desktop application do not satisfy this test.
@@ -14905,5 +14905,5 @@ renderer's durable transcript reads. No real model or provider is contacted.
 **Automation:** `node --test apps/desktop/test/slash-command-source.test.mjs`,
 `node --test apps/desktop/test/session-transcript-empty-read.test.mjs`,
 `node --test apps/desktop/test/plugin-timeout-budgets.test.mjs`,
-`pnpm --filter @pi-desktop/shared test`, and
-`pnpm --filter @pi-desktop/host-runtime test`.
+`pnpm --filter @duaer-ai-desk/shared test`, and
+`pnpm --filter @duaer-ai-desk/host-runtime test`.

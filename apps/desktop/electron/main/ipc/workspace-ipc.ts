@@ -12,11 +12,11 @@ import {
   type FsChatRefProjectRoot,
   type FsChatRefResolveResult,
   type ProjectGroupRecord,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import {
   loadComposerTemplates,
   type ComposerTemplate,
-} from "@pi-desktop/agent-runtime";
+} from "@duaer-ai-desk/agent-runtime";
 import { cloneGitRepository } from "../git-clone";
 import {
   importComposerFiles,
@@ -26,7 +26,7 @@ import {
   consumeComposerPickerSelection,
   rememberComposerPickerSelection,
 } from "../composer-picker";
-import { collectWorkspaceDiff } from "@pi-desktop/host-runtime";
+import { collectWorkspaceDiff } from "@duaer-ai-desk/host-runtime";
 import { parseAllowedExternalUrl } from "../safe-open-external";
 import {
   isAttachmentBlobRef,
@@ -35,7 +35,7 @@ import {
   readOpenableImage,
   resolveOpenablePath,
   resolveRealOpenablePath,
-} from "@pi-desktop/host-runtime";
+} from "@duaer-ai-desk/host-runtime";
 import { resolveChatFileRef } from "../chat-ref-resolve";
 import { getWorkspaceFileIndex } from "../fs-index";
 import {
@@ -205,8 +205,8 @@ export function registerWorkspaceIpc({
     // Dev convenience only: never auto-open the app bundle directory as the
     // workspace in a packaged build.
     const seed =
-      process.env.PI_DESKTOP_SEED_WORKSPACE ||
-      process.env.PI_DESKTOP_WORKSPACE ||
+      process.env.DUAER_AI_DESK_SEED_WORKSPACE ||
+      process.env.DUAER_AI_DESK_WORKSPACE ||
       (isDevelopmentBuild ? join(__dirname, "../../..") : "");
     if (!res.workspace && seed) {
       try {

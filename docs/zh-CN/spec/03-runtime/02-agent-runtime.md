@@ -278,7 +278,7 @@ E2E-SESSION-completion-notice-allows-silence。
 同一个会话。持久检查点总结了旧模型上下文，同时
 渲染器继续显示每个原始用户、助手和工具行。
 
-PI-Desktop 复用 pi-agent-core 的 `buildSessionContext`、`convertToLlm`、
+DuaerAiDesk 复用 pi-agent-core 的 `buildSessionContext`、`convertToLlm`、
 `estimateContextTokens`、`prepareCompaction` 和 `compact` 原语。桌面运行时拥有
 这些原语的运行时机，以及结果如何穿过 Rust 存储
 边界； OpenCode DCP 仅是 AGPL-3.0 行为参考，不是链接或
@@ -298,7 +298,7 @@ pi 0.84.4+ 只在循环将要在同一次运行中开启另一个助手回合时
 
 1. pi 在助手消息和所有工具之后发出并等待 `turn_end`
    该回合的结果已完成
-2. PI-Desktop 根据完整转录本和最新转录本重建上下文
+2. DuaerAiDesk 根据完整转录本和最新转录本重建上下文
    有效的检查点并估计下一个请求预算
 3.低于硬边界，并且没有待处理的模型请求，下一回合
    收益不变
@@ -372,7 +372,7 @@ pi 0.84.4+ 只在循环将要在同一次运行中开启另一个助手回合时
   正在总结中。
 
 压缩系列先由构造选项决定，其次才轮到
-`PI_DESKTOP_COMPACTION_STRATEGY`。它不是设置项，在 `AppSettings` 与 i18n 中
+`DUAER_AI_DESK_COMPACTION_STRATEGY`。它不是设置项，在 `AppSettings` 与 i18n 中
 都不存在；它之所以存在，是为了让"不做摘要"这条机制既被实现、又可被测试。
 
 **面向模型的表面。** `new_context` 不带任何参数并开始一个新的
@@ -439,7 +439,7 @@ Headroom 是 16,384 个代币储备底线的最大值，模型最大输出
 计为运行状态，直到持久持久性完成。
 
 检查点携带的文件清单由 pi 自己的收集器从被摘要的区间里读出，它只认小写拼写
-`read` / `write` / `edit`——也就是 pi 自己工具的名字。PI-Desktop 注册的是
+`read` / `write` / `edit`——也就是 pi 自己工具的名字。DuaerAiDesk 注册的是
 `Read` / `Write` / `Edit`，因此运行时**只在交给 pi 的准备阶段**转换这三个名字
 （`withPiFileOpToolNames`）：存储内容不变，其它工具名一律保持我们注册的拼写。
 缺少这一步时，检查点的 `readFiles` / `modifiedFiles` 与摘要里的 `<read-files>` 段
@@ -621,7 +621,7 @@ Frontmatter 新增 `permission: inherit | ask | accept-edits | auto`（默认
 弹出授权卡。只有内置定义和用户定义可以声明非 `inherit` 作用域；项目定义随仓库
 一起到来，声明会在解析时被丢弃并留下警告，其委托仍在会话的有效模式下运行 ——
 想要该作用域的用户把文档复制到自己的 agents 目录。可写的内置 `fixer` 与
-`ui-designer` 也默认继承父会话：`auto` 下跟随父会话自动放行，而 `ask` 和
+`coder` 也默认继承父会话：`auto` 下跟随父会话自动放行，而 `ask` 和
 `accept-edits` 仍保留各自的审批边界。显式声明的内置或用户作用域仍然是一次有意的覆盖。
 
 **工具（ADR 0089）。** 委托是四个工具的生命周期，仅在 Agent 模式下且目录
@@ -675,8 +675,8 @@ Frontmatter 新增 `permission: inherit | ask | accept-edits | auto`（默认
 委托自身的响应 —— 会话自己的请求仍沿用模型绑定。超过天花板的值属于笔误，会被钳制
 而不会转发给 provider。
 内置的 `explorer` 声明 `Read`、
-`Glob`、`Grep` 和 `Bash`，而 `code-reviewer` 保持只读；`fixer` 与 `ui-designer`
-会在工作区内写入，`ui-designer` 另外声明 `BrowserPreview`，以便在报告前检查渲染结果。
+`Glob`、`Grep` 和 `Bash`，而 `code-reviewer` 保持只读；`fixer` 与 `coder`
+会在工作区内写入。`ui-designer` 只读（`Read`、`Glob`、`Grep`），架构锁定后交回风格和布局，不改文件。
 其状态为 `completed`、`failed`、`aborted`、`timed_out` 以及仅存在于注册表的
 `stopped`；终态通过 `TaskWait` 呈现，其文本是报告（上限为
 `MAX_SUBAGENT_REPORT_CHARS`，12k），其 details 携带 `delegationId`、`agent`、
@@ -871,8 +871,8 @@ Composer 增强使用与 agent 请求相同的已解析提供商绑定和重试�
 `opencode.ai`——都会发送：
 
 - `x-opencode-session`：持久的对话 id；调用方没有会话时则为一个按次生成的 UUID
-- `x-opencode-client: pi-desktop`
-- `User-Agent: pi-desktop/<APP_VERSION>`
+- `x-opencode-client: duaer-ai-desk`
+- `User-Agent: duaer-ai-desk/<APP_VERSION>`
 
 调用方自带的标头会覆盖 client 与 User-Agent 默认值。空的会话标头会由对话 id
 补回，使 OpenCode Go 不会返回 `MissingSessionID`。提供商行上的 `headers` 映射
@@ -1141,7 +1141,7 @@ provider/model 目录发现超出当前有线路径。
 
 桌面 sidecar 使用 Node 的 `--use-system-ca` 启动，同时保留内置根证书和继承的
 `NODE_EXTRA_CA_CERTS`。它使用操作系统信任库，但不会关闭证书链或主机名校验。
-更新本地信任库或额外 CA 启动环境后，需要重启桌面应用。无头 pi-host 启动行为以及
+更新本地信任库或额外 CA 启动环境后，需要重启桌面应用。无头 duaer-ai-desk-host 启动行为以及
 System/Direct/Custom 代理路由保持不变。
 
 在主 session 和内置 delegate 中，明确的证书校验错误在初始化和流恢复阶段都视为

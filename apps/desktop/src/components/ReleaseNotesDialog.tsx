@@ -4,7 +4,7 @@ import {
   CHANGELOG,
   normalizeChangelogVersion,
   resolveChangelogLocale,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import { Badge, cx } from "./ui";
 import { IconClose } from "./icons";
 import { TooltipButton } from "./ui";

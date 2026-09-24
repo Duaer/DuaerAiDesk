@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import type { ProjectRecord, ScheduledTask, ScheduledTaskRun } from "@pi-desktop/shared";
+import type { ProjectRecord, ScheduledTask, ScheduledTaskRun } from "@duaer-ai-desk/shared";
 import { useAppStore } from "../stores/app-store";
 import { api } from "../lib/api";
 import { Badge, Button, Panel } from "../components/ui";

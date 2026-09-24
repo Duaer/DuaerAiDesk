@@ -7,7 +7,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 const here = dirname(fileURLToPath(import.meta.url));
 register(pathToFileURL(join(here, "helpers/ts-import-hooks.mjs")));
 
-const { IPC } = await import("@pi-desktop/shared");
+const { IPC } = await import("@duaer-ai-desk/shared");
 const { makeRemoteApprovalRequestId, makeRemoteSessionId } = await import(
   "../electron/main/remote/backend-router.ts"
 );
@@ -150,8 +150,8 @@ test("handles() covers exactly the channels the remote profile serves", () => {
   ];
   for (const channel of covered) assert.ok(backend.handles(channel), `${channel} should be handled`);
   // Unrelated desktop channels remain local.
-  assert.equal(backend.handles(IPC.invoke.appSettings ?? "pi-desktop/settings/get"), false);
-  assert.equal(backend.handles("pi-desktop/anything/unknown"), false);
+  assert.equal(backend.handles(IPC.invoke.appSettings ?? "duaer-ai-desk/settings/get"), false);
+  assert.equal(backend.handles("duaer-ai-desk/anything/unknown"), false);
 });
 
 test("agentPrompt starts a turn with reject_if_busy and returns the local response shape", async () => {
@@ -456,7 +456,7 @@ test("plansPending stays empty — pending cards ride the snapshot at attach tim
 test("an unknown channel is a bug and surfaces INTERNAL", async () => {
   const { backend } = makeBackend();
   await assert.rejects(
-    backend.invoke("pi-desktop/channel/not-a-thing", [{ sessionId: REMOTE_SESSION_ID }]),
+    backend.invoke("duaer-ai-desk/channel/not-a-thing", [{ sessionId: REMOTE_SESSION_ID }]),
     (error) => error.errorCode === "INTERNAL",
   );
 });

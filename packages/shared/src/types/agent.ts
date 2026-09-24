@@ -92,6 +92,60 @@ export type PromptEnhancementResponse = {
   enhancedDraft: string;
 };
 
+/** One-shot requirements-card review. This never reads the chat transcript. */
+export type DeliveryReviewCard = {
+  goal: string;
+  outOfScope: string;
+  acceptance: string;
+  assumptions: string;
+  style: string;
+  layout: string;
+  deviceMatrix: string;
+  criticalPaths: string;
+  exceptionCases: string;
+  apiContract: string;
+  envChecklist: string;
+  dataPrecheck: string;
+  externalDeps: string;
+  perfBudget: string;
+};
+
+export type DeliveryReviewRequest = {
+  sessionId?: string | null;
+  providerId?: string;
+  modelId?: string;
+  mode: "validate" | "fix";
+  card: DeliveryReviewCard;
+  issues?: string[];
+};
+
+export type DeliveryReviewResponse = {
+  passed: boolean;
+  summary: string;
+  issues: string[];
+  card: DeliveryReviewCard;
+};
+
+/** Archify IR render — same pipeline as Duaer live desk / tt-a1i Archify. */
+export type DeliveryArchitectureRenderRequest = {
+  ir: unknown;
+};
+
+export type DeliveryArchitectureRenderResponse = {
+  key: string;
+  summary: string;
+  html: string;
+};
+
+export type DeliveryArchitectureGetRequest = {
+  key: string;
+};
+
+export type DeliveryArchitectureGetResponse = {
+  key: string;
+  html: string | null;
+};
+
 export type SessionSummarizeTitleRequest = {
   sessionId: string;
   userPrompt: string;

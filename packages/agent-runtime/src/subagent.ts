@@ -30,8 +30,8 @@ import {
   type AgentMessage,
   type AgentTool,
   type PrepareNextTurnContext,
-} from "@earendil-works/pi-agent-core";
-import type { AssistantMessage } from "@earendil-works/pi-ai";
+} from "@duaer-ai-desk/upstream-agent-core";
+import type { AssistantMessage } from "@duaer-ai-desk/upstream-ai";
 import {
   addUsage,
   cumulativeDelta,
@@ -44,7 +44,7 @@ import {
   type SubagentRunStatus as SharedSubagentRunStatus,
   type SubagentThinkingLevel,
   type UiMessage,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import { classifyAgentError } from "./agent-errors.js";
 import { readLocalRequestErrorDetails } from "./local-request-errors.js";
 import { withProviderFetchFailure } from "./provider-transport-recovery.js";
@@ -183,7 +183,7 @@ export function composeSubagentSystemPrompt(options: {
       ? resolved.join(", ")
       : subagentToolsLabel(definition);
   const framing = [
-    `You are the \"${definition.name}\" subagent inside PI-Desktop, working on one task delegated by the main agent.`,
+    `You are the \"${definition.name}\" subagent inside DuaerAiDesk, working on one task delegated by the main agent.`,
     `You cannot see the user, ask questions, or delegate further. Finish the task with the tools you have: ${toolList}.`,
     subagentCanMutate(definition, resolved)
       ? "You may change files, but only the ones the task is about; leave everything else untouched."

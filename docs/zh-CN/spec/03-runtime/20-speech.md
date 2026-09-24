@@ -48,9 +48,9 @@ synthesize({ sessionId, text, voice?, format? }) → { path, mimeType, dataUrl? 
 ## 4. IPC
 
 ```
-pi-desktop/speech/getStatus → SpeechStatus（无密钥）
-pi-desktop/speech/transcribe
-pi-desktop/speech/synthesize
+duaer-ai-desk/speech/getStatus → SpeechStatus（无密钥）
+duaer-ai-desk/speech/transcribe
+duaer-ai-desk/speech/synthesize
 ```
 
 错误码：`SPEECH_NOT_CONFIGURED`、`SPEECH_PROTOCOL_UNSUPPORTED`、

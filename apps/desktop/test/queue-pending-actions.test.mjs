@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { createServer } from "vite";
-import { IPC } from "@pi-desktop/shared";
+import { IPC } from "@duaer-ai-desk/shared";
 
 test("pending queue actions stay locked until admission succeeds", async (t) => {
   const server = await createServer({
@@ -25,7 +25,7 @@ test("pending queue actions stay locked until admission succeeds", async (t) => 
         const admission = new Promise((resolve) => { resolvePush = resolve; });
         let entries = [];
         const removed = [];
-        globalThis.window = { piDesktop: { invoke: async (channel, payload) => {
+        globalThis.window = { duaerAiDesk: { invoke: async (channel, payload) => {
           if (channel === IPC.invoke.agentQueuePush) {
             await admission;
             const entry = { ...payload, id: "durable-turn", createdAt: "2026-09-21T00:00:00Z" };
@@ -87,7 +87,7 @@ test("pending queue actions stay locked until admission succeeds", async (t) => 
       const admission = new Promise((_, reject) => { rejectPush = reject; });
       const errors = [];
       let entries = [];
-      globalThis.window = { piDesktop: { invoke: async (channel, payload) => {
+      globalThis.window = { duaerAiDesk: { invoke: async (channel, payload) => {
         if (channel === IPC.invoke.agentQueuePush) {
           if (!errors.length) await admission;
           const entry = { ...payload, id: "retried-turn", createdAt: "2026-09-21T00:00:00Z" };

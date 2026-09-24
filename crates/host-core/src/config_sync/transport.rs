@@ -401,8 +401,8 @@ impl WebDavTransport {
     pub async fn probe(&self) -> Result<ProbeResult> {
         self.ensure_collection(".probe").await?;
         let probe = format!(".probe/{}", Uuid::new_v4());
-        let first_body = b"pi-desktop-config-sync-probe".to_vec();
-        let second_body = b"pi-desktop-config-sync-probe-2".to_vec();
+        let first_body = b"duaer-ai-desk-config-sync-probe".to_vec();
+        let second_body = b"duaer-ai-desk-config-sync-probe-2".to_vec();
         let first = self.put_if_none(&probe, first_body.clone()).await?;
         if !first {
             bail!("CONFIG_SYNC_REMOTE: probe object unexpectedly existed");
@@ -423,7 +423,7 @@ impl WebDavTransport {
         let stale_rejected = if matched_update {
             if let Some(etag) = strong_etag.as_deref() {
                 match self
-                    .put_if_match(&probe, etag, b"pi-desktop-config-sync-stale".to_vec())
+                    .put_if_match(&probe, etag, b"duaer-ai-desk-config-sync-stale".to_vec())
                     .await
                 {
                     Ok(accepted) => !accepted,
@@ -821,8 +821,8 @@ pub(crate) mod tests {
         assert!(validate_relative_directory("vault\\escape").is_err());
         assert!(validate_relative_directory("vault/%secret").is_err());
         assert_eq!(
-            validate_relative_directory("/pi-desktop/config/").expect("safe directory"),
-            "pi-desktop/config"
+            validate_relative_directory("/duaer-ai-desk/config/").expect("safe directory"),
+            "duaer-ai-desk/config"
         );
     }
 

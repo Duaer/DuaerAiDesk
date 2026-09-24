@@ -28,14 +28,14 @@ import {
   type MessageEntry,
   type PrepareNextTurnContext,
   type ThinkingLevel,
-} from "@earendil-works/pi-agent-core";
+} from "@duaer-ai-desk/upstream-agent-core";
 import type {
   Api,
   Model,
   Models,
   Usage,
   UserMessage,
-} from "@earendil-works/pi-ai";
+} from "@duaer-ai-desk/upstream-ai";
 import {
   contextBudgetFor,
   contextBudgetLimitsFor,

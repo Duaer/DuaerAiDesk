@@ -7,7 +7,7 @@
  * `skills.create` path on the renderer's side.
  */
 import { net, session } from "electron";
-import type { SkillCatalogEntry, SkillMarketSource } from "@pi-desktop/shared";
+import type { SkillCatalogEntry, SkillMarketSource } from "@duaer-ai-desk/shared";
 import { createPublicHttpsClient } from "./public-https-fetch";
 import {
   allowInsecureUserEndpointsEnabled,

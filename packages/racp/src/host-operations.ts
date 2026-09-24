@@ -1,15 +1,15 @@
-import type { Principal, SessionSummary } from "@pi-desktop/agent-host";
+import type { Principal, SessionSummary } from "@duaer-ai-desk/agent-host";
 import type {
   FsEntry,
   FsReadResult,
   RacpProjectSummary,
   WorkspaceDiff,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 
 /**
  * Everything the RACP server delegates to the Host besides the Agent Host
  * module: session catalog mutations, projects, workspace reads, terminals.
- * `pi-host` implements these on host-core and its filesystem; a test hands
+ * `duaer-ai-desk-host` implements these on host-core and its filesystem; a test hands
  * the server fakes. The server itself never touches host-core RPC, a
  * filesystem, or a pty, so the boundary of security §7 holds by construction.
  */

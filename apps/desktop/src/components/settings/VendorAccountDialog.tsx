@@ -13,7 +13,7 @@ import {
   bindingForCustomModel,
   type ModelBinding,
   type ProviderPublic,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import { useTranslation } from "react-i18next";
 import { pairsToRecord, recordToPairs } from "../extensions/KeyValueRows";
 import { Button, Field, Input, portalOverlay } from "../ui";

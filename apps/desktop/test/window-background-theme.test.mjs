@@ -17,7 +17,7 @@ const appSource = await readAppSource();
 test("theme changes synchronize the native non-macOS window background", () => {
   assert.match(
     protocolSource,
-    /windowSetBackgroundColor:\s*"pi-desktop\/window\/setBackgroundColor"/,
+    /windowSetBackgroundColor:\s*"duaer-ai-desk\/window\/setBackgroundColor"/,
   );
   assert.match(
     apiSource,

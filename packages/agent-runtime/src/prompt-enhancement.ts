@@ -4,14 +4,14 @@ import type {
   Context,
   Model,
   SimpleStreamOptions,
-} from "@earendil-works/pi-ai";
-import type { ThinkingLevel } from "@pi-desktop/shared";
+} from "@duaer-ai-desk/upstream-ai";
+import type { ThinkingLevel } from "@duaer-ai-desk/shared";
 import {
   PROMPT_ENHANCEMENT_DEFAULT_SYSTEM_PROMPT,
   renderPromptEnhancementUserPrompt,
   resolvePromptEnhancementTemplates,
   type PromptEnhancementTemplateOverrides,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import { completeOneShot } from "./one-shot-complete.js";
 import type { RuntimeProviderConfig } from "./provider-binding.js";
 
@@ -125,7 +125,7 @@ export async function enhancePromptDraft(
 
 /**
  * Kept as a runtime-owned alias so existing callers and specs that name the
- * system prompt keep working now that the text lives in `@pi-desktop/shared`.
+ * system prompt keep working now that the text lives in `@duaer-ai-desk/shared`.
  */
 export const PROMPT_ENHANCEMENT_SYSTEM_PROMPT =
   PROMPT_ENHANCEMENT_DEFAULT_SYSTEM_PROMPT;

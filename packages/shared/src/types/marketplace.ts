@@ -36,7 +36,7 @@ export type MarketPluginDetail = MarketPluginSummary & {
     version: string;
     publishedAt: string;
     changelog?: string;
-    minPiDesktop?: string;
+    minDuaerAiDesk?: string;
     shasum: string;
     url: string;
     sizeBytes: number;

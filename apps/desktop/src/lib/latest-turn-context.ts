@@ -4,7 +4,7 @@ import type {
   ModelInfo,
   ProviderPublic,
   UiMessage,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import {
   assistantTurnResponseDuration,
   assistantTurnResponseOutputIsEstimated,

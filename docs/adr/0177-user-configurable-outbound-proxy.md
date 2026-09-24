@@ -2,7 +2,7 @@
 
 - Status: Accepted
 - Date: 2026-09-08
-- Deciders: PI-Desktop core
+- Deciders: DuaerAiDesk core
 - Related: D340, ADR 0083, ADR 0096,
   `04-ux/06-settings-ia.md`, `03-runtime/07-process-model.md`
 
@@ -54,7 +54,7 @@ A single Settings control should apply one proxy to app-owned traffic.
 
 6. **Apply without restart.** `settings.set` updates Chromium sessions
    (including `session-created`), main env, and `sidecar.configure`. A Test
-   action (`pi-desktop/network/testProxy`) runs one bounded Chromium fetch
+   action (`duaer-ai-desk/network/testProxy`) runs one bounded Chromium fetch
    through the supplied config and does not persist it.
 
 7. **Secrets.** Proxy userinfo lives in the settings JSON next to other

@@ -1,13 +1,13 @@
 import { randomUUID } from "node:crypto";
 import { mkdir, realpath, writeFile } from "node:fs/promises";
 import { isAbsolute, join, relative, resolve } from "node:path";
-import { generateImageBatch } from "@pi-desktop/agent-runtime";
+import { generateImageBatch } from "@duaer-ai-desk/agent-runtime";
 import {
   imageGenerationPrompts,
   parseImageGenerationBinding,
   type AppSettings,
   type ProviderPublic,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import type { HostProcess } from "../host-process";
 import type { LocalToolHandler } from "../agent-sidecar";
 import { imageInputLoader } from "./image-inputs";

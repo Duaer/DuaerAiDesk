@@ -156,6 +156,8 @@ test("a switched-off builtin leaves the delegation catalog, not the page", () =>
   // host-core owns the handle; every launch re-reads it, so the switch takes
   // effect on the next prompt and the catalog keeps the row for Settings.
   assert.match(sessionLaunchSource, /"agents\.disabledBuiltins"/);
+  assert.match(sessionLaunchSource, /"agents\.builtinModels"/);
+  assert.match(sessionLaunchSource, /builtinModels: await builtinSubagentModels\(\),/);
   assert.match(
     sessionLaunchSource,
     /disabledBuiltins: await disabledBuiltinSubagents\(\),/,

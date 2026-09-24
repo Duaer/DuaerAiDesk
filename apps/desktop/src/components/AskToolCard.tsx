@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import type { AskToolQuestion } from "@pi-desktop/shared";
+import type { AskToolQuestion } from "@duaer-ai-desk/shared";
 import type { PendingAsk } from "../lib/pending-asks";
 import { useAppStore } from "../stores/app-store";
 import { Button } from "./ui";

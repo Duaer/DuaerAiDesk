@@ -80,7 +80,7 @@ test("the blank page launcher renders plugin views from the data-driven list", (
   assert.match(panelSource, /pluginViews\.map\(\(view\) =>/);
   // Rows carry the same affordances as the host-owned Review row, so a plugin
   // surface is not visibly second-class.
-  assert.match(panelSource, /className="work-panel-launcher-row"/);
+  assert.match(panelSource, /work-panel-launcher-row/);
   assert.match(panelSource, /data-work-panel-launcher-item=\{item\.id\}/);
   assert.doesNotMatch(panelSource, /role="menuitemradio"|work-panel-new-menu/);
 });

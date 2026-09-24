@@ -3,19 +3,19 @@
  * agent.complete. Credentials stay in this process.
  */
 
-import type { Context } from "@earendil-works/pi-ai";
+import type { Context } from "@duaer-ai-desk/upstream-ai";
 import {
   PLUGIN_COMPLETE_DEFAULT_TAIL,
   pluginLlmContextFromTranscript,
   serializePluginLlmContext,
-} from "@pi-desktop/agent-runtime";
+} from "@duaer-ai-desk/agent-runtime";
 import type {
   PluginCompleteInput,
   PluginLlmContext,
   PluginModelInfo,
-} from "@pi-desktop/plugin-sdk";
-import type { AppSettings, ContextCompactionRecord, ThinkingLevel, UiMessage } from "@pi-desktop/shared";
-import { THINKING_LEVELS } from "@pi-desktop/shared";
+} from "@duaer-ai-desk/plugin-sdk";
+import type { AppSettings, ContextCompactionRecord, ThinkingLevel, UiMessage } from "@duaer-ai-desk/shared";
+import { THINKING_LEVELS } from "@duaer-ai-desk/shared";
 
 export function parsePluginModelKey(modelKey: string): { providerId: string; modelId: string } | null {
   const slash = modelKey.indexOf("/");

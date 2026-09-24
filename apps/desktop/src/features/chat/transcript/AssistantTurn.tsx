@@ -1,5 +1,6 @@
 import {
   memo,
+  useEffect,
   useMemo,
   useRef,
   type MouseEvent as ReactMouseEvent,
@@ -8,8 +9,8 @@ import { useTranslation } from "react-i18next";
 import type {
   AgentActivity,
   ContextCompactionMark,
-} from "@pi-desktop/shared";
-import { formatCompactTokenCount } from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
+import { formatCompactTokenCount } from "@duaer-ai-desk/shared";
 import {
   assistantTurnContent,
   assistantTurnMessages,
@@ -32,6 +33,23 @@ import {
   resolveThinkingDisplayMode,
   shouldGroupTurnProcess,
 } from "../../../lib/turn-process";
+import { stripInlineMarkdown } from "../../../lib/choice-options.ts";
+import {
+  applyDeliveryChat,
+  applyDeliveryProse,
+  deliveryChatHasCard,
+  isDeliveryAutoHandleChoice,
+  isDeliveryConfirmArchitectureChoice,
+  isDeliveryGateNote,
+  isDeliveryReviseArchitectureChoice,
+  parseDeliveryChat,
+  parseDeliveryGateChoices,
+  visibleDeliveryText,
+} from "../../../lib/delivery-chat.ts";
+import { confirmArchitectureFromChat, maybeRenderArchitectureFromReply, reviseArchitectureFromChat } from "../../../lib/delivery-architecture.ts";
+import { runDeliveryAutoHandle } from "../../../lib/delivery-auto-handle.ts";
+import { maybeApplyDispatchSplitFromReply } from "../../../lib/delivery-dispatch-chat.ts";
+import { deliveryProjectPath } from "../../../lib/use-delivery-desk";
 import { useAppStore } from "../../../stores/app-store";
 import { Markdown } from "../../../components/Markdown";
 import { IconBranch, IconReview } from "../../../components/icons";
@@ -230,12 +248,76 @@ export const AssistantTurn = memo(function AssistantTurn({
   const { copyText, selectText } = useChatTextActions();
   const retryAssistantMessage = useAppStore((s) => s.retryAssistantMessage);
   const forkAssistantMessage = useAppStore((s) => s.forkAssistantMessage);
-  const messages = assistantTurnMessages(entry);
+  const turnMessages = assistantTurnMessages(entry);
   const content = assistantTurnContent(entry);
-  const actionMessage = [...messages]
+  const visibleContent = visibleDeliveryText(content, "assistant");
+  const delivery = useMemo(() => parseDeliveryChat(content), [content]);
+  const gateChoices = useMemo(() => {
+    const last = assistantTurnMessages(entry).at(-1);
+    return parseDeliveryGateChoices(last?.content || "");
+  }, [entry]);
+  const choiceItems = gateChoices.length ? gateChoices : (delivery?.options ?? []);
+  const projectPath = useAppStore(deliveryProjectPath);
+  const deliveryChatActive = useAppStore((state) => {
+    if (!state.workPanelOpen) return false;
+    const tab = state.workPanelTabs.find((item) => item.id === state.activeWorkPanelTabId);
+    return tab?.kind === "requirements" || tab?.kind === "architecture";
+  });
+  const transcript = useAppStore((state) => state.messages);
+  const sendPrompt = useAppStore((state) => state.sendPrompt);
+  const turnMessageIds = useMemo(
+    () => new Set(turnMessages.map((message) => message.id)),
+    [turnMessages],
+  );
+  const latestId = transcript.at(-1)?.id;
+  const showChoices = Boolean(
+    deliveryChatActive &&
+    choiceItems.length &&
+    latestId &&
+    turnMessageIds.has(latestId),
+  );
+  const choiceLabel = (option: string) => {
+    if (isDeliveryAutoHandleChoice(option)) return t("panel.requirements.autoHandle");
+    if (isDeliveryConfirmArchitectureChoice(option)) return t("panel.architecture.confirmChoice");
+    if (isDeliveryReviseArchitectureChoice(option)) return t("panel.architecture.reviseChoice");
+    return stripInlineMarkdown(option);
+  };
+  const onChoice = (option: string) => {
+    if (isDeliveryAutoHandleChoice(option)) {
+      void runDeliveryAutoHandle();
+      return;
+    }
+    if (isDeliveryConfirmArchitectureChoice(option)) {
+      void confirmArchitectureFromChat();
+      return;
+    }
+    if (isDeliveryReviseArchitectureChoice(option)) {
+      void reviseArchitectureFromChat();
+      return;
+    }
+    void sendPrompt(option);
+  };
+  useEffect(() => {
+    if (!projectPath) return;
+    maybeApplyDispatchSplitFromReply(projectPath, content);
+    if (!deliveryChatActive) return;
+    if (delivery && deliveryChatHasCard(delivery)) {
+      applyDeliveryChat(projectPath, delivery);
+    } else if (visibleContent.trim()) {
+      applyDeliveryProse(projectPath, visibleContent);
+    }
+    if (isDeliveryGateNote(content)) return;
+    const tab = useAppStore.getState().workPanelTabs.find(
+      (item) => item.id === useAppStore.getState().activeWorkPanelTabId,
+    );
+    if (tab?.kind === "architecture") {
+      void maybeRenderArchitectureFromReply(projectPath, content);
+    }
+  }, [content, delivery, deliveryChatActive, projectPath, visibleContent]);
+  const actionMessage = [...turnMessages]
     .reverse()
     .find((message) => (message.content || "").trim());
-  const metaMessage = [...messages]
+  const metaMessage = [...turnMessages]
     .reverse()
     .find(
       (message) =>
@@ -244,18 +326,18 @@ export const AssistantTurn = memo(function AssistantTurn({
         message.responseDurationMs ||
         message.responseOutputTokens,
     );
-  const latestUsageMessage = [...messages]
+  const latestUsageMessage = [...turnMessages]
     .reverse()
     .find((message) => message.usage);
   const usage = assistantTurnUsage(entry);
   const responseDurationMs = assistantTurnResponseDuration(entry);
   const responseOutputTokens = assistantTurnResponseOutputTokens(entry);
   const modelId = metaMessage?.modelId ?? latestUsageMessage?.modelId;
-  const hasError = messages.some((message) => Boolean(message.error));
+  const hasError = turnMessages.some((message) => Boolean(message.error));
   const complete =
     !isActive && !hasError && Boolean(content) && Boolean(actionMessage);
   const streaming =
-    isActive && messages.some((message) => message.status === "streaming");
+    isActive && turnMessages.some((message) => message.status === "streaming");
   /*
     The turn owns the menu for its whole subtree, the answer rows it renders
     included: Regenerate and Branch act on the turn's answer message, so a menu
@@ -266,7 +348,7 @@ export const AssistantTurn = memo(function AssistantTurn({
       label: t("chat.messageMenu"),
       items: assistantTurnMenuItems({
         t,
-        answer: content,
+        answer: visibleContent,
         selectTarget:
           [
             ...event.currentTarget.querySelectorAll<HTMLElement>(
@@ -350,7 +432,7 @@ export const AssistantTurn = memo(function AssistantTurn({
       >
         {part.message.content ? (
           <div className="prose-chat">
-            <Markdown source={part.message.content} />
+            <Markdown source={visibleDeliveryText(part.message.content, "assistant")} />
           </div>
         ) : null}
         {part.message.error ? (
@@ -382,6 +464,21 @@ export const AssistantTurn = memo(function AssistantTurn({
         {turnAllActivityItems.filter((item) => item.kind === "tool" && item.message.toolName === "GenerateImages").map((item) => (
           <GeneratedImages key={item.message.id} message={item.message} />
         ))}
+        {showChoices ? (
+          <div className="choice-options" role="group" aria-label={t("chat.choiceOptions")}>
+            {choiceItems.map((option) => (
+              <button
+                key={option}
+                type="button"
+                className="choice-chip"
+                disabled={isActive}
+                onClick={() => onChoice(option)}
+              >
+                {choiceLabel(option)}
+              </button>
+            ))}
+          </div>
+        ) : null}
         {!isActive && metaMessage ? (
           <MessageMeta
             modelId={modelId}
@@ -392,7 +489,7 @@ export const AssistantTurn = memo(function AssistantTurn({
         ) : null}
         {complete && actionMessage ? (
           <div className="message-actions">
-            <CopyButton text={content} label={t("chat.copy")} />
+            <CopyButton text={visibleContent} label={t("chat.copy")} />
             <TooltipButton
               className="copy-btn icon"
               tooltip={t("chat.forkResponse")}

@@ -30,14 +30,14 @@ import {
   type CloseBehavior,
   type KeybindingOverrides,
   type PlanExecutionFinishStatus,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import {
   genericModelConfig,
   summarizeSessionTitle,
-} from "@pi-desktop/agent-runtime";
+} from "@duaer-ai-desk/agent-runtime";
 import { AgentExtensionBridge } from "./agent-extensions";
 import { registerAgentExtensionIpc } from "./agent-extensions-ipc";
-import { isTemplateName, scaffold } from "@pi-desktop/plugin-devkit";
+import { isTemplateName, scaffold } from "@duaer-ai-desk/plugin-devkit";
 
 import { HostProcess } from "./host-process";
 import {
@@ -62,7 +62,7 @@ import {
 } from "./models-dev-catalog";
 import { VendorOAuth } from "./oauth";
 import { AppUpdaterController } from "./updater";
-import { catalogs, resolveLocale } from "@pi-desktop/i18n";
+import { catalogs, resolveLocale } from "@duaer-ai-desk/i18n";
 import {
   baseWindowBounds,
   clampBoundsOriginToWorkArea,
@@ -92,7 +92,7 @@ import {
   executionFromResponse,
   executionListFromResponse,
   planExecutionFromUnknown,
-} from "@pi-desktop/host-runtime";
+} from "@duaer-ai-desk/host-runtime";
 import { readWindowState, writeWindowState } from "./window-preferences";
 import { applyDevelopmentUserData, desktopDataDir } from "./data-paths";
 import { createPlanUiProbe } from "./plan-ui-probe";
@@ -176,7 +176,7 @@ ignoreBrokenStdio();
 installMainProcessErrorHandlers();
 
 const isDevelopmentBuild =
-  process.env.PI_DESKTOP_DEV === "1" || !app.isPackaged;
+  process.env.DUAER_AI_DESK_DEV === "1" || !app.isPackaged;
 
 app.setName(APP_NAME);
 applyDevelopmentUserData(app, isDevelopmentBuild);
@@ -187,8 +187,8 @@ if (process.platform === "win32") {
 // One installation, one process. The lock lives in `userData` (set just
 // above), so it is taken after `setName` and before anything else here
 // touches the data directory. A development build is its own installation;
-// `PI_DESKTOP_DATA_DIR` still opts a run out of the lock (E2E, capture rig).
-const singleInstanceRequired = !process.env.PI_DESKTOP_DATA_DIR;
+// `DUAER_AI_DESK_DATA_DIR` still opts a run out of the lock (E2E, capture rig).
+const singleInstanceRequired = !process.env.DUAER_AI_DESK_DATA_DIR;
 const hasSingleInstanceLock = singleInstanceRequired
   ? app.requestSingleInstanceLock()
   : true;
@@ -515,7 +515,7 @@ const dataDir = desktopDataDir(isDevelopmentBuild);
 // The plugin runtime resolves this root from the environment rather than taking
 // it as a parameter, and a profile split across two directories is the
 // divergence D236 closes.
-process.env.PI_DESKTOP_DATA_DIR = dataDir;
+process.env.DUAER_AI_DESK_DATA_DIR = dataDir;
 
 // Agent extensions (D387/D388, ADR 0214): plugins contribute the modules,
 // the sidecar loads them; this bridge carries commands, diagnostics, and

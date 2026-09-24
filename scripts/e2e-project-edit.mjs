@@ -18,7 +18,7 @@ await build({
   entryPoints: [join(root, "scripts/e2e/project-edit.tsx")],
   outfile: join(temp, "renderer.js"), bundle: true, platform: "browser", format: "esm",
   jsx: "automatic", define: { "process.env.NODE_ENV": '"production"' },
-  alias: { "@pi-desktop/i18n": join(root, "packages/i18n/src/index.ts"),
+  alias: { "@duaer-ai-desk/i18n": join(root, "packages/i18n/src/index.ts"),
     react: join(root, "apps/desktop/node_modules/react"),
     "react-dom": join(root, "apps/desktop/node_modules/react-dom") },
   nodePaths: [join(root, "apps/desktop/node_modules")],
@@ -39,15 +39,15 @@ await writeFile(join(temp, "index.html"), `<!doctype html><html lang="en"><meta 
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:">
 <link rel="stylesheet" href="styles.css"><body><div id="root"></div><script type="module" src="renderer.js"></script></body></html>`);
 await writeFile(join(temp, "preload.cjs"), `const {contextBridge,ipcRenderer}=require('electron');
-contextBridge.exposeInMainWorld('piDesktop',{invoke:(channel,...args)=>ipcRenderer.invoke(channel,...args)});`);
+contextBridge.exposeInMainWorld('duaerAiDesk',{invoke:(channel,...args)=>ipcRenderer.invoke(channel,...args)});`);
 await writeFile(join(temp, "main.cjs"), `
 const {app,BrowserWindow,ipcMain}=require('electron');
 const path=require('node:path');
 app.setPath('userData',path.join(__dirname,'profile'));
 let group={id:'website',name:'Website',primaryPath:'/fixture/website',lastOpenedAt:1,pinned:false,
  roots:[{path:'/fixture/website',name:'website',position:0},{path:'/fixture/assets',name:'assets',position:1}]};
-ipcMain.handle('pi-desktop/project-group/list',()=>({ok:true,data:{groups:[group]}}));
-ipcMain.handle('pi-desktop/project-group/update',(_event,input)=>{
+ipcMain.handle('duaer-ai-desk/project-group/list',()=>({ok:true,data:{groups:[group]}}));
+ipcMain.handle('duaer-ai-desk/project-group/update',(_event,input)=>{
  group={...group,name:input.name,roots:input.folders.map((p,i)=>({path:p,name:path.basename(p),position:i}))};
  return {ok:true,data:{group}};
 });
@@ -64,7 +64,7 @@ app.whenReady().then(async()=>{
 });
 app.on('window-all-closed',()=>app.quit());
 `);
-const electronBinary = process.env.PI_DESKTOP_ELECTRON_BIN ?? resolveElectronBinary(root).electronBinary;
+const electronBinary = process.env.DUAER_AI_DESK_ELECTRON_BIN ?? resolveElectronBinary(root).electronBinary;
 const env = { ...process.env };
 delete env.ELECTRON_RUN_AS_NODE;
 const child = spawn(electronBinary, [join(temp, "main.cjs")], { env, stdio: ["ignore", "pipe", "pipe"] });

@@ -18,7 +18,7 @@
 
 ```json
 {
-  "$id": "pi-desktop.provider.v1",
+  "$id": "duaer-ai-desk.provider.v1",
   "type": "object",
   "required": ["id", "name", "vendorKey", "type", "protocol", "enabled", "authKind"],
   "properties": {
@@ -226,8 +226,8 @@ IPC 方法、存储 schema 或权限边界。
 
 OpenCode Go（以及任何 `opencode.ai` 主机）的 LLM 请求必须带稳定的
 `x-opencode-session`。agent-runtime 在会话、子代理、提示增强与插件 one-shot
-上发送该头，并附带 `x-opencode-client: pi-desktop` 与
-`User-Agent: pi-desktop/<APP_VERSION>`。行上可选的 `headers` 会覆盖这些默认值；留空则保持适配器默认。
+上发送该头，并附带 `x-opencode-client: duaer-ai-desk` 与
+`User-Agent: duaer-ai-desk/<APP_VERSION>`。行上可选的 `headers` 会覆盖这些默认值；留空则保持适配器默认。
 
 每行（AI 服务或 OAuth 账户）可在高级选项中用键值行编辑自定义请求头。空映射保持 pi-ai / `claude-cli` / OpenCode 默认。fetch 包装器是最后写入者，因此 Codex 与 Anthropic SDK 无法覆盖。禁止 `Authorization` / `Host` / `Content-Type` 等保留头。遗留的 `userAgent` 读取时迁入 `headers["User-Agent"]`。首次 OAuth 登录不收集请求头，登录后再编辑。覆盖 Anthropic OAuth 的 `claude-cli/…` 可能导致 Claude Pro/Max 拒绝请求。
 

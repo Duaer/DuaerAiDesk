@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
-import type { AgentEventEnvelope, SubagentDefinition } from "@pi-desktop/shared";
-import type { Message } from "@earendil-works/pi-ai";
+import type { AgentEventEnvelope, SubagentDefinition } from "@duaer-ai-desk/shared";
+import type { Message } from "@duaer-ai-desk/upstream-ai";
 import {
   composeSubagentSystemPrompt,
   MAX_SUBAGENT_REPORT_CHARS,

@@ -64,7 +64,7 @@ shell search: stdin is null, arguments are not quoted through a shell, and the
 host still applies budgets, newest-first order, scoped ignore (`--no-ignore-parent`
 when `path` is explicit), and the same JSON shape. A missing, overridden-invalid,
 or failing `rg` (spawn error or exit 2) falls back to the in-process `ignore` +
-`regex` searcher. `PI_DESKTOP_RG` selects a binary; `PI_DESKTOP_DISABLE_RG`
+`regex` searcher. `DUAER_AI_DESK_RG` selects a binary; `DUAER_AI_DESK_DISABLE_RG`
 forces the fallback. Bash search remains a bounded last resort and still does
 not assume POSIX utilities, PowerShell, or `rg` availability.
 

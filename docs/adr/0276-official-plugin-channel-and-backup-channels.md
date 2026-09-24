@@ -2,7 +2,7 @@
 
 - Status: Accepted for implementation
 - Date: 2026-09-17
-- Deciders: PI-Desktop plugin and distribution maintainers
+- Deciders: DuaerAiDesk plugin and distribution maintainers
 - Related: ADR 0102, D238, E2E-024P, E2E-PLUGIN-official-channel-resolves-through-the-platform
 
 ## Context
@@ -40,7 +40,7 @@ the device identifier, the platform stores counts rather than identities, and
 the optional `source` field is a statistics hint only.
 
 Measured on the same day: the catalog declares
-`artifactBaseUrl = raw.githubusercontent.com/AIUO-Net/pi-desktop-plugins/main`;
+`artifactBaseUrl = raw.githubusercontent.com/AIUO-Net/duaer-ai-desk-plugins/main`;
 all three mirrors answered `200` and every mirror host is already inside the
 client's download allowlist; the CNB mirror still served an older distribution
 (22 plugins, and `pi.todo-0.6.5` at 92487 bytes where the other mirror served
@@ -57,8 +57,8 @@ hosts as backups", and the install path has to follow the platform's contract.
 | # | Channel | Value | Catalog URL | Install path |
 | --- | --- | --- | --- | --- |
 | 1 | Official channel | `official` (default) | `https://plugins.aiuo.net/catalog.json` | Platform resolve |
-| 2 | GitHub backup | `github` (new) | `https://raw.githubusercontent.com/AIUO-Net/pi-desktop-plugins/main/catalog.json` | Static relative URL |
-| 3 | CNB backup | `mirror` (unchanged) | `https://cnb.cool/aixk/pi-desktop-plugins/-/git/raw/main/catalog.json` | Static relative URL |
+| 2 | GitHub backup | `github` (new) | `https://raw.githubusercontent.com/AIUO-Net/duaer-ai-desk-plugins/main/catalog.json` | Static relative URL |
+| 3 | CNB backup | `mirror` (unchanged) | `https://cnb.cool/aixk/duaer-ai-desk-plugins/-/git/raw/main/catalog.json` | Static relative URL |
 | 4 | Custom | `custom` (unchanged) | user-provided | Static relative URL |
 
 `official` keeps meaning "the project's own first-party channel" and now points
@@ -106,7 +106,7 @@ identity the operating system exposes — the Windows
 `HKLM\SOFTWARE\Microsoft\Cryptography\MachineGuid`, the macOS platform UUID, or
 Linux `/etc/machine-id` (falling back to `/var/lib/dbus/machine-id` and
 `/sys/class/dmi/id/product_uuid`). What leaves the machine is
-`sha256("pi-desktop.device.v1:" + <machine id>)` as 64-character lowercase hex,
+`sha256("duaer-ai-desk.device.v1:" + <machine id>)` as 64-character lowercase hex,
 never the machine code itself: the platform only needs to compare two requests
 for equality, so it has no use for the code, and a raw hardware identifier in a
 third-party request is a privacy downgrade the counting feature does not

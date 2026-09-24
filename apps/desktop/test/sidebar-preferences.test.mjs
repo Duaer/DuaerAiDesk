@@ -489,10 +489,10 @@ test("renames a recent project without changing its recency", () => {
 
 test("home switcher lists retained sidebar projects and the active workspace", () => {
   const projects = listSwitcherProjects({
-    openProjectPaths: ["/Users/lan/PI-Desktop", "/Users/lan/pi-desktop-plugins"],
+    openProjectPaths: ["/Users/lan/DuaerAiDesk", "/Users/lan/duaer-ai-desk-plugins"],
     openProjects: [
-      { path: "/Users/lan/PI-Desktop", name: "PI-Desktop" },
-      { path: "/Users/lan/pi-desktop-plugins", name: "pi-desktop-plugins" },
+      { path: "/Users/lan/DuaerAiDesk", name: "DuaerAiDesk" },
+      { path: "/Users/lan/duaer-ai-desk-plugins", name: "duaer-ai-desk-plugins" },
     ],
     workspace: { path: "/Users/lan/other", name: "other" },
     projectMeta: {},
@@ -501,7 +501,7 @@ test("home switcher lists retained sidebar projects and the active workspace", (
 
   assert.deepEqual(
     projects.map((project) => project.name),
-    ["other", "PI-Desktop", "pi-desktop-plugins"],
+    ["other", "DuaerAiDesk", "duaer-ai-desk-plugins"],
   );
 });
 
@@ -528,22 +528,22 @@ test("home switcher hides archived projects and prefers renamed labels", () => {
 
 test("home switcher search matches name or path and ignores case", () => {
   const projects = [
-    { key: "/tmp/pi-desktop", path: "/tmp/pi-desktop", name: "PI-Desktop", pinned: false },
+    { key: "/tmp/duaer-ai-desk", path: "/tmp/duaer-ai-desk", name: "DuaerAiDesk", pinned: false },
     {
       key: "/tmp/plugins",
       path: "/tmp/plugins",
-      name: "pi-desktop-plugins",
+      name: "duaer-ai-desk-plugins",
       pinned: false,
     },
   ];
 
   assert.deepEqual(
     filterSwitcherProjects(projects, "PLUGIN").map((project) => project.name),
-    ["pi-desktop-plugins"],
+    ["duaer-ai-desk-plugins"],
   );
   assert.deepEqual(
-    filterSwitcherProjects(projects, "/tmp/pi-desktop").map((project) => project.name),
-    ["PI-Desktop"],
+    filterSwitcherProjects(projects, "/tmp/duaer-ai-desk").map((project) => project.name),
+    ["DuaerAiDesk"],
   );
   assert.equal(filterSwitcherProjects(projects, "   ").length, 2);
 });

@@ -8,7 +8,7 @@ import {
   findSubagentPreset,
   subagentCanMutate,
   type SubagentDefinition,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import {
   BUILTIN_SUBAGENT_DOCUMENTS,
   findSubagentProviderSource,
@@ -25,7 +25,7 @@ import {
 
 describe("builtin subagent documents", () => {
   it("parse into read-only delegates plus a write-capable fixer", async () => {
-    const { definitions, diagnostics } = await loadSubagentDefinitions(null);
+    const { definitions, builtins, diagnostics } = await loadSubagentDefinitions(null);
 
     expect(diagnostics).toEqual([]);
     expect(definitions.map((d) => d.name)).toEqual([
@@ -34,8 +34,18 @@ describe("builtin subagent documents", () => {
       "test-runner",
       "fixer",
       "ui-designer",
+      "coder",
     ]);
-    expect(definitions).toHaveLength(BUILTIN_SUBAGENT_DOCUMENTS.length);
+    expect(builtins.map((d) => d.name)).toEqual([
+      "explorer",
+      "code-reviewer",
+      "test-runner",
+      "fixer",
+      "ui-designer",
+      "coder",
+      "judge",
+    ]);
+    expect(BUILTIN_SUBAGENT_DOCUMENTS).toHaveLength(7);
     // The turn cap is gone (ADR 0253): no builtin document declares one.
     for (const document of BUILTIN_SUBAGENT_DOCUMENTS) {
       expect(document).not.toMatch(/max[_-]?turns/i);
@@ -45,16 +55,16 @@ describe("builtin subagent documents", () => {
       expect(definition.description.length).toBeGreaterThan(20);
       expect(definition.prompt.length).toBeGreaterThan(50);
     }
-    // Only `fixer` and `ui-designer` may write to the workspace; every other
-    // builtin is read-only (the shell delegate reads and runs commands, which
-    // is a permission prompt, not an edit). Builtins inherit the parent
-    // session's permission mode unless they explicitly opt into a narrower
-    // scope.
+    // `fixer` and `coder` may write. `ui-designer` returns a design contract
+    // and does not edit. Every other builtin is read-only (the shell delegate
+    // reads and runs commands, which is a permission prompt, not an edit).
+    // Builtins inherit the parent session's permission mode unless they
+    // explicitly opt into a narrower scope.
     const mutating = definitions.filter(
       (definition) =>
         definition.tools.includes("Write") || definition.tools.includes("Edit"),
     );
-    expect(mutating.map((d) => d.name)).toEqual(["fixer", "ui-designer"]);
+    expect(mutating.map((d) => d.name)).toEqual(["fixer", "coder"]);
     expect(mutating[0]?.permission ?? "inherit").toBe("inherit");
     const explorer = definitions.find((definition) => definition.name === "explorer")!;
     expect(explorer.tools).toEqual(["Read", "Glob", "Grep", "Bash"]);
@@ -66,10 +76,34 @@ describe("builtin subagent documents", () => {
     expect(explorer.maxDurationSeconds).toBe(21_600);
     expect(definitions[2].tools).toContain("Bash");
     const designer = definitions.find((definition) => definition.name === "ui-designer")!;
-    expect(designer.tools).toContain("BrowserPreview");
+    expect(designer.tools).toEqual(["Read", "Glob", "Grep"]);
     expect("maxTurns" in designer).toBe(false);
     expect(designer.description).toBe(findSubagentPreset("ui-designer")?.description);
     expect(designer.prompt).toBe(findSubagentPreset("ui-designer")?.body.trim());
+    const coder = definitions.find((definition) => definition.name === "coder")!;
+    expect(coder.tools).toEqual(["Read", "Glob", "Grep", "Edit", "Write", "Bash"]);
+    expect(coder.description).toBe(findSubagentPreset("coder")?.description);
+    expect(coder.prompt).toBe(findSubagentPreset("coder")?.body.trim());
+    const judge = builtins.find((definition) => definition.name === "judge")!;
+    expect(judge.tools).toEqual(["Read", "Glob", "Grep"]);
+    expect(judge.model).toBeUndefined();
+    expect(subagentCanMutate(judge)).toBe(false);
+    expect(judge.description).toBe(findSubagentPreset("judge")?.description);
+    expect(judge.prompt).toBe(findSubagentPreset("judge")?.body.trim());
+  });
+
+  it("offers judge only on the judgment model", async () => {
+    const hidden = await loadSubagentDefinitions(null, {
+      builtinModels: { judge: { model: "other/chat", fallbackModels: ["other/backup"] } },
+    });
+    expect(hidden.definitions.some((definition) => definition.name === "judge")).toBe(false);
+    const shown = await loadSubagentDefinitions(null, {
+      judgmentModel: { providerId: "p", modelId: "jev-latest" },
+      builtinModels: { judge: { model: "other/chat", fallbackModels: ["other/backup"] } },
+    });
+    const judge = shown.definitions.find((definition) => definition.name === "judge");
+    expect(judge?.model).toEqual({ providerId: "p", modelId: "jev-latest" });
+    expect(judge?.fallbackModels).toBeUndefined();
   });
 });
 
@@ -123,6 +157,26 @@ describe("loadSubagentDefinitions", () => {
     // builtin has no document to delete.
     expect(builtins.map((d) => d.name)).toContain("fixer");
     expect(builtins.every((d) => d.source === "builtin")).toBe(true);
+  });
+
+  it("applies a saved model pin to a builtin in both catalogs", async () => {
+    const { definitions, builtins } = await loadSubagentDefinitions(null, {
+      builtinModels: {
+        explorer: { model: "openai/gpt-4.1", fallbackModels: ["anthropic/claude"] },
+        fixer: { model: "not-a-pin" },
+      },
+    });
+
+    const explorer = definitions.find((definition) => definition.name === "explorer");
+    expect(explorer?.model).toEqual({ providerId: "openai", modelId: "gpt-4.1" });
+    expect(explorer?.fallbackModels).toEqual([
+      { providerId: "anthropic", modelId: "claude" },
+    ]);
+    expect(builtins.find((definition) => definition.name === "explorer")?.model).toEqual({
+      providerId: "openai",
+      modelId: "gpt-4.1",
+    });
+    expect(definitions.find((definition) => definition.name === "fixer")?.model).toBeUndefined();
   });
 
   it("lets a user document keep a handle the user switched the builtin off", async () => {

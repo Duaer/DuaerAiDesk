@@ -1,4 +1,4 @@
-import type { AskToolRequest } from "@pi-desktop/shared";
+import type { AskToolRequest } from "@duaer-ai-desk/shared";
 
 export type PendingAsk = AskToolRequest;
 export type AskQueues = Record<string, PendingAsk[]>;

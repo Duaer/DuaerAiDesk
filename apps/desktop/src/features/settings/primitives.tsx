@@ -4,12 +4,12 @@ import type {
   AppSettings,
   CommandShellCatalog,
   CommandShellId,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import {
   MAX_LARGE_PASTE_THRESHOLD,
   MIN_LARGE_PASTE_THRESHOLD,
   normalizeLargePasteThreshold,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import { api } from "../../lib/api";
 import { resolveContextUsageDisplay } from "../../lib/context-usage";
 import { HelpIcon, Input, cx } from "../../components/ui";

@@ -1,4 +1,4 @@
-import { prepareCompaction, type AgentMessage, type Entry } from "@earendil-works/pi-agent-core";
+import { prepareCompaction, type AgentMessage, type Entry } from "@duaer-ai-desk/upstream-agent-core";
 import { describe, expect, it } from "vitest";
 
 import { withPiFileOpToolNames } from "./pi-file-ops.js";

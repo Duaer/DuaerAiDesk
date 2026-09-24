@@ -16,20 +16,21 @@ import {
   type SessionThinkingLevel,
   type UserSkillRecord,
   type UserSubagentRecord,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import {
   capabilitiesFromModelConfig,
   clampThinkingLevel,
   genericModelConfig,
   loadCustomSystemPrompt,
   loadInstructionChain,
+  judgmentModelFromSettings,
   loadSubagentDefinitions,
   modelConfigWithBinding,
   optionalProviderHeaders,
   resolveSubagentProviders,
   visionFromModelConfig,
   type UserSubagentDocument,
-} from "@pi-desktop/agent-runtime";
+} from "@duaer-ai-desk/agent-runtime";
 import { builtinSkills } from "../builtin-skills";
 import { OAUTH_AUTH_KIND, type VendorOAuth } from "../oauth";
 import {
@@ -212,6 +213,25 @@ export function createSessionLaunchRuntime({
         });
       }
       return [];
+    }
+  }
+
+  async function builtinSubagentModels(): Promise<
+    Record<string, { model?: string; fallbackModels?: string[] }>
+  > {
+    if (!runtimeState.host?.isAvailable()) return {};
+    try {
+      const result = await runtimeState.host!.call<{
+        models?: Record<string, { model?: string; fallbackModels?: string[] }>;
+      }>("agents.builtinModels");
+      return result.models ?? {};
+    } catch (error) {
+      if (!isHostUnavailable(error)) {
+        logger.app("plugin", "warn", "builtin subagent models failed", {
+          data: String(error),
+        });
+      }
+      return {};
     }
   }
 
@@ -476,6 +496,8 @@ export function createSessionLaunchRuntime({
       userDocuments: await activeUserSubagentDocuments(projectPath),
       // A switched-off builtin is dropped from what this prompt may delegate to.
       disabledBuiltins: await disabledBuiltinSubagents(),
+      builtinModels: await builtinSubagentModels(),
+      judgmentModel: judgmentModelFromSettings(settings),
     });
     const subagentBindings = await resolveSubagentProviders({
       definitions: subagentCatalog.definitions,

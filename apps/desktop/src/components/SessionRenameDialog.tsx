@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { portalToBody } from "../lib/portal-visibility";
 import { useTranslation } from "react-i18next";
-import { MAX_SESSION_TITLE_LENGTH } from "@pi-desktop/shared";
-import type { SessionSummary } from "@pi-desktop/shared";
+import { MAX_SESSION_TITLE_LENGTH } from "@duaer-ai-desk/shared";
+import type { SessionSummary } from "@duaer-ai-desk/shared";
 import { TooltipButton } from "./ui";
 import { Button } from "./ui";
 import { IconClose, IconPencil } from "./icons";

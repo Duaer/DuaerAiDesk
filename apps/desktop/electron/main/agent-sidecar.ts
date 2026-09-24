@@ -3,7 +3,7 @@ import { join } from "node:path";
 import {
   AgentSidecar as RuntimeAgentSidecar,
   type StderrHandler,
-} from "@pi-desktop/host-runtime";
+} from "@duaer-ai-desk/host-runtime";
 import { redactValue } from "./logger";
 
 export type {
@@ -13,7 +13,7 @@ export type {
   SidecarNotificationHandler,
   TrustedExtensionSidecarBridge,
   VendorAuthResolver,
-} from "@pi-desktop/host-runtime";
+} from "@duaer-ai-desk/host-runtime";
 
 function resolveSidecarEntry(): string {
   const candidates = [
@@ -43,7 +43,7 @@ function fallbackStderrLogger(text: string): void {
 
 /**
  * The desktop's agent sidecar: the shared stdio transport from
- * `@pi-desktop/host-runtime`, launched the only way Electron can run Node
+ * `@duaer-ai-desk/host-runtime`, launched the only way Electron can run Node
  * code out of process — its own executable with `ELECTRON_RUN_AS_NODE` — on
  * the sidecar bundle this build ships.
  */

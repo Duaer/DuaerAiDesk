@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { Agent, convertToLlm, type AgentMessage, type AgentTool } from "@earendil-works/pi-agent-core";
+import { Agent, convertToLlm, type AgentMessage, type AgentTool } from "@duaer-ai-desk/upstream-agent-core";
 import {
   createAssistantMessageEventStream,
   getCurrentSystemMessage,
@@ -10,8 +10,8 @@ import {
   type AssistantMessage,
   type SystemMessage,
   type Tool,
-} from "@earendil-works/pi-ai";
-import { estimateContextTokens as estimateTranscriptTokens } from "@earendil-works/pi-ai/utils/estimate";
+} from "@duaer-ai-desk/upstream-ai";
+import { estimateContextTokens as estimateTranscriptTokens } from "@duaer-ai-desk/upstream-ai/utils/estimate";
 import {
   initialSystemTranscript,
   rebuildSystemTranscript,

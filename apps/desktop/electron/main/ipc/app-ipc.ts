@@ -10,8 +10,8 @@ import {
   PROTOCOL_VERSION,
   assertFeedbackIssueUrl,
   buildBugReportUrl,
-} from "@pi-desktop/shared";
-import { globalInstructionPath } from "@pi-desktop/agent-runtime";
+} from "@duaer-ai-desk/shared";
+import { globalInstructionPath } from "@duaer-ai-desk/agent-runtime";
 import type { HostProcess } from "../host-process";
 import type { AppUpdaterController } from "../updater";
 import type { IpcRegistrar } from "./types";

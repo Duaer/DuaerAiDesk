@@ -121,7 +121,7 @@ describe("withProviderHeaders", () => {
       {
         headers: {
           "x-opencode-session": "s1",
-          "User-Agent": "pi-desktop/0.0.0",
+          "User-Agent": "duaer-ai-desk/0.0.0",
         },
         fetch: base,
       },

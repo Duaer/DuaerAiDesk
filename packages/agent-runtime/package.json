@@ -1,5 +1,5 @@
 {
-  "name": "@pi-desktop/agent-runtime",
+  "name": "@duaer-ai-desk/agent-runtime",
   "version": "0.15.6",
   "private": true,
   "type": "module",
@@ -23,13 +23,13 @@
     "clean": "node -e \"fs.rmSync('dist',{recursive:true,force:true});fs.rmSync('dist-bundle',{recursive:true,force:true})\""
   },
   "dependencies": {
-    "@earendil-works/pi-agent-core": "0.87.1",
-    "@earendil-works/pi-ai": "0.87.1",
-    "@earendil-works/pi-coding-agent": "0.87.1",
-    "@pi-desktop/shared": "workspace:*",
+    "@duaer-ai-desk/shared": "workspace:*",
     "jiti": "2.7.0",
     "typebox": "1.3.27",
-    "undici": "8.10.2"
+    "undici": "8.10.2",
+    "@duaer-ai-desk/upstream-agent-core": "npm:@earendil-works/pi-agent-core@0.87.1",
+    "@duaer-ai-desk/upstream-coding-agent": "npm:@earendil-works/pi-coding-agent@0.87.1",
+    "@duaer-ai-desk/upstream-ai": "npm:@earendil-works/pi-ai@0.87.1"
   },
   "devDependencies": {
     "@types/node": "^24.13.3",

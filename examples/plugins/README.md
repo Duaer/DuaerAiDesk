@@ -28,7 +28,7 @@ Related specs:
 
 Panel chrome contract:
 
-- PI-Desktop owns exactly a transparent 46px drag band and the minimal
+- DuaerAiDesk owns exactly a transparent 46px drag band and the minimal
   top-right three-button window-control capsule on every platform.
 - Normal-flow panel content is offset below that band automatically. Do not
   add another 46px top padding.
@@ -45,7 +45,7 @@ Panel chrome contract:
 
 ## Official marketplace repository
 
-Published plugins live in [`vastsa/pi-desktop-plugins`](https://github.com/vastsa/pi-desktop-plugins).
+Published plugins live in [`vastsa/duaer-ai-desk-plugins`](https://github.com/vastsa/duaer-ai-desk-plugins).
 
 Local examples here remain useful for development loading (`Load dev plugin`).
 Marketplace installs should come from that repository's `catalog.json` + `packages/*.piplug`.
@@ -55,5 +55,5 @@ Marketplace installs should come from that repository's `catalog.json` + `packag
 
 Prefer the official warehouse template:
 
-- https://github.com/vastsa/pi-desktop-plugins/tree/main/plugins/demo.workspace-summary
-- Contribution guide: https://github.com/vastsa/pi-desktop-plugins/blob/main/CONTRIBUTING.md
+- https://github.com/vastsa/duaer-ai-desk-plugins/tree/main/plugins/demo.workspace-summary
+- Contribution guide: https://github.com/vastsa/duaer-ai-desk-plugins/blob/main/CONTRIBUTING.md

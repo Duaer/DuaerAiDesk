@@ -4,11 +4,11 @@ import type {
   AgentEventEnvelope,
   PlanningStateEvent,
   UiMessage,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import {
   applyMessageUpdate,
   mergeAgentEventEnvelopes,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import { createFrameBatcher } from "../../lib/frame-batcher";
 import {
   clearSessionAsks,

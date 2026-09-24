@@ -16,7 +16,7 @@
  * The GUI half of the documented scenario — the Settings row menu, the toast —
  * stays manual; this script is the half a headless run can prove.
  *
- * Env: PI_DESKTOP_HOST_BIN (optional), DEBUG_HOST for tracing.
+ * Env: DUAER_AI_DESK_HOST_BIN (optional), DEBUG_HOST for tracing.
  * Deterministic: no live network access.
  */
 import { spawn } from "node:child_process";
@@ -40,7 +40,7 @@ const SCENARIO = "E2E-CAPABILITY-move-across-levels";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = join(__dirname, "..");
 const hostBinCandidates = [];
-const configuredHostBin = process.env.PI_DESKTOP_HOST_BIN?.trim();
+const configuredHostBin = process.env.DUAER_AI_DESK_HOST_BIN?.trim();
 if (configuredHostBin) {
   const configured = resolve(configuredHostBin);
   hostBinCandidates.push(configured);
@@ -48,7 +48,7 @@ if (configuredHostBin) {
     hostBinCandidates.push(`${configured}.exe`);
   }
 }
-const hostBinaryName = `pi-desktop-host-core${process.platform === "win32" ? ".exe" : ""}`;
+const hostBinaryName = `duaer-ai-desk-host-core${process.platform === "win32" ? ".exe" : ""}`;
 hostBinCandidates.push(join(root, "target", "debug", hostBinaryName));
 hostBinCandidates.push(join(root, "..", "..", "..", "target", "debug", hostBinaryName));
 const hostBin = hostBinCandidates.find((candidate) => existsSync(candidate));
@@ -71,10 +71,10 @@ class Host {
       env: {
         ...process.env,
         HOME: home,
-        PI_DESKTOP_DATA_DIR: dataDir,
+        DUAER_AI_DESK_DATA_DIR: dataDir,
         // Narrower than HOME: only the global capability root reads it, so the
         // fixture cannot leak into anything else the host resolves from home.
-        PI_DESKTOP_AGENTS_DIR: join(home, ".agents"),
+        DUAER_AI_DESK_AGENTS_DIR: join(home, ".agents"),
       },
     });
     this.pending = new Map();

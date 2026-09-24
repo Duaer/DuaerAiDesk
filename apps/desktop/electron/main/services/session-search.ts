@@ -1,4 +1,4 @@
-import type { SessionSearchPage } from "@pi-desktop/shared";
+import type { SessionSearchPage } from "@duaer-ai-desk/shared";
 
 type RpcClient = {
   call<T>(method: string, input?: unknown): Promise<T>;

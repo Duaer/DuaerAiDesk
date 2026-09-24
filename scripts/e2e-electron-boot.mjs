@@ -5,8 +5,8 @@
  * E2E-SESSION-list-refresh-keeps-desktop-responsive against 800 synthetic
  * sessions (BOOT_PROBE emitted by electron/main/bootstrap/startup.ts).
  *
- * Prereqs: `pnpm --filter @pi-desktop/desktop build` and a host-core binary
- * (target/debug or target/release, or PI_DESKTOP_HOST_BIN).
+ * Prereqs: `pnpm --filter @duaer-ai-desk/desktop build` and a host-core binary
+ * (target/debug or target/release, or DUAER_AI_DESK_HOST_BIN).
  */
 import { spawn } from "node:child_process";
 import { rmSync, existsSync, readFileSync } from "node:fs";
@@ -21,7 +21,7 @@ const root = repositoryRoot();
 const { appDir, electronBinary: electronBin } = resolveElectronBinary(root);
 
 if (!existsSync(join(appDir, "out/main/index.js"))) {
-  console.error("desktop app not built. Run: pnpm --filter @pi-desktop/desktop build");
+  console.error("desktop app not built. Run: pnpm --filter @duaer-ai-desk/desktop build");
   process.exit(1);
 }
 if (!existsSync(electronBin)) {
@@ -44,16 +44,16 @@ for (const preloadPath of [
   }
 }
 
-const dataDir = createTempDataDir("pi-desktop-boot-");
+const dataDir = createTempDataDir("duaer-ai-desk-boot-");
 const env = { ...process.env };
 delete env.ELECTRON_RUN_AS_NODE;
 const child = spawn(electronBin, ["."], {
   cwd: appDir,
   env: {
     ...env,
-    PI_DESKTOP_DATA_DIR: dataDir,
-    PI_DESKTOP_BOOT_PROBE: "1",
-    PI_DESKTOP_START_MAXIMIZED: process.platform === "darwin" ? "0" : "1",
+    DUAER_AI_DESK_DATA_DIR: dataDir,
+    DUAER_AI_DESK_BOOT_PROBE: "1",
+    DUAER_AI_DESK_START_MAXIMIZED: process.platform === "darwin" ? "0" : "1",
     // never inherit a dev-server URL: probe the packaged renderer path
     ELECTRON_RENDERER_URL: "",
   },
@@ -122,7 +122,7 @@ child.on("close", (code) => {
   if (
     code === 0 &&
     probe?.ok &&
-    probe.appName === "PI-Desktop" &&
+    probe.appName === "DuaerAiDesk" &&
     probe.platform === process.platform &&
     (process.platform === "darwin" || probe.maximized === true) &&
     menuContractOk &&

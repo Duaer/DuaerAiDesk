@@ -6,7 +6,7 @@ import {
   type ActivationScope,
   type AgentCapabilityLevel,
   type UserSkillRecord,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import { Button, Field, HelpIcon, Input, Textarea, TooltipButton, cx, portalOverlay } from "../ui";
 import { IconFolderOpen, IconX } from "../icons";
 

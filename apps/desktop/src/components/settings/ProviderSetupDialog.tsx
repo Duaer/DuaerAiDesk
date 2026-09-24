@@ -14,7 +14,7 @@ import {
   type CatalogApiStyle,
   type ModelBinding,
   type ProviderPublic,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import { api } from "../../lib/api";
 import { pairsToRecord, recordToPairs } from "../extensions/KeyValueRows";
 import { Button, Field, HelpIcon, Input, portalOverlay } from "../ui";
@@ -112,7 +112,13 @@ export type ProviderSetupDialogProps = {
   initialDraft?: ProviderCopyDraft | null;
   onClose: () => void;
   imageModelIds?: string[];
-  onSaved: (provider: ProviderPublic, models: ModelBinding[], imageModelIds?: string[]) => void | Promise<void>;
+  judgmentModelId?: string | null;
+  onSaved: (
+    provider: ProviderPublic,
+    models: ModelBinding[],
+    imageModelIds?: string[],
+    judgmentModelId?: string | null,
+  ) => void | Promise<void>;
 };
 
 export function ProviderSetupDialog({
@@ -121,9 +127,11 @@ export function ProviderSetupDialog({
   onClose,
   onSaved,
   imageModelIds,
+  judgmentModelId,
 }: ProviderSetupDialogProps) {
   const { t } = useTranslation();
   const [imageModelDraft, setImageModelDraft] = useState<string[] | undefined>();
+  const [judgmentDraft, setJudgmentDraft] = useState<string | null | undefined>();
   const editing = !!provider;
   const apiKeyRef = useRef<HTMLInputElement>(null);
   const [service, setService] = useState(() => initialDraft
@@ -289,7 +297,7 @@ export function ProviderSetupDialog({
           headers,
           ...(apiKey ? { secretValue: apiKey } : {}),
         });
-        await onSaved(result.provider ?? provider, persisted, imageModelIdsToSave);
+        await onSaved(result.provider ?? provider, persisted, imageModelIdsToSave, judgmentDraft);
       } else {
         const result = await api.createProvider({
           name: providerName,
@@ -304,7 +312,7 @@ export function ProviderSetupDialog({
           apiStyle: resolvedApiStyle,
           headers,
         });
-        await onSaved(result.provider, persisted, imageModelIdsToSave);
+        await onSaved(result.provider, persisted, imageModelIdsToSave, judgmentDraft);
       }
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : String(cause));
@@ -321,6 +329,10 @@ export function ProviderSetupDialog({
       }
       return next.filter((entry) => !modelIdsMatch(entry, id));
     });
+  };
+
+  const updateJudgmentDraft = (id: string, selected: boolean) => {
+    setJudgmentDraft(selected ? id : null);
   };
 
   const canSave =
@@ -546,6 +558,8 @@ export function ProviderSetupDialog({
             apiStyle={resolvedApiStyle}
             imageModelIds={imageModelDraft ?? imageModelIds}
             onImageModelChange={updateImageModelDraft}
+            judgmentModelId={judgmentDraft !== undefined ? judgmentDraft : judgmentModelId}
+            onJudgmentModelChange={updateJudgmentDraft}
             lookupContext={{
               baseUrl: requestBaseUrl,
               vendorKey: namedPreset?.vendorKey ?? "custom",

@@ -24,7 +24,7 @@ const {
   planImageGenerationDefaults,
   resolvesImageGenerationDefault,
 } = await import("../src/components/settings/image-generation-default.ts");
-const { MAX_IMAGE_GENERATION_MODELS } = await import("@pi-desktop/shared");
+const { MAX_IMAGE_GENERATION_MODELS } = await import("@duaer-ai-desk/shared");
 
 /** A runnable image provider row; `over` overrides any field. */
 const provider = (id, modelIds, over = {}) => ({
@@ -295,7 +295,7 @@ test("a long candidate list is capped like the host and keeps the active binding
 
 for (const candidates of [undefined, [], [binding("x", "chat-model")]]) {
   test(`unchecking the only image model releases it for chat (${JSON.stringify(candidates)})`, async () => {
-    const { imageGenerationBindings } = await import("@pi-desktop/shared");
+    const { imageGenerationBindings } = await import("@duaer-ai-desk/shared");
     const { defaultModelOptions } = await import("../src/components/settings/default-model.ts");
     const providers = [provider("x", ["chat-model"])];
     const plan = planImageGenerationDefaults(

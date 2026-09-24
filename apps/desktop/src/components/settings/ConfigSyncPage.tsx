@@ -8,7 +8,7 @@ import type {
   ConfigSyncProgress,
   ConfigSyncRemoteMode,
   ConfigSyncState,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import { api } from "../../lib/api";
 import { Badge, Button, Field, Input, PasswordInput, cx } from "../ui";
 import { IconCloudDown, IconRefresh, IconShield, IconTrash } from "../icons";
@@ -89,7 +89,7 @@ export function ConfigSyncPage() {
     endpoint: "",
     username: "",
     appPassword: "",
-    directory: "pi-desktop",
+    directory: "duaer-ai-desk",
     deviceLabel: "",
     backupPassword: "",
     currentBackupPassword: "",

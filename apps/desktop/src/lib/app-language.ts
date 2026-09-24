@@ -3,8 +3,8 @@ import {
   isAppLocale,
   resolveLocale,
   type AppLocale,
-} from "@pi-desktop/i18n";
-import type { AppSettings } from "@pi-desktop/shared";
+} from "@duaer-ai-desk/i18n";
+import type { AppSettings } from "@duaer-ai-desk/shared";
 import { useAppStore } from "../stores/app-store";
 
 export type AppLanguageSetting = NonNullable<AppSettings["language"]>;
@@ -18,7 +18,7 @@ export type AppLanguageSetting = NonNullable<AppSettings["language"]>;
  */
 export function resolveOsLocale(): string {
   return (
-    window.piDesktop?.locale ||
+    window.duaerAiDesk?.locale ||
     navigator.language ||
     (navigator as { userLanguage?: string }).userLanguage ||
     "en-US"

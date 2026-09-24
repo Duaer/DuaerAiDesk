@@ -5,7 +5,7 @@ import { validateCatalog } from "../../../scripts/check-marketplace-catalog.mjs"
 const packageFields = {
   version: "1.0.0",
   shasum: "a".repeat(64),
-  url: "https://raw.githubusercontent.com/vastsa/pi-desktop-plugins/main/packages/demo.hello-1.0.0.piplug",
+  url: "https://raw.githubusercontent.com/vastsa/duaer-ai-desk-plugins/main/packages/demo.hello-1.0.0.piplug",
   sizeBytes: 1024,
   permissions: ["ui.panel"],
 };
@@ -22,11 +22,11 @@ test("preflight accepts a string catalog author", () => {
   const errors = validateCatalog(
     catalog({
       id: "demo.hello",
-      author: "PI-Desktop",
+      author: "DuaerAiDesk",
       versions: [packageFields],
     }),
     "demo.hello",
-    "https://raw.githubusercontent.com/vastsa/pi-desktop-plugins/main/catalog.json",
+    "https://raw.githubusercontent.com/vastsa/duaer-ai-desk-plugins/main/catalog.json",
   );
   assert.deepEqual(errors, []);
 });
@@ -39,7 +39,7 @@ test("preflight rejects a plugin-manifest author object in the catalog", () => {
       versions: [packageFields],
     }),
     "com.vastsa.voice-assistant",
-    "https://raw.githubusercontent.com/vastsa/pi-desktop-plugins/main/catalog.json",
+    "https://raw.githubusercontent.com/vastsa/duaer-ai-desk-plugins/main/catalog.json",
   );
   assert.ok(
     errors.some((error) =>

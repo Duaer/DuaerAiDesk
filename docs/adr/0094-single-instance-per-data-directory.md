@@ -2,12 +2,12 @@
 
 - Status: Accepted
 - Date: 2026-08-18
-- Deciders: PI-Desktop core
+- Deciders: DuaerAiDesk core
 - Related: D236, D002, D216, ADR 0078, ADR 0090
 
 ## Context
 
-Nothing stopped a second PI-Desktop process from starting. Launching the app
+Nothing stopped a second DuaerAiDesk process from starting. Launching the app
 again while it was already running — a double click on Windows or Linux, a
 `open -n` or a packaged app started next to a development host on macOS, or a
 tray-resident session the user assumed had exited — booted a complete second
@@ -23,7 +23,7 @@ mental model is one desktop app; the process model was the only thing that
 disagreed.
 
 The data directory is what cannot be shared, but Electron's single-instance lock
-is scoped to `userData`, not to `PI_DESKTOP_DATA_DIR`. Runs that point at their
+is scoped to `userData`, not to `DUAER_AI_DESK_DATA_DIR`. Runs that point at their
 own data directory — the E2E harnesses, the capture rig, a deliberate
 side-by-side profile — share no state with the default installation and must
 stay launchable while one is running.
@@ -40,7 +40,7 @@ stay launchable while one is running.
 3. The instance that holds the lock handles `second-instance` by restoring and
    focusing its main window through the same path as the tray's Show action,
    which recreates a window that was closed or hidden into the tray.
-4. The lock is requested only when `PI_DESKTOP_DATA_DIR` is unset. A run given
+4. The lock is requested only when `DUAER_AI_DESK_DATA_DIR` is unset. A run given
    its own data directory keeps the current start-anytime behavior.
 
 ## Consequences
@@ -50,7 +50,7 @@ stay launchable while one is running.
 - Relaunching the app is a reliable way back to a tray-hidden or closed window,
   alongside the tray, the Dock, and `did-become-active` (ADR 0078, ADR 0086).
 - E2E harnesses, the capture rig, and side-by-side profiles are unaffected
-  because they set `PI_DESKTOP_DATA_DIR`.
+  because they set `DUAER_AI_DESK_DATA_DIR`.
 - Two runs that are pointed at the *same* explicit data directory are still
   admitted. That combination is a deliberate act, not an accidental relaunch,
   and scoping the lock to it would mean relocating `userData` under the data
@@ -58,7 +58,7 @@ stay launchable while one is running.
 
 ## Alternatives
 
-### Relocate `userData` under `PI_DESKTOP_DATA_DIR`
+### Relocate `userData` under `DUAER_AI_DESK_DATA_DIR`
 
 This would scope the lock to the resource that actually cannot be shared.
 Rejected because `userData` also holds renderer `localStorage` (retained project
@@ -86,13 +86,13 @@ database, and the user has no signal that two shells are open on one workspace.
 ## Amendment (D599)
 
 The alternatives below still stand: the lock is not scoped to
-`PI_DESKTOP_DATA_DIR`, and `userData` is not relocated under it.
+`DUAER_AI_DESK_DATA_DIR`, and `userData` is not relocated under it.
 
 What changed is that a development build is no longer the same installation as
-the packaged app. It takes `PI-Desktop Dev` in the OS application-data root and
-`~/.pi-desktop-dev`, so `pnpm dev` starts while the packaged app holds its lock
+the packaged app. It takes `DuaerAiDesk Dev` in the OS application-data root and
+`~/.duaer-ai-desk-dev`, so `pnpm dev` starts while the packaged app holds its lock
 and the two never share `pi.sqlite`, the outbox, or the log tree. An explicit
 `--user-data-dir` still wins, because the E2E harnesses point a build at a
 throwaway profile with it. Only the development side moved: a shipped
-installation keeps `PI-Desktop` and `~/.pi-desktop`, so no existing profile is
+installation keeps `DuaerAiDesk` and `~/.duaer-ai-desk`, so no existing profile is
 relocated. See D599.

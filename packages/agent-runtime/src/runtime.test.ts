@@ -1,14 +1,14 @@
 import { describe, expect, it, vi } from "vitest";
-import { estimateContextTokens as estimateAgentContextTokens, estimateTokens, type Agent, type AgentMessage } from "@earendil-works/pi-agent-core";
+import { estimateContextTokens as estimateAgentContextTokens, estimateTokens, type Agent, type AgentMessage } from "@duaer-ai-desk/upstream-agent-core";
 import {
   createAssistantMessageEventStream,
   getCurrentTools,
   getCurrentSystemMessage,
   toToolDeclaration,
   type AssistantMessage,
-} from "@earendil-works/pi-ai";
-import { formatSessionMessage, type SessionMessageOrigin } from "@pi-desktop/shared";
-import { estimateContextTokens as estimateTranscriptTokens } from "@earendil-works/pi-ai/utils/estimate";
+} from "@duaer-ai-desk/upstream-ai";
+import { formatSessionMessage, type SessionMessageOrigin } from "@duaer-ai-desk/shared";
+import { estimateContextTokens as estimateTranscriptTokens } from "@duaer-ai-desk/upstream-ai/utils/estimate";
 import { buildSessionContext } from "./session-context.js";
 import {
   COMPACTION_FALLBACK_MARKER,
@@ -100,7 +100,7 @@ import {
   DEFAULT_SUBAGENT_IDLE_TIMEOUT_SECONDS,
   MAX_RESUMABLE_CHAINS_PER_AGENT,
   MAX_SUBAGENT_CONCURRENCY,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import type {
   AgentEventEnvelope,
   ContextCompactionRecord,
@@ -111,7 +111,7 @@ import type {
   SessionThinkingLevel,
   SubagentDefinition,
   UiMessage,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 
 const provider: RuntimeProviderConfig = {
   id: "local",
@@ -341,7 +341,7 @@ describe("custom system prompt files (issue #542)", () => {
     const prompt = promptOf(runtime);
 
     expect(prompt).toContain(persona);
-    expect(prompt).not.toContain("You are PI-Desktop");
+    expect(prompt).not.toContain("You are DuaerAiDesk");
     // Operational rules from the default prompt must survive the replacement.
     expect(prompt).toContain("Collaboration: answer in the same language");
     expect(prompt).toContain("Searching and reading: prefer the Read");
@@ -362,10 +362,10 @@ describe("custom system prompt files (issue #542)", () => {
     const prompt = promptOf(runtime);
 
     expect(prompt).toContain(appendix);
-    expect(prompt).toContain("You are PI-Desktop");
+    expect(prompt).toContain("You are DuaerAiDesk");
     expect(prompt).toContain("Run unit tests.");
     expect(prompt.indexOf(appendix)).toBeGreaterThan(
-      prompt.indexOf("You are PI-Desktop"),
+      prompt.indexOf("You are DuaerAiDesk"),
     );
     expect(prompt.indexOf("Run unit tests.")).toBeGreaterThan(
       prompt.indexOf(appendix),
@@ -382,7 +382,7 @@ describe("custom system prompt files (issue #542)", () => {
 
     expect(prompt).toContain(persona);
     expect(prompt).toContain(appendix);
-    expect(prompt).not.toContain("You are PI-Desktop");
+    expect(prompt).not.toContain("You are DuaerAiDesk");
 
     await runtime.dispose();
   });
@@ -391,7 +391,7 @@ describe("custom system prompt files (issue #542)", () => {
     const runtime = createRuntime();
     const prompt = promptOf(runtime);
 
-    expect(prompt).toContain("You are PI-Desktop");
+    expect(prompt).toContain("You are DuaerAiDesk");
     expect(prompt).not.toContain("MARKER-XYZ-123");
 
     await runtime.dispose();
@@ -8607,7 +8607,7 @@ describe("DesktopAgentRuntime compaction request headers", () => {
     expect(calls[0]?.sessionId).toBe("session-1");
     expect(calls[0]?.headers).toMatchObject({
       "x-opencode-session": "session-1",
-      "x-opencode-client": "pi-desktop",
+      "x-opencode-client": "duaer-ai-desk",
       "X-Team": "platform",
     });
     await runtime.dispose();

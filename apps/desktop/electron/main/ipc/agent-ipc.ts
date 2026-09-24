@@ -1,9 +1,9 @@
-import { IPC, ErrorCodes, compactionRecordId, isGlobalPermissionMode, isRpcTimeoutError, type AgentEventEnvelope, type AgentPromptRequest, type AgentSteerRequest, type UiMessage, type AgentQueuePushRequest, type AgentStopRequest, type AskToolResolution, type GlobalPermissionMode, type MessageUsage, type PlanExecutionFinishStatus, type PlanResolutionResult, type PlanResolveRequest, type PromptEnhancementRequest, type SessionSummarizeTitleRequest, canonicalThinkingLevel, type ThinkingLevel } from "@pi-desktop/shared";
+import { IPC, ErrorCodes, compactionRecordId, isGlobalPermissionMode, isRpcTimeoutError, type AgentEventEnvelope, type AgentPromptRequest, type AgentSteerRequest, type UiMessage, type AgentQueuePushRequest, type AgentStopRequest, type AskToolResolution, type DeliveryArchitectureGetRequest, type DeliveryArchitectureRenderRequest, type DeliveryReviewRequest, type GlobalPermissionMode, type MessageUsage, type PlanExecutionFinishStatus, type PlanResolutionResult, type PlanResolveRequest, type PromptEnhancementRequest, type SessionSummarizeTitleRequest, canonicalThinkingLevel, type ThinkingLevel } from "@duaer-ai-desk/shared";
 import type { FinishTurn } from "../runtime/plans";
-import { expandSlashInvocation, enhancePromptDraft, summarizeSessionTitle, visionFromModelConfig, type ComposerTemplate, type RuntimeProviderConfig } from "@pi-desktop/agent-runtime";
+import { completeOneShot, expandSlashInvocation, enhancePromptDraft, summarizeSessionTitle, visionFromModelConfig, type ComposerTemplate, type RuntimeProviderConfig } from "@duaer-ai-desk/agent-runtime";
 import { OAUTH_AUTH_KIND, type VendorOAuth } from "../oauth";
 import { appendPromptFallbackPaths, durableUserMessageId, preparePromptAttachments, type PreparedPromptAttachment } from "../prompt-attachments";
-import { executionFromResponse, resolveSessionMessageInput } from "@pi-desktop/host-runtime";
+import { executionFromResponse, resolveSessionMessageInput } from "@duaer-ai-desk/host-runtime";
 import type { AgentExtensionBridge } from "../agent-extensions";
 import type { AgentHostBridge } from "../agent-host-bridge";
 import type { AgentSidecar } from "../agent-sidecar";
@@ -13,6 +13,12 @@ import type { PersistenceOutbox } from "../persistence-outbox";
 import type { ComposerCommandService } from "./composer-ipc";
 import type { IpcRegistrar } from "./types";
 import { withPromptEnhancementTimeout } from "../prompt-enhancement-timeout";
+import { clipDeliveryReviewCard, deliveryReviewPrompt, parseDeliveryReview } from "../../../src/lib/delivery-review.ts";
+import { isJudgmentModelId, requestJudgmentReview } from "../../../src/lib/judgment-review.ts";
+import {
+  readDeliveryArchitectureHtml,
+  renderDeliveryArchitecture,
+} from "../architecture-render";
 
 export type AgentIpcDependencies = {
   registrar: IpcRegistrar;
@@ -54,6 +60,25 @@ function rejectNativeAgentOperation(sessionId: string): void {
   if (sessionId.startsWith("native-pi:")) {
     throw Object.assign(new Error("Operation is unsupported for native Pi sessions"), { errorCode: "NATIVE_PI_UNSUPPORTED" });
   }
+}
+
+function isAgentBusy(error: unknown): boolean {
+  if (!error || typeof error !== "object") return false;
+  const record = error as { message?: unknown; errorCode?: unknown; data?: { errorCode?: unknown } };
+  const code = typeof record.data?.errorCode === "string" ? record.data.errorCode : record.errorCode;
+  if (code === ErrorCodes.AGENT_BUSY) return true;
+  return typeof record.message === "string" && record.message.startsWith("AGENT_BUSY");
+}
+
+/** Turn id carried by `AGENT_BUSY: <uuid>`. Inbox-full text does not match. */
+function orphanBusyTurnId(error: unknown): string | null {
+  if (!error || typeof error !== "object") return null;
+  const message = (error as { message?: unknown }).message;
+  if (typeof message !== "string") return null;
+  const match = message.match(
+    /AGENT_BUSY:\s*([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i,
+  );
+  return match?.[1] ?? null;
 }
 
 /** Register prompt, agent lifecycle, queue, approval and plan channels. */
@@ -196,6 +221,100 @@ export function registerAgentIpc({
       data: { providerId: launch.providerId, modelId: launch.modelId },
     });
     return { enhancedDraft };
+  });
+
+  handle(IPC.invoke.deliveryReview, async (req: DeliveryReviewRequest) => {
+    if (!host) throw new Error("backend unavailable");
+    const mode = req?.mode === "fix" ? "fix" : req?.mode === "validate" ? "validate" : "";
+    if (!mode) {
+      throw Object.assign(new Error("mode must be validate or fix"), {
+        errorCode: ErrorCodes.INVALID_ARGUMENT,
+      });
+    }
+    const card = clipDeliveryReviewCard(req?.card);
+    const issues = Array.isArray(req?.issues)
+      ? req.issues.map((item) => String(item).trim()).filter(Boolean).slice(0, 8)
+      : [];
+    const sessionId = typeof req?.sessionId === "string" ? req.sessionId.trim() : "";
+    const session = sessionId
+      ? (await host.call<{ session?: any }>("session.get", { id: sessionId })).session
+      : {};
+    if (sessionId && !session) {
+      throw Object.assign(new Error("Session not found"), {
+        errorCode: ErrorCodes.NOT_FOUND,
+      });
+    }
+    const settings = await host.call<any>("settings.get");
+    const launchSessionId = sessionId || `delivery-review:${crypto.randomUUID()}`;
+    const launch = await resolveAgentRuntimeLaunch(launchSessionId, session ?? {}, settings, {
+      mode: "agent",
+      providerId: typeof req?.providerId === "string" ? req.providerId.trim() : undefined,
+      modelId: typeof req?.modelId === "string" ? req.modelId.trim() : undefined,
+      thinkingLevel: "off",
+    });
+    const runtimeProvider = {
+      ...launch.sidecarParams.provider,
+      ...(launch.sidecarParams.provider.authKind === OAUTH_AUTH_KIND
+        ? { resolveAuth: () => vendorOAuth.resolveAuth(launch.providerId) }
+        : {}),
+    } as RuntimeProviderConfig;
+    // jev models reject chat completions and require the judgments endpoint.
+    const modelId = typeof launch.modelId === "string" ? launch.modelId : "";
+    let reviewed;
+    if (mode === "validate" && isJudgmentModelId(modelId)) {
+      reviewed = await withPromptEnhancementTimeout((signal) =>
+        requestJudgmentReview({
+          baseUrl: typeof runtimeProvider.baseUrl === "string" ? runtimeProvider.baseUrl : "",
+          apiKey: typeof runtimeProvider.apiKey === "string" ? runtimeProvider.apiKey : "",
+          modelId,
+          card,
+          signal,
+        }),
+      );
+    } else {
+      const prompt = deliveryReviewPrompt(mode, card, issues);
+      const result = await withPromptEnhancementTimeout((signal) =>
+        completeOneShot(
+          runtimeProvider,
+          {
+            systemPrompt: prompt.systemPrompt,
+            messages: [{ role: "user", content: prompt.user, timestamp: Date.now() }],
+          },
+          "off",
+          { signal, sessionId: launchSessionId },
+        ),
+      );
+      reviewed = parseDeliveryReview(result.text, card, mode);
+    }
+    logger.app("session", "info", "delivery card reviewed", {
+      sessionId: sessionId || undefined,
+      data: { mode, providerId: launch.providerId, modelId: launch.modelId },
+    });
+    return reviewed;
+  });
+
+  handle(IPC.invoke.deliveryArchitectureRender, async (req: DeliveryArchitectureRenderRequest) => {
+    if (!req || typeof req !== "object" || req.ir == null) {
+      throw Object.assign(new Error("architecture IR required"), {
+        errorCode: ErrorCodes.INVALID_ARGUMENT,
+      });
+    }
+    const rendered = await renderDeliveryArchitecture(req.ir);
+    logger.app("session", "info", "architecture diagram rendered", {
+      data: { key: rendered.key },
+    });
+    return rendered;
+  });
+
+  handle(IPC.invoke.deliveryArchitectureGet, async (req: DeliveryArchitectureGetRequest) => {
+    const key = typeof req?.key === "string" ? req.key.trim() : "";
+    if (!key) {
+      throw Object.assign(new Error("architecture key required"), {
+        errorCode: ErrorCodes.INVALID_ARGUMENT,
+      });
+    }
+    const html = await readDeliveryArchitectureHtml(key);
+    return { key, html };
   });
 
   handle(IPC.invoke.sessionSummarizeTitle, async (req: SessionSummarizeTitleRequest) => {
@@ -420,12 +539,35 @@ export function registerAgentIpc({
     sidecar.setProjectInstructionRoot(req.sessionId, launch.projectPath);
 
     // Open a durable turn row, then persist the user message under it.
-    const turn = await host.call<{ turnId?: string }>("session.beginTurn", {
+    // A running row this process is not tracking is leftover from a turn the
+    // window no longer shows. Close it and start again, instead of telling
+    // the user to stop a task they cannot see.
+    const turnWasTracked = activeTurns.has(req.sessionId);
+    const beginTurn = () => host.call<{ turnId?: string }>("session.beginTurn", {
       sessionId: req.sessionId,
       providerId: launch.providerId,
       modelId: launch.modelId,
       ...(sessionMessage ? { sessionMessageId: sessionMessage.origin.messageId } : {}),
     });
+    let turn: { turnId?: string };
+    try {
+      turn = await beginTurn();
+    } catch (error) {
+      const orphanTurnId = !turnWasTracked && isAgentBusy(error) ? orphanBusyTurnId(error) : null;
+      if (!orphanTurnId) throw error;
+      logger.app("session", "warn", "closed an untracked running turn", {
+        sessionId: req.sessionId,
+        turnId: orphanTurnId,
+      });
+      await host.call("session.endTurn", {
+        turnId: orphanTurnId,
+        status: "aborted",
+        errorCode: "TURN_ABORTED",
+        createNotification: false,
+      });
+      await sidecar.call("agent.abort", { sessionId: req.sessionId }).catch(() => undefined);
+      turn = await beginTurn();
+    }
     const durableTurnId = String(turn?.turnId ?? "").trim();
     if (!durableTurnId) {
       throw new Error("session.beginTurn returned no turn");
@@ -570,39 +712,57 @@ export function registerAgentIpc({
     } satisfies AgentEventEnvelope);
 
     let result: { accepted: boolean; turnId: string };
+    const promptParams = {
+      ...launch.sidecarParams,
+      // The host-created durable turn is the approval identity used by
+      // Rust. The runtime must not replace it with a provider-local UUID.
+      turnId: durableTurnId,
+      content: modelContent,
+      ...(sessionMessage ? { sessionMessage: sessionMessage.origin } : {}),
+      attachments: preparedAttachments
+        .filter((attachment) => attachment.inlineData)
+        .map((attachment) => ({
+          path: attachment.message.ref,
+          name: attachment.message.name,
+          kind: attachment.message.kind,
+          mimeType: attachment.message.mimeType,
+          size: attachment.message.size,
+          data: attachment.inlineData,
+        })),
+      userMessageId: userMessage.id,
+      // Per-turn permission ceiling override (R1 leftover; spec §7.3). The
+      // sidecar records it on the turn context; enforcement of a NARROWER
+      // ceiling still routes through the session's stored mode until
+      // host-core `session.beginTurn` accepts the scoped param.
+      ...(req.permissionMode ? { permissionMode: req.permissionMode } : {}),
+    };
     try {
       result = await sidecar.call<{ accepted: boolean; turnId: string }>(
         "agent.prompt",
-        {
-          ...launch.sidecarParams,
-          // The host-created durable turn is the approval identity used by
-          // Rust. The runtime must not replace it with a provider-local UUID.
-          turnId: durableTurnId,
-          content: modelContent,
-          ...(sessionMessage ? { sessionMessage: sessionMessage.origin } : {}),
-          attachments: preparedAttachments
-            .filter((attachment) => attachment.inlineData)
-            .map((attachment) => ({
-              path: attachment.message.ref,
-              name: attachment.message.name,
-              kind: attachment.message.kind,
-              mimeType: attachment.message.mimeType,
-              size: attachment.message.size,
-              data: attachment.inlineData,
-            })),
-          userMessageId: userMessage.id,
-          // Per-turn permission ceiling override (R1 leftover; spec §7.3). The
-          // sidecar records it on the turn context; enforcement of a NARROWER
-          // ceiling still routes through the session's stored mode until
-          // host-core `session.beginTurn` accepts the scoped param.
-          ...(req.permissionMode ? { permissionMode: req.permissionMode } : {}),
-        },
+        promptParams,
       );
     } catch (e) {
-      await finishTurn(req.sessionId, "error", (e as any)?.errorCode, {
-        turnId: durableTurnId,
-      });
-      throw e;
+      // The runtime can stay "running" after the window has already gone idle.
+      // Drop that leftover only when this process was not tracking a turn.
+      if (!turnWasTracked && isAgentBusy(e)) {
+        await sidecar.call("agent.abort", { sessionId: req.sessionId }).catch(() => undefined);
+        try {
+          result = await sidecar.call<{ accepted: boolean; turnId: string }>(
+            "agent.prompt",
+            promptParams,
+          );
+        } catch (retryError) {
+          await finishTurn(req.sessionId, "error", (retryError as { errorCode?: string })?.errorCode, {
+            turnId: durableTurnId,
+          });
+          throw retryError;
+        }
+      } else {
+        await finishTurn(req.sessionId, "error", (e as { errorCode?: string })?.errorCode, {
+          turnId: durableTurnId,
+        });
+        throw e;
+      }
     }
     logger.app("session", "info", "prompt accepted", {
       sessionId: req.sessionId,

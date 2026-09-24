@@ -1,4 +1,4 @@
-/** Canonical ladder; keep in lockstep with `@pi-desktop/shared` THINKING_LEVELS. */
+/** Canonical ladder; keep in lockstep with `@duaer-ai-desk/shared` THINKING_LEVELS. */
 const THINKING_LEVELS = [
   "off",
   "minimal",

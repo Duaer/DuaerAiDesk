@@ -6,7 +6,7 @@ import {
   useState,
 } from "react";
 import { useTranslation } from "react-i18next";
-import type { UiMessage } from "@pi-desktop/shared";
+import type { UiMessage } from "@duaer-ai-desk/shared";
 import { formatToolDuration } from "../../../lib/tool-display";
 import { toolResultPayload } from "../../../lib/tool-presentation";
 import {

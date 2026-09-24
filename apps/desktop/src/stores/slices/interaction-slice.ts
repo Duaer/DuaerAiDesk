@@ -2,7 +2,7 @@ import i18n from "i18next";
 import type {
   AskToolResolution,
   PlanResolveRequest,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import { api } from "../../lib/api";
 import {
   headAsk,

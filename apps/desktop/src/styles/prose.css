@@ -30,6 +30,23 @@
   margin-bottom: 0 !important;
 }
 
+.choice-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.choice-chip {
+  border: 1px solid var(--ds-border-default);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: var(--text-sm);
+  padding: 4px 8px;
+}
+
 /* Body rhythm: breathing room between blocks so multi-part answers read as
    distinct thoughts, while consecutive paragraphs stay conversational. */
 .prose-chat p {

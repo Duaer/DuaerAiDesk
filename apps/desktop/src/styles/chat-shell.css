@@ -30,10 +30,12 @@
 
 .drag {
   -webkit-app-region: drag;
+  app-region: drag;
 }
 
 .no-drag {
   -webkit-app-region: no-drag;
+  app-region: no-drag;
 }
 
 .main-pane {
@@ -57,6 +59,53 @@
  */
 .app-shell.sidebar-collapsed .main-pane {
   --chat-width-transition: var(--motion-duration-fast) var(--motion-ease-in);
+}
+
+/* Chat page: the dialog stays at most 460px. Dragging the divider cannot widen it.
+   The work panel fills whatever remains. Its entrance animation otherwise keeps
+   the first frame's width and leaves this column blank. */
+.app-shell.chat-column-capped {
+  --ds-main-pane-min-width: 242px;
+}
+
+.app-shell.chat-column-capped .main-pane {
+  max-width: 460px;
+  flex: 0 1 460px;
+}
+
+/* Expanded sidebar and the dialog share 460px. Collapsed, the dialog keeps it. */
+.app-shell.chat-column-capped:not(.sidebar-collapsed) {
+  --ds-main-pane-min-width: 0px;
+}
+
+.app-shell.chat-column-capped:not(.sidebar-collapsed) .main-pane {
+  max-width: calc(460px - var(--ds-sidebar-width));
+  flex: 0 1 calc(460px - var(--ds-sidebar-width));
+}
+
+.app-shell.chat-column-capped .delivery-work-column {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  min-width: 244px;
+  min-height: 0;
+  height: 100%;
+  background: var(--ds-bg-dock);
+  /* Do not raise z-index here: app-chat-shell is display:contents, so a
+     stacking context on this column would sit above MainChat and, with the
+     work-panel drag header, Electron's app-region hit testing swallows clicks. */
+  position: relative;
+}
+
+.app-shell.chat-column-capped .delivery-work-column > .work-panel {
+  flex: 1 1 auto;
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 0;
+  height: 100%;
+  opacity: 1 !important;
+  transform: none !important;
+  animation: none !important;
 }
 
 .chat-surface,

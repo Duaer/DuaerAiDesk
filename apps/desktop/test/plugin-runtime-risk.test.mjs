@@ -166,7 +166,7 @@ test("shared protocol declares marketplace and package install IPC", () => {
 
 test("plugins page can refresh the official marketplace repository", () => {
   assert.match(pageSrc, /marketRefresh|refreshMarket|refreshRemote/);
-  assert.match(pageSrc, /pi-desktop-plugins|marketSource/);
+  assert.match(pageSrc, /duaer-ai-desk-plugins|marketSource/);
 });
 
 

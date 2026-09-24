@@ -16,6 +16,7 @@ export type SettingsTabId =
   | "subagents"
   | "import"
   | "projects"
+  | "deploy"
   | "sync"
   | "remoteHosts"
   | "about";
@@ -210,6 +211,7 @@ export const SETTINGS_NAV: SettingsNavEntry[] = [
       "extensions.subagents.presetReviewerName",
       "extensions.subagents.presetTestRunnerName",
       "extensions.subagents.presetFixerName",
+      "extensions.subagents.presetCoderName",
       "extensions.subagents.presetUiDesignerName",
       "extensions.subagents.tools",
     ],
@@ -240,6 +242,21 @@ export const SETTINGS_NAV: SettingsNavEntry[] = [
       "project.archive",
       "project.restore",
       "project.delete",
+    ],
+  },
+  {
+    id: "deploy",
+    labelKey: "settings.nav.deploy",
+    titleKey: "settings.deploy.title",
+    group: "workspace",
+    keywordKeys: [
+      "settings.deploy.pages",
+      "settings.deploy.cloudflare",
+      "settings.deploy.aliyun",
+      "settings.deploy.aws",
+      "settings.deploy.token",
+      "settings.deploy.accessKeyId",
+      "settings.deploy.awsKeyId",
     ],
   },
   {

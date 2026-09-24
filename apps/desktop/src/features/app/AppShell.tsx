@@ -21,6 +21,7 @@ import { api } from "../../lib/api";
 import { PortalVisibilityProvider } from "../../lib/portal-visibility";
 import { CollapsedTitlebarActions, RoutePending } from "./chrome";
 import { useAppShellRuntime } from "./useAppShellRuntime";
+import { DELIVERY_CHAT_MAX_WIDTH } from "../../lib/work-panel-resize";
 
 const SettingsPage = lazy(() =>
   import("../../pages/SettingsPage").then((module) => ({
@@ -56,6 +57,9 @@ export function AppShell() {
     searchOpen,
     setSearchOpen,
     sidebarCollapsed,
+    sidebarRevealed,
+    revealSidebar,
+    concealSidebar,
     sidebarEntering,
     sidebarExiting,
     sidebarWidth,
@@ -76,7 +80,6 @@ export function AppShell() {
     finishWorkPanelExit,
     togglePresentedWorkPanel,
     workPanelMaximized,
-    toggleWorkPanelMaximize,
     backendDown,
     archMismatch,
     setArchMismatch,
@@ -116,7 +119,11 @@ export function AppShell() {
             inert={page === "settings" ? true : undefined}
             aria-hidden={page === "settings" ? true : undefined}
           >
-            {!sidebarCollapsed || sidebarExiting ? (
+            <div
+              className="sidebar-slot"
+              onPointerEnter={revealSidebar}
+              onPointerLeave={concealSidebar}
+            >
               <Sidebar
                 className={cx(sidebarEntering && "is-entering", sidebarExiting && "is-exiting")}
                 onAnimationEnd={handleSidebarAnimationEnd}
@@ -128,7 +135,7 @@ export function AppShell() {
                 onWidthCommit={handleSidebarWidthCommit}
                 onResizeCollapse={handleSidebarResizeCollapse}
               />
-            ) : null}
+            </div>
 
             {workPanelMaximized && (
               /* MainChat is absent; the panel header owns dragging while this
@@ -149,7 +156,7 @@ export function AppShell() {
                 {!sidebarCollapsed && (
                   <TooltipButton
                     type="button"
-                    className="title-nav-btn"
+                    className="title-nav-btn no-drag"
                     tooltip={t("nav.newTask")}
                     ariaLabel={t("nav.newTask")}
                     data-nav="new-task"
@@ -267,25 +274,31 @@ export function AppShell() {
               </section>
             )}
 
-            {(presentedWorkPanelOpen || workPanelExiting) && (
-              <WorkPanel
-                panelBlocked={searchOpen}
-                exiting={workPanelExiting}
-                onExitAnimationEnd={() =>
-                  finishWorkPanelExit(workPanelExitGeneration.current)
-                }
-                subagentPanel={subagentPanelOpen ? subagentPanel : null}
-                onCloseSubagentPanel={closeSubagentPanel}
-                containerWidth={shellWidth}
-                sidebarWidth={sidebarWidth}
-                sidebarCollapsed={sidebarCollapsed}
-                sidebarExiting={sidebarExiting}
-                onAutoCollapseSidebar={autoCollapseSidebar}
-                maximized={workPanelMaximized}
-                onToggleMaximize={toggleWorkPanelMaximize}
-              />
+            {(page === "chat" || presentedWorkPanelOpen || workPanelExiting) && (
+              <div
+                className={page === "chat" ? "delivery-work-column" : undefined}
+                style={page === "chat" ? undefined : { display: "contents" }}
+              >
+                <WorkPanel
+                  panelBlocked={searchOpen}
+                  exiting={page === "chat" ? false : workPanelExiting}
+                  onExitAnimationEnd={() =>
+                    finishWorkPanelExit(workPanelExitGeneration.current)
+                  }
+                  subagentPanel={subagentPanelOpen ? subagentPanel : null}
+                  onCloseSubagentPanel={closeSubagentPanel}
+                  containerWidth={shellWidth}
+                  sidebarWidth={sidebarWidth}
+                  sidebarCollapsed={sidebarCollapsed}
+                  sidebarExiting={sidebarExiting}
+                  onAutoCollapseSidebar={autoCollapseSidebar}
+                  maximized={workPanelMaximized}
+                  mainMaxWidth={page === "chat" ? DELIVERY_CHAT_MAX_WIDTH : undefined}
+                />
+              </div>
             )}
 
+            {page === "chat" ? null : (
             <TooltipButton
               type="button"
               className="app-work-panel-toggle no-drag"
@@ -300,6 +313,7 @@ export function AppShell() {
                 <IconPanelOpen size={15} />
               </span>
             </TooltipButton>
+            )}
           </div>
         </PortalVisibilityProvider>
         {page === "settings" ? (
@@ -323,7 +337,9 @@ export function AppShell() {
         !ready && "app-shell-boot",
         page === "settings" && ready && "settings-mode",
         sidebarCollapsed && "sidebar-collapsed",
+        sidebarCollapsed && sidebarRevealed && "sidebar-revealed",
         workPanelMaximized && "work-panel-maximized",
+        page === "chat" && "chat-column-capped",
         showSplash && "is-booting",
       )}
       style={{ "--ds-sidebar-width": `${sidebarWidth}px` } as CSSProperties}

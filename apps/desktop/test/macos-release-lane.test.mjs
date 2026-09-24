@@ -42,11 +42,11 @@ exit 0
 printf 'pnpm %s\\n' "$*" >> "${log}"
 case "$*" in
   *electron-builder*)
-    app="${repoRoot}/apps/desktop/release/mac-arm64/PI-Desktop.app"
+    app="${repoRoot}/apps/desktop/release/mac-arm64/DuaerAiDesk.app"
     mkdir -p "$app/Contents/MacOS" "$app/Contents/Resources/bin"
-    : > "$app/Contents/MacOS/PI-Desktop"
-    : > "$app/Contents/Resources/bin/pi-desktop-host-core"
-    : > "${repoRoot}/apps/desktop/release/PI-Desktop-0.0.0-arm64.dmg"
+    : > "$app/Contents/MacOS/DuaerAiDesk"
+    : > "$app/Contents/Resources/bin/duaer-ai-desk-host-core"
+    : > "${repoRoot}/apps/desktop/release/DuaerAiDesk-0.0.0-arm64.dmg"
     ;;
 esac
 exit 0
@@ -85,7 +85,7 @@ test(
   "the signed local macOS lane runs electron-builder with every documented flag",
   { skip: process.platform !== "darwin" ? "macOS-only lane" : false },
   async (t) => {
-    const root = await mkdtemp(join(tmpdir(), "pi-desktop-macos-lane-"));
+    const root = await mkdtemp(join(tmpdir(), "duaer-ai-desk-macos-lane-"));
     t.after(() => rm(root, { recursive: true, force: true }));
 
     const repoRoot = join(root, "repo");

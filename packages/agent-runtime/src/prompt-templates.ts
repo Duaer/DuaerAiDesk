@@ -1,7 +1,7 @@
 /**
  * Bridge to pi's prompt-template ("slash command") system for the composer
  * (D123, ADR 0024). Loading and expansion reuse pi-agent-core verbatim so
- * `.pi/prompts` assets behave identically in pi CLI and PI-Desktop.
+ * `.pi/prompts` assets behave identically in pi CLI and DuaerAiDesk.
  *
  * Discovery: `<workspace>/.pi/prompts/*.md` (project) and
  * `~/.pi/agent/prompts/*.md` (user-global); project wins name conflicts.
@@ -16,11 +16,11 @@ import {
   parseCommandArgs,
   substituteArgs,
   type PromptTemplate,
-} from "@earendil-works/pi-agent-core";
-import { NodeExecutionEnv } from "@earendil-works/pi-agent-core/node";
+} from "@duaer-ai-desk/upstream-agent-core";
+import { NodeExecutionEnv } from "@duaer-ai-desk/upstream-agent-core/node";
 
 /**
- * Prompt-enhancement templates live in `@pi-desktop/shared` so the runtime,
+ * Prompt-enhancement templates live in `@duaer-ai-desk/shared` so the runtime,
  * the settings UI, and the "restore default" action all read one copy
  * (`packages/shared/src/prompt-enhancement.ts`).
  */

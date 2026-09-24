@@ -4,7 +4,7 @@ import {
   matchNamedPreset,
   type CatalogApiStyle,
   type ProviderPublic,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 
 export function isAccountOnlyApiStyle(style?: string): boolean {
   return style === "openai_codex_responses" || style === "pi_messages";

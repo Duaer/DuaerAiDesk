@@ -13,8 +13,8 @@
 
 1. **安全拒绝列表**（始终开启，不在 MVP 中由用户禁用）
 2. **应用程序默认设置**（已发货）
-3. **工作区规则**（工作区根目录下的 `.pi-desktopignore`）
-4. **用户全局忽略**（`<data_dir>/ignore`，默认即 `~/.pi-desktop/ignore`）
+3. **工作区规则**（工作区根目录下的 `.duaer-ai-deskignore`）
+4. **用户全局忽略**（`<data_dir>/ignore`，默认即 `~/.duaer-ai-desk/ignore`）
 5. 显式工具路径仍受安全拒绝名单和
    外部路径权限门
 
@@ -25,7 +25,7 @@
 ## 3. 安全拒绝名单（始终）
 
 默认情况下，工作空间外 read/write/search 被拒绝。明确的
-Goal/scanning/reading/writing/MVP/`.pi-desktopignore`/`~/.pi-desktop/ignore` 路径只有在主机申请后才能继续
+Goal/scanning/reading/writing/MVP/`.duaer-ai-deskignore`/`~/.duaer-ai-desk/ignore` 路径只有在主机申请后才能继续
 权限模式：`auto` 允许，而 `ask` 和 `accept-edits` 询问
 用户。隐式递归遍历永远不会获得工作空间外部的访问权限。
 
@@ -70,7 +70,7 @@ coverage/
 支持：
 
 ```text
-.pi-desktopignore
+.duaer-ai-deskignore
 ```
 
 语法：与 gitignore 兼容的子集。

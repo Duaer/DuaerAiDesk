@@ -158,7 +158,7 @@ export type PluginManifest = {
    * Omitted or empty means no egress, whatever `net.fetch` says.
    */
   net?: { domains?: PluginNetDomain[] };
-  engines?: { piDesktop?: string };
+  engines?: { duaerAiDesk?: string };
   activationEvents?: string[];
 };
 
@@ -333,7 +333,7 @@ export type PluginSessionMessageListResult = {
   nextCursor?: string;
 };
 
-/** Resolve a plugin label using the active PI-Desktop locale. */
+/** Resolve a plugin label using the active DuaerAiDesk locale. */
 export function resolvePluginLocalizedString(
   value: string | PluginLocalizedString | undefined,
   locale: string | undefined,

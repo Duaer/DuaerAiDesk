@@ -58,12 +58,12 @@ async fn main() -> anyhow::Result<()> {
         .with_writer(std::io::stderr)
         .init();
 
-    let data_dir = std::env::var("PI_DESKTOP_DATA_DIR")
+    let data_dir = std::env::var("DUAER_AI_DESK_DATA_DIR")
         .map(std::path::PathBuf::from)
         .unwrap_or_else(|_| {
             dirs::home_dir()
                 .unwrap_or_else(|| std::path::PathBuf::from("."))
-                .join(".pi-desktop")
+                .join(".duaer-ai-desk")
         });
 
     std::fs::create_dir_all(&data_dir)?;

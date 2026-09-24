@@ -26,7 +26,7 @@
 import {
   estimateTokens,
   type AgentMessage,
-} from "@earendil-works/pi-agent-core";
+} from "@duaer-ai-desk/upstream-agent-core";
 import { isRecord, truncateMessageText } from "./agent-messages.js";
 
 /**

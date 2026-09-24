@@ -24,8 +24,8 @@ test("the plugin and MCP paths share desktop operation validation", async () => 
   const calls = [];
   const controller = createMcpControlController({
     channels: {
-      projectSet: "pi-desktop/project/set",
-      sessionDelete: "pi-desktop/session/delete",
+      projectSet: "duaer-ai-desk/project/set",
+      sessionDelete: "duaer-ai-desk/session/delete",
     },
     invoke: async (channel, args) => {
       calls.push({ channel, args });
@@ -44,8 +44,8 @@ test("the plugin and MCP paths share desktop operation validation", async () => 
   await controller.invoke({ operation: "project/set", args: ["/tmp/project"] });
   await controller.invoke({ operation: "session/delete", args: ["s1"], confirm: true });
   assert.deepEqual(calls, [
-    { channel: "pi-desktop/project/set", args: ["/tmp/project"] },
-    { channel: "pi-desktop/session/delete", args: ["s1"] },
+    { channel: "duaer-ai-desk/project/set", args: ["/tmp/project"] },
+    { channel: "duaer-ai-desk/session/delete", args: ["s1"] },
   ]);
 });
 
@@ -67,14 +67,14 @@ async function post(url, token, body, headers = {}) {
 }
 
 const fixtureChannels = {
-  appGetVersion: "pi-desktop/app/getVersion",
-  projectSet: "pi-desktop/project/set",
-  sessionGet: "pi-desktop/session/get",
-  sessionCreate: "pi-desktop/session/create",
-  sessionDelete: "pi-desktop/session/delete",
-  sessionConfigure: "pi-desktop/session/configure",
-  plansResolve: "pi-desktop/plans/resolve",
-  agentPrompt: "pi-desktop/agent/prompt",
+  appGetVersion: "duaer-ai-desk/app/getVersion",
+  projectSet: "duaer-ai-desk/project/set",
+  sessionGet: "duaer-ai-desk/session/get",
+  sessionCreate: "duaer-ai-desk/session/create",
+  sessionDelete: "duaer-ai-desk/session/delete",
+  sessionConfigure: "duaer-ai-desk/session/configure",
+  plansResolve: "duaer-ai-desk/plans/resolve",
+  agentPrompt: "duaer-ai-desk/agent/prompt",
 };
 
 test("local MCP control server authenticates, discovers, and invokes desktop operations", async (t) => {
@@ -88,13 +88,13 @@ test("local MCP control server authenticates, discovers, and invokes desktop ope
     channels: fixtureChannels,
     invoke: async (channel, args) => {
       calls.push({ channel, args });
-      if (channel === "pi-desktop/app/getVersion") {
-        return { name: "PI-Desktop", version: "test" };
+      if (channel === "duaer-ai-desk/app/getVersion") {
+        return { name: "DuaerAiDesk", version: "test" };
       }
-      if (channel === "pi-desktop/project/set") {
+      if (channel === "duaer-ai-desk/project/set") {
         return { workspace: { path: args[0], name: "fixture" } };
       }
-      if (channel === "pi-desktop/session/create") {
+      if (channel === "duaer-ai-desk/session/create") {
         return { session: { id: "session-created", projectPath: args[0]?.projectPath ?? null } };
       }
       return { ok: true };
@@ -141,7 +141,7 @@ test("local MCP control server authenticates, discovers, and invokes desktop ope
     params: { protocolVersion: "2099-01-01" },
   });
   assert.equal(initialized.response.status, 200);
-  assert.equal(initialized.body.result.serverInfo.name, "pi-desktop");
+  assert.equal(initialized.body.result.serverInfo.name, "duaer-ai-desk");
   assert.equal(initialized.body.result.serverInfo.version, "test");
   assert.equal(initialized.body.result.protocolVersion, "2025-06-18");
   const sessionId = initialized.response.headers.get("mcp-session-id");
@@ -169,7 +169,7 @@ test("local MCP control server authenticates, discovers, and invokes desktop ope
     { "Mcp-Session-Id": sessionId },
   );
   const toolNames = listed.body.result.tools.map((tool) => tool.name);
-  assert.ok(toolNames.includes("pi_desktop_invoke"));
+  assert.ok(toolNames.includes("duaer_ai_desk_invoke"));
   assert.ok(toolNames.includes("pi_control_describe"));
   assert.ok(toolNames.includes("pi_project_open"));
   assert.ok(toolNames.includes("pi_plans_resolve"));
@@ -188,7 +188,7 @@ test("local MCP control server authenticates, discovers, and invokes desktop ope
   );
   assert.equal(opened.body.result.structuredContent.workspace.path, "/tmp/project");
   assert.deepEqual(calls.at(-1), {
-    channel: "pi-desktop/project/set",
+    channel: "duaer-ai-desk/project/set",
     args: ["/tmp/project"],
   });
 
@@ -200,7 +200,7 @@ test("local MCP control server authenticates, discovers, and invokes desktop ope
       id: 4,
       method: "tools/call",
       params: {
-        name: "pi_desktop_invoke",
+        name: "duaer_ai_desk_invoke",
         arguments: { operation: "app/getVersion", args: [] },
       },
     },
@@ -216,14 +216,14 @@ test("local MCP control server authenticates, discovers, and invokes desktop ope
       id: 5,
       method: "tools/call",
       params: {
-        name: "pi_desktop_invoke",
+        name: "duaer_ai_desk_invoke",
         arguments: { operation: "session/delete", args: ["session-1"] },
       },
     },
     { "Mcp-Session-Id": sessionId },
   );
   assert.equal(refusedDelete.body.result.isError, true);
-  assert.equal(calls.some((call) => call.channel === "pi-desktop/session/delete"), false);
+  assert.equal(calls.some((call) => call.channel === "duaer-ai-desk/session/delete"), false);
 
   await post(
     info.url,
@@ -233,7 +233,7 @@ test("local MCP control server authenticates, discovers, and invokes desktop ope
       id: 6,
       method: "tools/call",
       params: {
-        name: "pi_desktop_invoke",
+        name: "duaer_ai_desk_invoke",
         arguments: {
           operation: "session/delete",
           args: ["session-1"],
@@ -243,7 +243,7 @@ test("local MCP control server authenticates, discovers, and invokes desktop ope
     },
     { "Mcp-Session-Id": sessionId },
   );
-  assert.equal(calls.at(-1).channel, "pi-desktop/session/delete");
+  assert.equal(calls.at(-1).channel, "duaer-ai-desk/session/delete");
 
   const refusedPlan = await post(
     info.url,
@@ -266,7 +266,7 @@ test("local MCP control server authenticates, discovers, and invokes desktop ope
     { "Mcp-Session-Id": sessionId },
   );
   assert.equal(refusedPlan.body.result.isError, true);
-  assert.equal(calls.some((call) => call.channel === "pi-desktop/plans/resolve"), false);
+  assert.equal(calls.some((call) => call.channel === "duaer-ai-desk/plans/resolve"), false);
 
   await post(
     info.url,
@@ -290,7 +290,7 @@ test("local MCP control server authenticates, discovers, and invokes desktop ope
     { "Mcp-Session-Id": sessionId },
   );
   assert.deepEqual(calls.at(-1), {
-    channel: "pi-desktop/plans/resolve",
+    channel: "duaer-ai-desk/plans/resolve",
     args: [{
       proposalId: "proposal-1",
       sessionId: "session-1",
@@ -319,7 +319,7 @@ test("local MCP control server authenticates, discovers, and invokes desktop ope
     { "Mcp-Session-Id": sessionId },
   );
   assert.equal(refusedConfigure.body.result.isError, true);
-  assert.equal(calls.some((call) => call.channel === "pi-desktop/session/configure"), false);
+  assert.equal(calls.some((call) => call.channel === "duaer-ai-desk/session/configure"), false);
 
   await post(
     info.url,
@@ -341,7 +341,7 @@ test("local MCP control server authenticates, discovers, and invokes desktop ope
     { "Mcp-Session-Id": sessionId },
   );
   assert.deepEqual(calls.at(-1), {
-    channel: "pi-desktop/session/configure",
+    channel: "duaer-ai-desk/session/configure",
     args: ["session-1", { mode: "agent", permissionMode: "auto" }],
   });
 
@@ -434,7 +434,7 @@ test("local MCP control server authenticates, discovers, and invokes desktop ope
     headers: {
       "Content-Type": "application/json",
       "Mcp-Session-Id": sessionId,
-      "X-Pi-Desktop-Token": info.token,
+      "X-DuaerAiDesk-Token": info.token,
     },
     body: JSON.stringify({ jsonrpc: "2.0", id: 15, method: "ping" }),
   });
@@ -452,7 +452,7 @@ test("the MCP control connection file is marked inactive on shutdown", async () 
   const server = new McpControlServer({
     dataDir,
     port: 0,
-    channels: { appGetVersion: "pi-desktop/app/getVersion" },
+    channels: { appGetVersion: "duaer-ai-desk/app/getVersion" },
     invoke: async () => ({}),
   });
   const info = await server.start();
@@ -468,7 +468,7 @@ test("the MCP control server refuses a non-loopback bind address", async () => {
     dataDir,
     host: "0.0.0.0",
     port: 0,
-    channels: { appGetVersion: "pi-desktop/app/getVersion" },
+    channels: { appGetVersion: "duaer-ai-desk/app/getVersion" },
     invoke: async () => ({}),
   });
   await assert.rejects(() => server.start(), /loopback/);
@@ -508,7 +508,7 @@ test("control-plane helpers clamp protocol versions, strip secrets, and bound re
 test("renderer refresh events fire only for mutating control operations", () => {
   const sessionOp = (id) => ({
     id,
-    channel: `pi-desktop/${id}`,
+    channel: `duaer-ai-desk/${id}`,
     description: id,
     risk: "write",
     argumentShape: [],
@@ -558,15 +558,15 @@ test("renderer refresh events fire only for mutating control operations", () => 
 
 test("the reviewed catalog never includes picker or secret-write channels", () => {
   const operations = createMcpControlOperations({
-    appGetVersion: "pi-desktop/app/getVersion",
-    pluginLoadDev: "pi-desktop/plugin/loadDev",
-    pluginCreateFromTemplate: "pi-desktop/plugin/createFromTemplate",
-    secretsSet: "pi-desktop/secrets/set",
-    providersCreate: "pi-desktop/providers/create",
-    settingsSet: "pi-desktop/settings/set",
-    mcpUpsert: "pi-desktop/mcp/upsert",
-    sessionConfigure: "pi-desktop/session/configure",
-    projectSet: "pi-desktop/project/set",
+    appGetVersion: "duaer-ai-desk/app/getVersion",
+    pluginLoadDev: "duaer-ai-desk/plugin/loadDev",
+    pluginCreateFromTemplate: "duaer-ai-desk/plugin/createFromTemplate",
+    secretsSet: "duaer-ai-desk/secrets/set",
+    providersCreate: "duaer-ai-desk/providers/create",
+    settingsSet: "duaer-ai-desk/settings/set",
+    mcpUpsert: "duaer-ai-desk/mcp/upsert",
+    sessionConfigure: "duaer-ai-desk/session/configure",
+    projectSet: "duaer-ai-desk/project/set",
   });
   const ids = operations.map((operation) => operation.id).sort();
   assert.deepEqual(ids, ["app/getVersion", "project/set", "session/configure"].sort());
@@ -645,7 +645,7 @@ test("plugin-only session collaboration operations stay off the external MCP sur
   for (const id of collaborationIds) {
     assert.equal(toolNames.includes(id), false);
   }
-  const invokeTool = listed.body.result.tools.find((tool) => tool.name === "pi_desktop_invoke");
+  const invokeTool = listed.body.result.tools.find((tool) => tool.name === "duaer_ai_desk_invoke");
   const exposedIds = invokeTool.inputSchema.properties.operation.enum;
   for (const id of collaborationIds) {
     assert.equal(exposedIds.includes(id), false);
@@ -671,7 +671,7 @@ test("plugin-only session collaboration operations stay off the external MCP sur
       jsonrpc: "2.0",
       id: 4,
       method: "tools/call",
-      params: { name: "pi_desktop_invoke", arguments: { operation: "session/collaboration/list", args: [] } },
+      params: { name: "duaer_ai_desk_invoke", arguments: { operation: "session/collaboration/list", args: [] } },
     },
     { "Mcp-Session-Id": sessionId },
   );
@@ -690,14 +690,14 @@ test("plugin-only session collaboration operations stay off the external MCP sur
       jsonrpc: "2.0",
       id: 5,
       method: "tools/call",
-      params: { name: "pi_desktop_invoke", arguments: { operation: "app/getVersion", args: [] } },
+      params: { name: "duaer_ai_desk_invoke", arguments: { operation: "app/getVersion", args: [] } },
     },
     { "Mcp-Session-Id": sessionId },
   );
   assert.equal(known.body.result.isError, undefined);
   assert.deepEqual(known.body.result.structuredContent, {
     operation: "app/getVersion",
-    result: { ok: true, channel: "pi-desktop/app/getVersion" },
+    result: { ok: true, channel: "duaer-ai-desk/app/getVersion" },
   });
-  assert.deepEqual(calls.at(-1), { channel: "pi-desktop/app/getVersion", args: [] });
+  assert.deepEqual(calls.at(-1), { channel: "duaer-ai-desk/app/getVersion", args: [] });
 });

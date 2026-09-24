@@ -62,7 +62,7 @@ test("main serves BrowserPreview from its originating session workspace", () => 
     handler,
     /sendToRenderer\(IPC\.event\.browserPreview, \{\s*sessionId,\s*path: raw,\s*\}\)/,
   );
-  assert.match(protocolSource, /browserPreview: "pi-desktop\/browser\/event\/preview"/);
+  assert.match(protocolSource, /browserPreview: "duaer-ai-desk\/browser\/event\/preview"/);
 });
 
 test("renderer routes browser preview events to the originating session", () => {

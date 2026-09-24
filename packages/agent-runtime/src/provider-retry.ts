@@ -8,8 +8,8 @@ import {
   type FetchFunction,
   type Model,
   type SimpleStreamOptions,
-} from "@earendil-works/pi-ai";
-import { PROVIDER_RETRY_MAX_RETRIES } from "@pi-desktop/shared";
+} from "@duaer-ai-desk/upstream-ai";
+import { PROVIDER_RETRY_MAX_RETRIES } from "@duaer-ai-desk/shared";
 import {
   classifyAgentError,
   type ClassifiedAgentError,
@@ -559,13 +559,13 @@ export const STREAM_IDLE_TIMEOUT_DEFAULT_MS = 180_000;
 export const STREAM_IDLE_TIMEOUT_FLOOR_MS = PROVIDER_RATE_LIMIT_MAX_DELAY_MS;
 
 /**
- * `PI_DESKTOP_STREAM_IDLE_TIMEOUT_MS` overrides the zero-event idle budget;
+ * `DUAER_AI_DESK_STREAM_IDLE_TIMEOUT_MS` overrides the zero-event idle budget;
  * `0` disables the watchdog, and any other override is clamped up to
  * `STREAM_IDLE_TIMEOUT_FLOOR_MS` (see above). A value that is not a number, or
  * is negative, keeps the default.
  */
 export function streamIdleTimeoutMs(): number {
-  const raw = process.env.PI_DESKTOP_STREAM_IDLE_TIMEOUT_MS;
+  const raw = process.env.DUAER_AI_DESK_STREAM_IDLE_TIMEOUT_MS;
   if (raw === undefined || raw.trim() === "") {
     return STREAM_IDLE_TIMEOUT_DEFAULT_MS;
   }

@@ -1,4 +1,4 @@
-import type { BrowserState } from "@pi-desktop/shared";
+import type { BrowserState } from "@duaer-ai-desk/shared";
 import type { BrowserPane } from "./browser-view";
 import { BrowserCdp } from "./browser-cdp";
 import { writeFileSync, mkdirSync } from "node:fs";

@@ -11,8 +11,8 @@
 import * as typebox from "typebox";
 import * as typeboxCompile from "typebox/compile";
 import * as typeboxValue from "typebox/value";
-import * as piAgentCore from "@earendil-works/pi-agent-core";
-import * as piAi from "@earendil-works/pi-ai";
+import * as piAgentCore from "@duaer-ai-desk/upstream-agent-core";
+import * as piAi from "@duaer-ai-desk/upstream-ai";
 
 export type ExtensionFactory = (api: unknown) => unknown;
 

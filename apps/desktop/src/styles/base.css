@@ -33,6 +33,14 @@ body,
   */
   -webkit-user-select: none;
   user-select: none;
+  /*
+    macOS hiddenInset keeps a native drag band across the toolbar. Any CSS
+    drag region switches Electron into custom-drag mode, and display:contents
+    on the chat shell then drops the no-drag holes, so clicks never arrive.
+    The document stays non-draggable; only an explicit .drag control opts in.
+  */
+  -webkit-app-region: no-drag;
+  app-region: no-drag;
 }
 
 button,

@@ -6,7 +6,7 @@ import {
   type PermissionMode,
   type ShortcutPlatform,
   type SessionThinkingLevel,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import type { AppState } from "../../../stores/app-store";
 import { ComposerPermissionPicker } from "./ComposerPermissionPicker";
 import { ContextUsageInspector } from "../../../components/ContextUsageInspector";
@@ -97,7 +97,7 @@ export function ComposerToolbar({
   abort,
   submit,
 }: ComposerToolbarProps) {
-  const platform = (window.piDesktop?.platform ?? "darwin") as ShortcutPlatform;
+  const platform = (window.duaerAiDesk?.platform ?? "darwin") as ShortcutPlatform;
   const steeringShortcut = keybindingDisplayParts("Alt+Enter", platform).join("+");
   return (
     <div className="composer-toolbar">

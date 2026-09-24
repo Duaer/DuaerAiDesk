@@ -1,4 +1,4 @@
-import type { ComposerCommand } from "@pi-desktop/shared";
+import type { ComposerCommand } from "@duaer-ai-desk/shared";
 
 import type { ComposerCommandResolution } from "../../../hooks/use-composer-autocomplete";
 

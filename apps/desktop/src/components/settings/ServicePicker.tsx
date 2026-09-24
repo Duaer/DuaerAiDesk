@@ -7,7 +7,7 @@
  */
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { NAMED_ENDPOINT_PRESETS } from "@pi-desktop/shared";
+import { NAMED_ENDPOINT_PRESETS } from "@duaer-ai-desk/shared";
 import { cx, Input } from "../ui";
 import { IconCheck, IconChevronDown, IconSearch } from "../icons";
 import { AnchoredMenu } from "./AnchoredMenu";

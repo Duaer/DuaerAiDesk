@@ -22,7 +22,7 @@ Create from template            (the folder opens as the project)
 ```
 
 第一步有三个入口点，都调用相同的
-`@pi-desktop/plugin-devkit` 实施：
+`@duaer-ai-desk/plugin-devkit` 实施：
 
 - **插件页面** — 溢出菜单的“来自模板的新插件”，或
   按钮处于空状态。选择一个模板，请求一个文件夹，写入
@@ -52,7 +52,7 @@ Create from template            (the folder opens as the project)
 
 ## 4. SDK 和 devkit
 
-`@pi-desktop/plugin-sdk` 由插件代码本身导入并保留
+`@duaer-ai-desk/plugin-sdk` 由插件代码本身导入并保留
 无依赖且无节点。它提供：
 - 清单类型
 - 权限枚举
@@ -65,7 +65,7 @@ SDK 的剪贴板接口包含 `pi.clipboard.getHistory()`，通过现有的 `clip
 不会在后台轮询。插件应使用此 API 实现剪贴板历史功能，而不是轮询 `readText()` 并维护
 第二份存储。
 
-`@pi-desktop/plugin-devkit` 是工具，而不是运行时，并且可以使用 Node。它拥有
+`@duaer-ai-desk/plugin-devkit` 是工具，而不是运行时，并且可以使用 Node。它拥有
 `scaffold` / `check` / `pack` 和 `pi-plugin` CLI。三位开发商
 表面（CLI、代理工具、插件页面）调用它，因此一旦成立就会强制执行规则
 无处不在。
@@ -79,7 +79,7 @@ CLI 目前作为私有工作区包提供。从结账处
 ```bash
 # repository setup
 pnpm install
-pnpm --filter @pi-desktop/plugin-devkit... build
+pnpm --filter @duaer-ai-desk/plugin-devkit... build
 
 # create from a template
 pnpm pi-plugin init full-demo /tmp/my-plugin

@@ -13,7 +13,7 @@ import {
   type CcSwitchProviderRow,
   type ModelConfigImportDraft,
   type ModelConfigImportEnv,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 
 export type ModelConfigScanOptions = {
   homeDir?: string;

@@ -72,7 +72,7 @@ only (no native modules), so the main bundle stays self-contained:
 
 Results are deduplicated, filtered (hidden `.`-prefixed families excluded),
 sorted, and cached for 60 seconds per process. The renderer reaches them
-through one new allowlisted IPC channel, `pi-desktop/app/systemFonts`.
+through one new allowlisted IPC channel, `duaer-ai-desk/app/systemFonts`.
 
 ### 4. Application
 

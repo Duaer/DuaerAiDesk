@@ -19,13 +19,13 @@
  */
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import type { AppSettings } from "@pi-desktop/shared";
+import type { AppSettings } from "@duaer-ai-desk/shared";
 import {
   PROMPT_ENHANCEMENT_DEFAULT_USER_TEMPLATE,
   PROMPT_ENHANCEMENT_DRAFT_VARIABLE,
   PROMPT_ENHANCEMENT_TEMPLATE_MAX_LENGTH,
   isValidPromptEnhancementUserTemplate,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import { Button, Field, TooltipButton, cx, portalOverlay } from "../../components/ui";
 import { IconPencil, IconX } from "../../components/icons";
 import { SettingsCard, SettingsRow } from "./primitives";

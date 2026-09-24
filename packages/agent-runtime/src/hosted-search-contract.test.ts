@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import type { AssistantMessage } from "@earendil-works/pi-ai";
+import type { AssistantMessage } from "@duaer-ai-desk/upstream-ai";
 
 /**
  * Contract tests for the pi-ai hosted web search patch.
@@ -22,7 +22,7 @@ async function processEvents(events: AnyRecord[]): Promise<{
   };
   stream: AnyRecord[];
 }> {
-  const { processResponsesStream } = await import("@earendil-works/pi-ai/api/openai-responses-shared");
+  const { processResponsesStream } = await import("@duaer-ai-desk/upstream-ai/api/openai-responses-shared");
   const output = {
     role: "assistant",
     content: [],
@@ -83,7 +83,7 @@ describe("pi-ai hosted web search: responses stream extraction", () => {
           type: "web_search_call",
           id: "ws_1",
           status: "in_progress",
-          action: { type: "search", query: "pi-desktop release notes" },
+          action: { type: "search", query: "duaer-ai-desk release notes" },
         },
       },
       {
@@ -114,7 +114,7 @@ describe("pi-ai hosted web search: responses stream extraction", () => {
           type: "web_search_call",
           id: "ws_1",
           status: "completed",
-          action: { type: "search", query: "pi-desktop release notes" },
+          action: { type: "search", query: "duaer-ai-desk release notes" },
         },
       },
       {
@@ -142,7 +142,7 @@ describe("pi-ai hosted web search: responses stream extraction", () => {
     expect(search?.status).toBe("completed");
     expect((((search ?? {}) as AnyRecord).wire as AnyRecord)?.action).toMatchObject({
       type: "search",
-      query: "pi-desktop release notes",
+      query: "duaer-ai-desk release notes",
     });
 
     const citations = (output as unknown as AnyRecord).hostedSearchCitations as
@@ -204,7 +204,7 @@ describe("pi-ai hosted web search: responses stream extraction", () => {
 
 describe("pi-ai hosted web search: responses message replay", () => {
   it("replays a hostedSearch block as a web_search_call output item", async () => {
-    const { convertResponsesMessages } = await import("@earendil-works/pi-ai/api/openai-responses-shared");
+    const { convertResponsesMessages } = await import("@duaer-ai-desk/upstream-ai/api/openai-responses-shared");
     const model = {
       id: "gpt-test",
       api: "openai-responses",
@@ -229,7 +229,7 @@ describe("pi-ai hosted web search: responses message replay", () => {
                 type: "web_search_call",
                 id: "ws_1",
                 status: "completed",
-                action: { type: "search", query: "pi-desktop release notes" },
+                action: { type: "search", query: "duaer-ai-desk release notes" },
               },
             },
             { type: "text", text: "Found it." },
@@ -255,12 +255,12 @@ describe("pi-ai hosted web search: responses message replay", () => {
     expect(searchItem?.id).toBe("ws_1");
     expect(searchItem?.status).toBe("completed");
     expect((searchItem?.action as AnyRecord)?.query).toBe(
-      "pi-desktop release notes",
+      "duaer-ai-desk release notes",
     );
   });
 
   it("replays an Anthropic search error with its error block type", async () => {
-    const { streamSimple } = await import("@earendil-works/pi-ai/api/anthropic-messages");
+    const { streamSimple } = await import("@duaer-ai-desk/upstream-ai/api/anthropic-messages");
     let request: AnyRecord | undefined;
     const context = {
       messages: [
@@ -417,7 +417,7 @@ describe("pi-agent-core hosted web search forwarding", () => {
     // Locks the agent-loop patch (patches/@earendil-works__pi-agent-core@0.87.1.patch):
     // without it the loop's switch drops the event and search rounds render only
     // after the whole turn finishes.
-    const { agentLoop } = await import("@earendil-works/pi-agent-core");
+    const { agentLoop } = await import("@duaer-ai-desk/upstream-agent-core");
 
     const partial = {
       role: "assistant",
@@ -491,7 +491,7 @@ describe("pi-agent-core hosted web search forwarding", () => {
 
 describe("pi-ai hosted web search: request params", () => {
   async function captureParams(model: AnyRecord, options: AnyRecord = {}): Promise<AnyRecord> {
-    const { streamSimple } = await import("@earendil-works/pi-ai/api/openai-responses");
+    const { streamSimple } = await import("@duaer-ai-desk/upstream-ai/api/openai-responses");
     let payload: AnyRecord | undefined;
     const sse =
       "event: response.completed\n" +

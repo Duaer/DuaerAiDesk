@@ -1,4 +1,4 @@
-import type { Entry } from "@earendil-works/pi-agent-core";
+import type { Entry } from "@duaer-ai-desk/upstream-agent-core";
 
 import { isRecord } from "./agent-messages.js";
 
@@ -8,7 +8,7 @@ import { isRecord } from "./agent-messages.js";
  *
  * `extractFileOpsFromMessage` in `@earendil-works/pi-coding-agent` switches on
  * the lowercase names `read` / `write` / `edit`, because those are the names
- * pi's own tools carry. PI-Desktop registers `Read` / `Write` / `Edit`, so that
+ * pi's own tools carry. DuaerAiDesk registers `Read` / `Write` / `Edit`, so that
  * collector matched nothing: a checkpoint's `readFiles` / `modifiedFiles` and
  * the `<read-files>` section of a summary were always empty (issue #827 turned
  * this up while reading a compaction report).

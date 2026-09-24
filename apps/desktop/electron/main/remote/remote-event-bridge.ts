@@ -9,7 +9,7 @@
  * kinds. It never touches the router, the connection, or persistence — the
  * connection layer (Stage 3) drives subscription and unsubscription.
  */
-import { IPC } from "@pi-desktop/shared";
+import { IPC } from "@duaer-ai-desk/shared";
 import type {
   AgentEvent,
   AgentEventEnvelope,
@@ -19,7 +19,7 @@ import type {
   RacpEventEnvelope,
   RacpInputRequest,
   ToolPermissionRequest,
-} from "@pi-desktop/shared";
+} from "@duaer-ai-desk/shared";
 import { makeRemoteApprovalRequestId, makeRemoteSessionId } from "./backend-router.js";
 
 /** A minimal shape of the session field carried by host-scope session events.
