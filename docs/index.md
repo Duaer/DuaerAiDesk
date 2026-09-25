@@ -1,16 +1,16 @@
 ---
 layout: home
 title: DuaerAiDesk
-titleTemplate: A modular desktop workspace for AI agents
+titleTemplate: One desk for a project change
 hero:
   name: DuaerAiDesk
-  text: A desktop workspace for AI agents.
-  tagline: Bring projects, agents, models, plugins, and workflows into one persistent desktop environment.
+  text: The background you type is the job.
+  tagline: Duaer picks a lane once. A signature comes before any employee edits the tree.
   actions:
     - theme: brand
-      text: Download
+      text: Releases
       link: https://github.com/Duaer/DuaerAiDesk/releases/latest
     - theme: alt
-      text: Documentation
+      text: Lanes
       link: /guide/
 ---
