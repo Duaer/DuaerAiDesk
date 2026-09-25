@@ -1,14 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { loadArchitectureHtml } from "../../lib/delivery-architecture";
-import { clearVisualDesignMark } from "../../lib/delivery-visual";
+import { clearVisualDesignMark, offerVisualDecision } from "../../lib/delivery-visual";
 import { assignDeliveryWorkers, deliveryDispatchPrompt, isPublishTask, withPublishTask } from "../../lib/delivery-dispatch.ts";
 import { loadDeployCredentialFlags } from "../../lib/deploy-credentials";
 import { deployHostChoices } from "../../lib/deploy-hosts";
 import { toolWorkPanelTab } from "../../lib/work-panel-tabs";
 import {
-  advanceDispatchWave,
-  beginDispatchSplit,
   clearDispatchSplitMark,
   recordDispatchProgress,
   redecomposeDispatch,
@@ -23,6 +21,7 @@ import {
 } from "../../lib/delivery-dispatch-plan.mjs";
 import {
   baselineIsValid,
+  dispatchExecutionLocked,
   markDeliveryBuilding,
   normalizeDeliveryDeployTarget,
   noteDeliveryPreviewUrl,
@@ -30,6 +29,7 @@ import {
   openDeliveryChange,
   setDeliveryDeployTarget,
   setDeliveryDispatchGraph,
+  peekDelivery,
   setDeliveryDispatchPlan,
   signDeliveryBaseline,
   type DeliveryDeployTarget,
@@ -162,7 +162,7 @@ export function DispatchTab() {
     };
   }, []);
   const building = shown?.stage === "building";
-  const isRunning = useAppStore((state) => state.isRunning);
+  const executionLocked = dispatchExecutionLocked(shown);
   const tasks = useMemo(() => {
     const base = plan?.tasks ?? [];
     const source = building ? base : withPublishTask(base, target);
@@ -198,15 +198,11 @@ export function DispatchTab() {
     void refreshDispatchGraphProgress(path);
   }, [building, graphKey, messages, path]);
 
+  const turnRunning = useAppStore((state) => state.isRunning);
   useEffect(() => {
-    if (!path || !building || isRunning) return;
-    void advanceDispatchWave(path);
-  }, [building, isRunning, messages, path]);
-
-  useEffect(() => {
-    if (!path || shown?.architecture.status !== "confirmed" || plan) return;
-    void beginDispatchSplit(path);
-  }, [path, plan, shown?.architecture.status]);
+    if (!path || shown?.architecture.status !== "confirmed" || plan || turnRunning) return;
+    offerVisualDecision(path);
+  }, [path, plan, shown, turnRunning]);
 
   useEffect(() => {
     if (!graphKey) {
@@ -223,7 +219,7 @@ export function DispatchTab() {
   }, [graphKey]);
 
   if (!path) return <p className="requirements-empty">{t("panel.requirements.empty")}</p>;
-  if (!shown || shown.architecture.status !== "confirmed") {
+  if (!shown || (shown.architecture.status !== "confirmed" && shown.intake?.kind !== "bug")) {
     return <p className="requirements-empty">{t("panel.dispatch.needArchitecture")}</p>;
   }
 
@@ -395,8 +391,9 @@ export function DispatchTab() {
               <button
                 type="button"
                 className="requirements-confirm"
-                disabled={!graphKey || tasks.length === 0}
+                disabled={!graphKey || tasks.length === 0 || executionLocked}
                 onClick={() => {
+                  if (dispatchExecutionLocked(peekDelivery(path))) return;
                   const outbound = assignDeliveryWorkers(
                     withPublishTask(plan.tasks, target),
                     count,

@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { fillDeliveryFromMessage } from "../../lib/delivery-chat.ts";
+import { applyDeliveryAcknowledgement, fillDeliveryFromMessage } from "../../lib/delivery-chat.ts";
 import { beginArchitectureDesign } from "../../lib/delivery-architecture";
+import { offerBugfixDecision } from "../../lib/delivery-dispatch-chat.ts";
 import { deliveryCardIssues } from "../../lib/delivery-card-check.ts";
 import {
   confirmDeliveryModule,
@@ -75,6 +76,16 @@ function ReqBlocks({ blocks }: { blocks: ReqBlock[] }) {
       })}
     </>
   );
+}
+
+function compactWhen(iso: string): string {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return "";
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+  const hour = String(date.getHours()).padStart(2, "0");
+  const minute = String(date.getMinutes()).padStart(2, "0");
+  return `${month}/${day} ${hour}:${minute}`;
 }
 
 function RequirementField({
@@ -191,26 +202,31 @@ export function RequirementsTab() {
   ));
   const shown = useDeliveryDesk(path);
   const [backgroundDraft, setBackgroundDraft] = useState<string | null>(null);
-  const fillCursorRef = useRef<{ path: string | null; sig: string | null }>({
+  const fillCursorRef = useRef<{ path: string | null; sig: string | null; ack: boolean }>({
     path: null,
     sig: null,
+    ack: false,
   });
   useEffect(() => {
     if (path) ensureDelivery(path);
   }, [path]);
   useEffect(() => {
     if (!path) return;
-    // Desk state is already persisted. Only the live tail is applied, and it is
-    // applied again as that row grows — replaying the whole transcript resets
-    // activeModuleId and snaps the module tab back after the user switches.
-    // One paint is enough: token-by-token commits make the card hitch.
+    // Desk state is already persisted. The live tail is applied as that row grows.
+    // Replaying JSON would reset activeModuleId, so history is only scanned for
+    // "明白了" restatements. One paint is enough: token-by-token commits hitch.
     const frame = requestAnimationFrame(() => {
       const last = messages[messages.length - 1];
       const text = last?.content || "";
       const sig = last ? `${last.id}\0${text.length}\0${text.slice(-32)}` : "";
-      if (fillCursorRef.current.path !== path) {
-        fillCursorRef.current = { path, sig };
-        return;
+      if (fillCursorRef.current.path !== path || !fillCursorRef.current.ack) {
+        const samePath = fillCursorRef.current.path === path;
+        fillCursorRef.current = { path, sig, ack: true };
+        for (const message of messages) {
+          if (message.role !== "assistant") continue;
+          applyDeliveryAcknowledgement(path, message.content || "");
+        }
+        if (!samePath) return;
       }
       if (!last || sig === fillCursorRef.current.sig) return;
       fillCursorRef.current.sig = sig;
@@ -221,12 +237,20 @@ export function RequirementsTab() {
   const module = shown?.modules.find((item) => item.id === shown.activeModuleId) ?? shown?.modules[0];
   useEffect(() => {
     if (!path || !module || module.id !== GLOBAL_MODULE_ID || module.status === "confirmed" || turnRunning) return;
+    if (peekDelivery(path)?.intake?.kind === "bug") return;
     const next = fillEmptyBaseline(module.card, "global");
     if (next === module.card) return;
     for (const field of DELIVERY_REVIEW_FIELDS) {
       if (next[field] === module.card[field]) continue;
       updateDeliveryCard(path, module.id, field, next[field]);
     }
+  }, [module, path, turnRunning]);
+  useEffect(() => {
+    if (!path || turnRunning) return;
+    if (peekDelivery(path)?.intake?.kind === "bug" && peekDelivery(path)?.activeModuleId !== GLOBAL_MODULE_ID) {
+      selectDeliveryModule(path, GLOBAL_MODULE_ID);
+    }
+    offerBugfixDecision(path);
   }, [module, path, turnRunning]);
   const { review, fingerprint } = useDeliveryReview(path, module);
 
@@ -237,11 +261,15 @@ export function RequirementsTab() {
 
   const locked = module.status === "confirmed";
   const globalModule = module.id === GLOBAL_MODULE_ID;
-  const ordered = [...shown.modules].sort((left, right) => (
-    Number(left.id !== GLOBAL_MODULE_ID) - Number(right.id !== GLOBAL_MODULE_ID)
-  ));
+  const bugLane = shown.intake?.kind === "bug";
+  const ordered = [...shown.modules]
+    .filter((item) => !bugLane || item.id === GLOBAL_MODULE_ID)
+    .sort((left, right) => (
+      Number(left.id !== GLOBAL_MODULE_ID) - Number(right.id !== GLOBAL_MODULE_ID)
+    ));
   const allConfirmed = shown.modules.every((item) => item.status === "confirmed");
-  const issues = locked ? [] : deliveryCardIssues(module.card, globalModule ? "global" : "module");
+  const checkScope = shown.intake?.kind === "bug" ? "bug" : globalModule ? "global" : "module";
+  const issues = locked ? [] : deliveryCardIssues(module.card, checkScope);
   const invalid = new Set(issues.map((issue) => issue.field));
   const done = shown.modules.filter((item) => item.status === "confirmed").length;
   const reviewForCard = review.fingerprint === fingerprint;
@@ -261,13 +289,18 @@ export function RequirementsTab() {
               : t("panel.requirements.lockHintNeedValidate");
 
   const featureModules = ordered.filter((item) => item.id !== GLOBAL_MODULE_ID);
+  const backgroundText = (backgroundDraft ?? shown.background).trim();
+  const echoed = shown.iterations.length === 1
+    && shown.iterations[0]?.summary.trim() === backgroundText;
+  const timeline = echoed ? [] : shown.iterations;
+  const echoAt = echoed ? shown.iterations[0]?.at : "";
   return (
     <div className="requirements-panel">
       <section className="requirements-background" aria-label={t("panel.requirements.background")}>
-        <label className="requirements-field">
+        <label className="requirements-field requirements-field-inline">
           <span>{t("panel.requirements.background")}</span>
           <textarea
-            rows={3}
+            rows={1}
             value={backgroundDraft ?? shown.background}
             placeholder={t("panel.requirements.backgroundPh")}
             onChange={(event) => setBackgroundDraft(event.target.value)}
@@ -278,12 +311,13 @@ export function RequirementsTab() {
               setBackgroundDraft(null);
             }}
           />
+          {echoAt ? <time dateTime={echoAt}>{compactWhen(echoAt)}</time> : null}
         </label>
-        {shown.iterations.length ? (
+        {timeline.length ? (
           <ol className="requirements-timeline">
-            {shown.iterations.map((item, index) => (
+            {timeline.map((item, index) => (
               <li key={`${item.at}-${index}`}>
-                {item.at ? <time dateTime={item.at}>{new Date(item.at).toLocaleString()}</time> : null}
+                {item.at ? <time dateTime={item.at}>{compactWhen(item.at)}</time> : null}
                 <span>{item.summary}</span>
               </li>
             ))}
@@ -298,7 +332,7 @@ export function RequirementsTab() {
             : (item.title.trim() || t("panel.requirements.moduleLabel", { n: featureIndex + 1 }));
           const status = item.status === "confirmed"
             ? t("panel.requirements.confirmed")
-            : moduleCanConfirm(item)
+            : moduleCanConfirm(item, shown.intake?.kind)
               ? t("panel.requirements.moduleReady")
               : t("panel.requirements.moduleDraft");
           return (
@@ -314,11 +348,11 @@ export function RequirementsTab() {
             </button>
           );
         })}
+        <span className="requirements-progress">
+          {t("panel.requirements.progress", { done, total: shown.modules.length })}
+        </span>
       </div>
-      <p className="requirements-hint">
-        {t("panel.requirements.progress", { done, total: shown.modules.length })}
-      </p>
-      <label className="requirements-field">
+      <label className="requirements-field requirements-field-inline">
         <span>{t("panel.requirements.moduleName")}</span>
         <input
           readOnly={locked}
@@ -343,7 +377,7 @@ export function RequirementsTab() {
           {shown.revision.assumptions ? <p className="requirements-hint">{t("panel.requirements.reviseWhy")}: {shown.revision.assumptions}</p> : null}
         </section>
       ) : null}
-      {globalModule ? OVERALL_FIELDS.map((item) => (
+      {globalModule && !bugLane ? OVERALL_FIELDS.map((item) => (
         <RequirementField
           key={item.field}
           label={t(`panel.requirements.${item.label}`)}
@@ -358,7 +392,13 @@ export function RequirementsTab() {
       {CORE_FIELDS.map((item) => (
         <RequirementField
           key={item.field}
-          label={t(`panel.requirements.${item.label}`)}
+          label={t(`panel.requirements.${bugLane && item.field === "goal"
+            ? "bugGoal"
+            : bugLane && item.field === "acceptance"
+              ? "bugAccept"
+              : bugLane && item.field === "assumptions"
+                ? "bugAssume"
+                : item.label}`)}
           hint={item.hint ? t(`panel.requirements.${item.hint}`) : undefined}
           placeholder={t(`panel.requirements.${item.placeholder ?? "placeholder"}`)}
           value={module.card[item.field]}
@@ -367,10 +407,12 @@ export function RequirementsTab() {
           onChange={(value) => updateDeliveryCard(path, module.id, item.field, value)}
         />
       ))}
+      {bugLane ? null : (
       <p className="requirements-hint">
         {globalModule ? t("panel.requirements.baseline") : t("panel.requirements.moduleBaseline")}
       </p>
-      {BASELINE_FIELDS.map((item) => (
+      )}
+      {bugLane ? null : BASELINE_FIELDS.map((item) => (
         <RequirementField
           key={item.field}
           label={t(`panel.requirements.${item.label}`)}
@@ -405,7 +447,7 @@ export function RequirementsTab() {
         <button
           type="button"
           className="requirements-confirm"
-          disabled={!moduleCanConfirm(module) || !reviewed}
+          disabled={!moduleCanConfirm(module, shown.intake?.kind) || !reviewed}
           onClick={() => {
             confirmDeliveryModule(path, module.id);
             const desk = peekDelivery(path);

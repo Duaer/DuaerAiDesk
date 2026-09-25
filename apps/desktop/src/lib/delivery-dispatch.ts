@@ -1,3 +1,4 @@
+import { DELIVERY_DISPATCH_MARKER } from "./delivery-chat.ts";
 import type { DeliveryEmployeeModels } from "./delivery-employees.ts";
 import { employeeModelDirective } from "./delivery-employees.ts";
 import {
@@ -254,6 +255,7 @@ export function deliveryDispatchPrompt(
     .join("\n\n");
   const ids = tasks.map((task) => task.id).join("、");
   return [
+    DELIVERY_DISPATCH_MARKER,
     "用 DuaerAiDesk 的 Task 子代理执行这一波已经放行的任务。不要重新拆分，不要派下面列表以外的任务。父对话不要自己改仓库。",
     "implement 任务的 Task 把 agent 填 coder（Duaer 编码师），只按这一条验收写代码。verify-l3 的 agent 填 test-runner。deploy 不要交给 coder。",
     `只做这些：${ids}。每个调用一次 Task，description 以任务 id 开头，并带上标题和这一条验收。`,
@@ -262,6 +264,9 @@ export function deliveryDispatchPrompt(
     employeeModelDirective(models ?? { implementer: "", regression: "", deployer: "" }),
     hostDirective(normalizeDeliveryDeployTarget(desk.deployTarget)),
     `数字员工 ${workerCount} 人。同一 workerId 串行；这一波里不同 workerId 的任务一起开工。`,
+    desk.intake?.kind === "both"
+      ? "修缺陷的任务 id 必须挡住新需求任务。不要为修缺陷另做架构。"
+      : "",
     "",
     ...lines,
     "",

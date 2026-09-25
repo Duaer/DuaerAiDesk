@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import test from "node:test";
 import {
   annotateParallelTasks,
@@ -161,4 +162,12 @@ test("task edges share one gutter and zoom shifts toward the pointer delta", () 
   const same = routeTaskEdge(from, { x: 48, y: 192, width: 200, height: 64 }, 308);
   assert.match(same.d, /^M 148 160 L 148 192$/);
   assert.deepEqual(zoomLogicalPoint(100, 80, 40, -20, 2), { x: 80, y: 90 });
+});
+
+test("queued dispatch waves advance outside the dispatch tab", async () => {
+  const read = (path) => readFile(new URL(path, import.meta.url), "utf8");
+  const shell = await read("../src/features/app/AppShell.tsx");
+  const tab = await read("../src/components/workpanel/DispatchTab.tsx");
+  assert.match(shell, /useDispatchWave\(/);
+  assert.doesNotMatch(tab, /advanceDispatchWave/);
 });

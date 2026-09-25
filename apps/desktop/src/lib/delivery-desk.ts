@@ -1,4 +1,10 @@
-import { deliveryCardIssues } from "./delivery-card-check.ts";
+import type { DeliveryIntakeKind } from "@duaer-ai-desk/shared";
+import { deliveryCardIssues, SHARED_BASELINE_FIELDS } from "./delivery-card-check.ts";
+
+export type DeliveryIntake = {
+  kind: DeliveryIntakeKind;
+  reason: string;
+};
 
 export type DeliveryStage =
   | "drafting"
@@ -130,6 +136,8 @@ export type DeliveryDesk = {
   deployTarget: DeliveryDeployTarget;
   previewUrl: string;
   revision: DeliveryRevision | null;
+  /** Set once from the first new ask. Null until the judge classifies it. */
+  intake: DeliveryIntake | null;
 };
 
 const STORAGE_KEY = "duaer.desk.delivery.v1";
@@ -336,6 +344,7 @@ export function emptyDeliveryDesk(): DeliveryDesk {
     deployTarget: "github-pages",
     previewUrl: "",
     revision: null,
+    intake: null,
   };
 }
 
@@ -475,6 +484,7 @@ function normalizeDesk(value: unknown): DeliveryDesk {
       ? asText(raw.previewUrl).trim().slice(0, 300)
       : "",
     revision: normalizeRevision(raw.revision),
+    intake: normalizeIntake(raw.intake),
   };
   return { ...next, stage: kept ?? deriveStage(next) };
 }
@@ -509,9 +519,35 @@ export function deriveStage(desk: DeliveryDesk): DeliveryStage {
   return started ? "confirming" : "drafting";
 }
 
-export function moduleCanConfirm(module: DeliveryModule): boolean {
-  const scope = module.id === GLOBAL_MODULE_ID ? "global" : "module";
+const INTAKE_KINDS = new Set<DeliveryIntakeKind>(["bug", "requirement", "both", "unclear"]);
+
+function normalizeIntake(value: unknown): DeliveryIntake | null {
+  if (!value || typeof value !== "object") return null;
+  const raw = value as Partial<DeliveryIntake>;
+  if (!INTAKE_KINDS.has(raw.kind as DeliveryIntakeKind)) return null;
+  return {
+    kind: raw.kind as DeliveryIntakeKind,
+    reason: asText(raw.reason).trim().slice(0, 200),
+  };
+}
+
+export function moduleCanConfirm(
+  module: DeliveryModule,
+  kind?: DeliveryIntakeKind | null,
+): boolean {
+  const scope = kind === "bug"
+    ? "bug"
+    : module.id === GLOBAL_MODULE_ID
+      ? "global"
+      : "module";
   return module.status === "draft" && deliveryCardIssues(module.card, scope).length === 0;
+}
+
+export function setDeliveryIntake(projectPath: string, intake: DeliveryIntake): void {
+  const key = normalizeProjectPath(projectPath);
+  const desk = key ? peekDelivery(key) : null;
+  if (!key || !desk) return;
+  persist(key, { ...desk, intake });
 }
 
 export function updateDeliveryModuleTitle(projectPath: string, moduleId: string, title: string): void {
@@ -612,6 +648,14 @@ export function replaceDeliveryCard(
     ...desk,
     modules: desk.modules.map((module) => {
       if (module.id !== moduleId || module.status === "confirmed") return module;
+      const keepBlankBaseline = (field: DeliveryCardField, incoming: string) => {
+        if (
+          module.id !== GLOBAL_MODULE_ID
+          && (SHARED_BASELINE_FIELDS as readonly string[]).includes(field)
+          && !module.card[field].trim()
+        ) return "";
+        return incoming.trim();
+      };
       return {
         ...module,
         card: {
@@ -622,14 +666,14 @@ export function replaceDeliveryCard(
           assumptions: next.assumptions.trim(),
           style: next.style.trim(),
           layout: next.layout.trim(),
-          deviceMatrix: next.deviceMatrix.trim(),
-          criticalPaths: next.criticalPaths.trim(),
-          exceptionCases: next.exceptionCases.trim(),
-          apiContract: next.apiContract.trim(),
-          envChecklist: next.envChecklist.trim(),
-          dataPrecheck: next.dataPrecheck.trim(),
-          externalDeps: next.externalDeps.trim(),
-          perfBudget: next.perfBudget.trim(),
+          deviceMatrix: keepBlankBaseline("deviceMatrix", next.deviceMatrix),
+          criticalPaths: keepBlankBaseline("criticalPaths", next.criticalPaths),
+          exceptionCases: keepBlankBaseline("exceptionCases", next.exceptionCases),
+          apiContract: keepBlankBaseline("apiContract", next.apiContract),
+          envChecklist: keepBlankBaseline("envChecklist", next.envChecklist),
+          dataPrecheck: keepBlankBaseline("dataPrecheck", next.dataPrecheck),
+          externalDeps: keepBlankBaseline("externalDeps", next.externalDeps),
+          perfBudget: keepBlankBaseline("perfBudget", next.perfBudget),
         },
       };
     }),
@@ -671,12 +715,27 @@ export function writeGlobalVisual(projectPath: string, style: string, layout: st
   });
 }
 
+/** Drop style and layout so the designer can write them again. */
+export function clearGlobalVisual(projectPath: string): void {
+  const key = normalizeProjectPath(projectPath);
+  const desk = key ? peekDelivery(key) : null;
+  if (!key || !desk) return;
+  persist(key, {
+    ...desk,
+    modules: desk.modules.map((module) => {
+      if (module.id !== GLOBAL_MODULE_ID) return module;
+      if (!module.card.style && !module.card.layout) return module;
+      return { ...module, card: { ...module.card, style: "", layout: "" } };
+    }),
+  });
+}
+
 export function confirmDeliveryModule(projectPath: string, moduleId: string): void {
   const key = normalizeProjectPath(projectPath);
   const desk = key ? peekDelivery(key) : null;
   if (!key || !desk) return;
   const modules = desk.modules.map((module) => {
-    if (module.id !== moduleId || !moduleCanConfirm(module)) return module;
+    if (module.id !== moduleId || !moduleCanConfirm(module, desk.intake?.kind)) return module;
     return { ...module, status: "confirmed" as const };
   });
   const next = modules.find((module) => module.status !== "confirmed");
@@ -1085,6 +1144,13 @@ export function openDeliveryChange(projectPath: string, reason: string): boolean
     },
   });
   return true;
+}
+
+/** True after「开始执行任务」until a change clears the run. */
+export function dispatchExecutionLocked(desk: DeliveryDesk | null | undefined): boolean {
+  if (!desk) return false;
+  if (desk.stage === "building" || desk.stage === "delivered") return true;
+  return (desk.dispatchPlan?.releasedIds?.length ?? 0) > 0;
 }
 
 export function markDeliveryBuilding(projectPath: string): void {

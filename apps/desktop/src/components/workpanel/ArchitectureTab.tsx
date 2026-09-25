@@ -5,6 +5,7 @@ import {
   offerArchitectureDecision,
   renderArchitectureFromDesk,
 } from "../../lib/delivery-architecture";
+import { offerVisualDecision } from "../../lib/delivery-visual";
 import {
   ensureDelivery,
   updateArchitectureSummary,
@@ -64,6 +65,11 @@ export function ArchitectureTab() {
     if (!modulesConfirmed) return;
     offerArchitectureDecision(path);
   }, [isRunning, locked, modulesConfirmed, path, shown]);
+
+  useEffect(() => {
+    if (!path || !shown || !locked || isRunning) return;
+    offerVisualDecision(path);
+  }, [isRunning, locked, path, shown]);
 
   if (!path) {
     return <p className="requirements-empty">{t("panel.requirements.empty")}</p>;

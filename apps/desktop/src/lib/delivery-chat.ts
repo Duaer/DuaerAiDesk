@@ -11,6 +11,7 @@ import {
   type DeliveryModule,
   type DeliveryRevision,
 } from "./delivery-desk.ts";
+import { isSharedBaselineOptOut } from "./delivery-card-check.ts";
 import { enrichChatOptions } from "./choice-options.ts";
 
 export const DELIVERY_DESK_MARKER = "<<<DESK>>>";
@@ -23,14 +24,20 @@ export const DELIVERY_CHOICES_MARKER = "<<<CHOICES>>>";
 export const DELIVERY_AUTO_HANDLE_ACTION = "duaer:auto-handle";
 export const DELIVERY_CONFIRM_ARCHITECTURE_ACTION = "duaer:confirm-architecture";
 export const DELIVERY_REVISE_ARCHITECTURE_ACTION = "duaer:revise-architecture";
+export const DELIVERY_START_DISPATCH_ACTION = "duaer:start-dispatch";
+export const DELIVERY_REVISE_VISUAL_ACTION = "duaer:revise-visual";
+export const DELIVERY_START_BUGFIX_ACTION = "duaer:start-bugfix";
 /** User turn that asks the model to rewrite a failed confirm card. */
 export const DELIVERY_AUTO_FIX_MARKER = "<<<AUTOFIX>>>";
+/** App-owned dispatch wave. Not a requirements or architecture card fill. */
+export const DELIVERY_DISPATCH_MARKER = "<<<DISPATCH>>>";
 
 /** Fields the in-flight auto-fix reply is allowed to rewrite. Null outside that turn. */
 let autoFixWriteFields: ReadonlySet<DeliveryCardField> | null = null;
 
 export function setDeliveryAutoFixFields(fields: readonly DeliveryCardField[] | null): void {
-  autoFixWriteFields = fields && fields.length ? new Set(fields) : null;
+  // null clears the lock. An empty list still locks, so a module auto-fix cannot invent global baselines.
+  autoFixWriteFields = fields ? new Set(fields) : null;
 }
 
 /** Drop confirm-card keys the auto-fix turn did not ask the model to change. */
@@ -186,8 +193,9 @@ export function visibleDeliveryText(content: string, role: "user" | "assistant" 
     let text = source;
     const desk = text.indexOf(DELIVERY_DESK_MARKER);
     if (desk >= 0) text = text.slice(0, desk);
-    text = text.replace(DELIVERY_AUTO_FIX_MARKER, "").trimEnd();
-    return text;
+    const dispatchWave = text.includes(DELIVERY_DISPATCH_MARKER);
+    text = text.replace(DELIVERY_AUTO_FIX_MARKER, "").replaceAll(DELIVERY_DISPATCH_MARKER, "");
+    return dispatchWave ? text.trim() : text.trimEnd();
   }
   if (source.includes(DELIVERY_GATE_NOTE_MARKER)) {
     let text = source.replace(DELIVERY_GATE_NOTE_MARKER, "").trim();
@@ -274,6 +282,18 @@ export function isDeliveryReviseArchitectureChoice(choice: string): boolean {
   return choice === DELIVERY_REVISE_ARCHITECTURE_ACTION;
 }
 
+export function isDeliveryStartDispatchChoice(choice: string): boolean {
+  return choice === DELIVERY_START_DISPATCH_ACTION;
+}
+
+export function isDeliveryReviseVisualChoice(choice: string): boolean {
+  return choice === DELIVERY_REVISE_VISUAL_ACTION;
+}
+
+export function isDeliveryStartBugfixChoice(choice: string): boolean {
+  return choice === DELIVERY_START_BUGFIX_ACTION;
+}
+
 export function parseDeliveryChat(content: string): DeliveryChatPayload | null {
   const split = splitDeliveryContent(content);
   if (!split) return null;
@@ -341,7 +361,7 @@ function revisionFrom(raw: unknown): DeliveryRevision | undefined {
   return revision;
 }
 
-const KICKOFF_RE = /请开始帮我梳理需求|Please start clarifying the requirements/;
+const KICKOFF_RE = /请开始帮我梳理需求|请先把现在的功能整理出来|Please start clarifying|Please organize the current functions|请先记下怎么复现|请先记下故障|还分不清是修缺陷|Please record how to reproduce|Please record the bug first|cannot tell yet whether/;
 
 const PROSE_LABELS: Array<{ field: DeliveryCardField; pattern: RegExp }> = [
   { field: "goal", pattern: /^(?:[•·*-]\s+)?(?:#{1,3}\s*)?(?:\*\*)?(?:要做什么|目标|goal)(?:\*\*)?\s*[:：]\s*(.*)$/i },
@@ -374,6 +394,7 @@ export function applyDeliveryUtterance(projectPath: string, text: string): void 
     !utterance
     || utterance.includes(DELIVERY_DESK_MARKER)
     || utterance.includes(DELIVERY_AUTO_FIX_MARKER)
+    || utterance.includes(DELIVERY_DISPATCH_MARKER)
   ) {
     return;
   }
@@ -432,6 +453,55 @@ export function applyDeliveryProse(projectPath: string, text: string): void {
   for (const [field, lines] of found) {
     const next = growText(current.module.card[field], lines.join("\n"));
     if (next === current.module.card[field]) continue;
+    updateDeliveryCard(projectPath, current.module.id, field, next);
+    current.module.card = { ...current.module.card, [field]: next };
+  }
+}
+
+const ACK_CUT = /那(?:下)?一个问题|再确认|接下来/;
+
+/** Sentences where the model restates what it just understood, before the next question. */
+export function deliveryAcknowledgements(text: string): string[] {
+  const visible = (text.split(DELIVERY_JSON_MARKER)[0] ?? "").trim();
+  const found: string[] = [];
+  for (const block of visible.split(/\n{2,}/)) {
+    const cut = (block.split(ACK_CUT)[0] ?? "").trim();
+    if (!/明白了|明白/.test(cut)) continue;
+    const cleaned = cut
+      .replace(/^(?:明白了|明白)[，,。.\s]*/u, "")
+      .replace(/[，,]?明白了?[。.]?\s*$/u, "")
+      .replace(/\s+/g, " ")
+      .trim();
+    if (cleaned.length >= 8) found.push(cleaned);
+  }
+  return found;
+}
+
+/**
+ * A reply that only restates "明白了，是做…" never matches the labeled prose
+ * fields, so the open card stays blank. Write that restatement onto the draft.
+ */
+export function applyDeliveryAcknowledgement(projectPath: string, text: string): void {
+  if (isDeliveryGateNote(text) || text.includes(DELIVERY_GATE_NOTE_MARKER)) return;
+  const parsed = parseDeliveryChat(text);
+  if (parsed && deliveryChatHasCard(parsed)) return;
+  const current = activeDraftModule(projectPath);
+  if (!current) return;
+  for (const ack of deliveryAcknowledgements(text)) {
+    const card = current.module.card;
+    const device = /手机|电脑|平板|浏览器|chrome|safari|firefox|edge/i.test(ack);
+    const purpose = /是做|要做|用来/.test(ack);
+    let field: DeliveryCardField | null = null;
+    if ((!card.goal.trim() || ack.startsWith(card.goal.trim())) && (!device || purpose || !card.goal.trim())) {
+      field = "goal";
+    } else if (device && (!card.deviceMatrix.trim() || ack.startsWith(card.deviceMatrix.trim()))) {
+      field = "deviceMatrix";
+    } else if (ack.length >= 12 && (!card.acceptance.trim() || ack.startsWith(card.acceptance.trim()))) {
+      field = "acceptance";
+    }
+    if (!field) continue;
+    const next = growText(card[field], ack).slice(0, 2000);
+    if (next === card[field]) continue;
     updateDeliveryCard(projectPath, current.module.id, field, next);
     current.module.card = { ...current.module.card, [field]: next };
   }
@@ -740,7 +810,9 @@ export function fillDeliveryFromMessage(projectPath: string, role: string, conte
   const desk = peekDelivery(projectPath);
   const module = desk?.modules.find((item) => item.id === desk.activeModuleId) ?? desk?.modules[0];
   if (!module || module.status === "confirmed") return;
-  applyDeliveryProse(projectPath, visibleDeliveryText(text, "assistant"));
+  const visible = visibleDeliveryText(text, "assistant");
+  applyDeliveryProse(projectPath, visible);
+  applyDeliveryAcknowledgement(projectPath, visible);
 }
 
 function applyOverallFields(
@@ -793,6 +865,11 @@ export function applyDeliveryChat(
     for (const field of CARD_FIELDS) {
       if ((field === "style" || field === "layout") && incoming.id !== GLOBAL_MODULE_ID) continue;
       const incomingText = incoming[field] || "";
+      if (
+        incoming.id !== GLOBAL_MODULE_ID
+        && !card[field].trim()
+        && isSharedBaselineOptOut(field, incomingText)
+      ) continue;
       card[field] = extendOnly
         ? growText(card[field], incomingText)
         : blankMerge(card[field], incomingText);
@@ -838,6 +915,11 @@ function patchActive(
   for (const field of CARD_FIELDS) {
     if ((field === "style" || field === "layout") && module.id !== GLOBAL_MODULE_ID) continue;
     if (!payload[field]) continue;
+    if (
+      module.id !== GLOBAL_MODULE_ID
+      && !card[field].trim()
+      && isSharedBaselineOptOut(field, payload[field])
+    ) continue;
     const next = extendOnly ? growText(card[field], payload[field]) : payload[field];
     if (next === card[field]) continue;
     card[field] = next;
@@ -851,8 +933,8 @@ const REQUIREMENTS_INSTRUCTION = `你是 DuaerAiDesk 的需求助手。把用户
 系统可能很大：边聊边发现模块清单 modules（id、title）。对话可以乱跳模块；把内容写进对应模块的确认卡，不要强迫用户按顺序说完。modules 是完整清单，可以新增和改名。小项目可以只有一个功能模块。不要让用户手动新建模块。已确认模块的确认卡保持锁定，JSON 里不要改这些模块的字段。
 模块清单必须保留 id 为 global 的全局要求。需求阶段不要填写 style 和 layout，留空；架构锁定后由 UI 设计师写入。全站共用的八项基线也只写在 global，并且要能核对。其它模块不要重复这些整体项，留空即可。某个模块自己的独特要求必须写在该模块上，而且要能核对，例如浏览器矩阵不能只写「桌面为主」。不要删除 global。
 用户不满意已定稿或成品（例如不够美观、美化一下、改样式）时：不要改确认卡，不要让用户从几种风格里选一个来代替验收。先判断范围：只涉及某一个模块就 scope 为 module 并填写 moduleId；说的是整体观感，或看不出是哪一块，就 scope 为 overall，moduleId 为空。写进 revise，不要写进 modules。revise.goal 是这一轮要改什么，outOfScope 是不要动什么（含已确认约束），acceptance 必须可核对（打开何处、看到什么），assumptions 是不满意的原因。禁止只写更好看。信息不够时只问 1 个缺口。
-用户没提到的基线先填合理默认。验收必须可核对，禁止用更好看代替验收。ready 不要催确认。
-输出：先写给用户看的纯文本，然后单独一行 <<<JSON>>>，再输出一个 JSON 对象（不要 markdown 围栏）：
+未写明的八项基线只填在 global，其它模块留空。验收必须可核对，禁止用更好看代替验收。ready 不要催确认。
+输出：先写给用户看的纯文本，然后单独一行 <<<JSON>>>，再输出一个 JSON 对象（不要 markdown 围栏）。正文里的「明白了」不能代替 JSON，刚确认的内容必须写进对应字段：
 {"modules":[{"id":"record","title":"记录","goal":"","outOfScope":"","acceptance":"","assumptions":"","deviceMatrix":"","criticalPaths":"","exceptionCases":"","apiContract":"","envChecklist":"","dataPrecheck":"","externalDeps":"","perfBudget":"","dependsOn":[]},{"id":"review","title":"回顾","goal":"","outOfScope":"","acceptance":"","assumptions":"","deviceMatrix":"","criticalPaths":"","exceptionCases":"","apiContract":"","envChecklist":"","dataPrecheck":"","externalDeps":"","perfBudget":"","dependsOn":["record"]}],"activeModuleId":"record","goal":"","outOfScope":"","acceptance":"","assumptions":"","deviceMatrix":"","criticalPaths":"","exceptionCases":"","apiContract":"","envChecklist":"","dataPrecheck":"","externalDeps":"","perfBudget":"","options":["可选A","可选B"],"revise":null}`;
 
 const EXISTING_REQUIREMENTS_INSTRUCTION = `你是 DuaerAiDesk 的需求助手。工作区里已经有产品代码。先只读仓库，把现在已经提供给用户的功能整理进确认卡。可以只读文件来核对现状。不要修改文件，不要写代码，不要派工。
@@ -860,22 +942,34 @@ const EXISTING_REQUIREMENTS_INSTRUCTION = `你是 DuaerAiDesk 的需求助手。
 每个现在能用的功能一个模块（id、title）。modules 必须盖住现状功能，不要只写用户这次想加的那一句。background 是这次迭代的上下文，不是现状的全部。现状模块还是草稿时，不要用新需求覆盖这些卡。现状模块全部确认之后，新需求写成新模块或 revise。已确认模块的确认卡保持锁定。
 模块清单必须保留 id 为 global 的全局要求。需求阶段不要填写 style 和 layout，留空；架构锁定后由 UI 设计师写入。全站共用的八项基线也只写在 global，并且要能核对。其它模块不要重复这些整体项，留空即可。某个模块自己的独特要求必须写在该模块上，而且要能核对，例如浏览器矩阵不能只写「桌面为主」。不要删除 global。
 用户不满意已定稿或成品（例如不够美观、美化一下、改样式）时：不要改确认卡，不要让用户从几种风格里选一个来代替验收。先判断范围：只涉及某一个模块就 scope 为 module 并填写 moduleId；说的是整体观感，或看不出是哪一块，就 scope 为 overall，moduleId 为空。写进 revise，不要写进 modules。revise.goal 是这一轮要改什么，outOfScope 是不要动什么（含已确认约束），acceptance 必须可核对（打开何处、看到什么），assumptions 是不满意的原因。禁止只写更好看。信息不够时只问 1 个缺口。
-基线按代码里的现状填。验收写现在打开哪里、能做什么，必须可核对。ready 不要催确认。
-输出：先写给用户看的纯文本，然后单独一行 <<<JSON>>>，再输出一个 JSON 对象（不要 markdown 围栏）：
+现状基线只写在 global。其它模块留空，除非这段功能自己有不同的设备、接口或性能要求。验收写现在打开哪里、能做什么，必须可核对。ready 不要催确认。
+输出：先写给用户看的纯文本，然后单独一行 <<<JSON>>>，再输出一个 JSON 对象（不要 markdown 围栏）。正文里的「明白了」不能代替 JSON，刚确认的内容必须写进对应字段。只读核对之后也要带上这张卡：
 {"modules":[{"id":"record","title":"记录","goal":"","outOfScope":"","acceptance":"","assumptions":"","deviceMatrix":"","criticalPaths":"","exceptionCases":"","apiContract":"","envChecklist":"","dataPrecheck":"","externalDeps":"","perfBudget":"","dependsOn":[]}],"activeModuleId":"record","goal":"","outOfScope":"","acceptance":"","assumptions":"","deviceMatrix":"","criticalPaths":"","exceptionCases":"","apiContract":"","envChecklist":"","dataPrecheck":"","externalDeps":"","perfBudget":"","options":["可选A","可选B"],"revise":null}`;
+
+const BUG_INSTRUCTION = `你是 DuaerAiDesk 的修缺陷助手。用户要修已经坏掉的行为，不是做新功能。不要调用工具，不要修改文件，不要写代码，不要派工，不要谈架构。
+每次只问 1 个卡点，按这个顺序问完：怎么复现、期望看到什么、实际看到什么。
+写进全局确认卡：goal 是坏掉的行为，acceptance 是期望结果（必须可核对），assumptions 是实际现象和复现步骤。不要编新功能。八项基线全部留空。style 和 layout 留空。
+输出：先写给用户看的纯文本，然后单独一行 <<<JSON>>>，再输出一个 JSON 对象（不要 markdown 围栏）。正文里的「明白了」不能代替 JSON：
+{"modules":[{"id":"global","title":"全局要求","goal":"","outOfScope":"","acceptance":"","assumptions":"","deviceMatrix":"","criticalPaths":"","exceptionCases":"","apiContract":"","envChecklist":"","dataPrecheck":"","externalDeps":"","perfBudget":"","dependsOn":[]}],"activeModuleId":"global","options":[]}`;
+
+const BOTH_PREFIX = `判断师：这句话里既有已坏掉的行为，也有新需求。先把故障记进全局确认卡（goal 是坏掉的行为，acceptance 是期望，assumptions 是实际现象和复现），再整理新需求。拆任务时，修缺陷的任务 id 挡住新需求任务。不要为了修这个缺陷去设计新架构。
+`;
+
+const UNCLEAR_INSTRUCTION = `你是 DuaerAiDesk。判断师还分不清这是修缺陷还是新需求。只问 1 个能区分的问题，不要猜，不要谈架构，不要派工，不要写确认卡 JSON。`;
 
 const ARCHITECTURE_INSTRUCTION = `你是 DuaerAiDesk 的架构助手。全部需求模块已确认。在左侧对话里一起定系统架构（Archify 架构图）。
 规则：每次只问 1 个最关键架构问题；options 给 2～5 个短选项（每个不超过 20 字），正文不要再列一遍选项。不要写业务代码，不要改仓库，不要派工。用户对已确认需求或成品的观感不满（美化、不好看）时，不要改架构图来代替，改写进 revise（scope 为 module 或 overall），已确认模块字段不动。
-当架构可画图时，JSON 必须带 Archify IR：diagram_type 固定为 "architecture"；components 每项含 id、type（frontend|backend|database|cloud|security|messagebus|external）、label、可选 sublabel；connections 用 from/to；meta.title 一句话标题。也可同时给 summary 与简版 components（name/responsibility）供确认卡。
+组件 4～12 个，一条主路径。type 只能是 frontend|backend|database|cloud|security|messagebus|external。label 短，sublabel 不超过 12 字，连线 label 不超过 8 字。用 boundaries 包住同一区域，用 cards 写旁注。不要写 pos/size，也不要只给 name/responsibility 简表。
+当架构可画图时，JSON 必须是完整 Archify IR。
 输出：先写给用户看的纯文本，然后单独一行 <<<JSON>>>，再输出 JSON（不要 markdown 围栏）：
-{"diagram_type":"architecture","meta":{"title":"一句话架构","quality_profile":"standard"},"components":[{"id":"web","type":"frontend","label":"Web","sublabel":"页面与交互"},{"id":"api","type":"backend","label":"API","sublabel":"业务接口"}],"connections":[{"id":"e1","from":"web","to":"api"}],"summary":"一句话架构","options":["选项A","选项B"]}`;
+{"diagram_type":"architecture","schema_version":1,"meta":{"title":"一句话架构","quality_profile":"standard"},"components":[{"id":"web","type":"frontend","label":"Web","sublabel":"页面"},{"id":"api","type":"backend","label":"API","sublabel":"业务"},{"id":"db","type":"database","label":"DB","sublabel":"数据"}],"boundaries":[{"kind":"region","label":"服务","wraps":["api","db"]}],"connections":[{"id":"e1","from":"web","to":"api","label":"请求","variant":"emphasis"},{"id":"e2","from":"api","to":"db","label":"读写"}],"cards":[{"dot":"cyan","title":"概览","items":["页面进 API","API 读写数据"]}],"summary":"一句话架构","options":["选项A","选项B"]}`;
 
 const EXISTING_ARCHITECTURE_INSTRUCTION = `你是 DuaerAiDesk 的架构助手。需求模块写的是现在已有的功能。在左侧对话里整理现在的系统架构（Archify 架构图），作为后面迭代的底图。
 规则：每次只问 1 个最关键架构问题；options 给 2～5 个短选项（每个不超过 20 字），正文不要再列一遍选项。可以只读仓库核对组件。不要写业务代码，不要改仓库，不要派工。用户对已确认需求或成品的观感不满（美化、不好看）时，不要改架构图来代替，改写进 revise（scope 为 module 或 overall），已确认模块字段不动。
-summary 用一句话说明现在的系统。components 是现在就有的组件和职责，不要画成尚未存在的目标方案。
-当架构可画图时，JSON 必须带 Archify IR：diagram_type 固定为 "architecture"；components 每项含 id、type（frontend|backend|database|cloud|security|messagebus|external）、label、可选 sublabel；connections 用 from/to；meta.title 一句话标题。也可同时给 summary 与简版 components（name/responsibility）供确认卡。
+组件 4～12 个，一条主路径，内容是现在就有的组件，不要画成尚未存在的目标方案。type 只能是 frontend|backend|database|cloud|security|messagebus|external。label 短，sublabel 不超过 12 字，连线 label 不超过 8 字。用 boundaries 包住同一区域，用 cards 写旁注。不要写 pos/size，也不要只给 name/responsibility 简表。
+当架构可画图时，JSON 必须是完整 Archify IR。
 输出：先写给用户看的纯文本，然后单独一行 <<<JSON>>>，再输出 JSON（不要 markdown 围栏）：
-{"diagram_type":"architecture","meta":{"title":"现在的系统","quality_profile":"standard"},"components":[{"id":"web","type":"frontend","label":"Web","sublabel":"页面与交互"}],"connections":[],"summary":"现在的系统","options":["选项A","选项B"]}`;
+{"diagram_type":"architecture","schema_version":1,"meta":{"title":"现在的系统","quality_profile":"standard"},"components":[{"id":"web","type":"frontend","label":"Web","sublabel":"页面"},{"id":"api","type":"backend","label":"API","sublabel":"业务"},{"id":"db","type":"database","label":"DB","sublabel":"数据"}],"boundaries":[{"kind":"region","label":"服务","wraps":["api","db"]}],"connections":[{"id":"e1","from":"web","to":"api","label":"请求","variant":"emphasis"},{"id":"e2","from":"api","to":"db","label":"读写"}],"cards":[{"dot":"cyan","title":"现状","items":["页面进 API","API 读写数据"]}],"summary":"现在的系统","options":["选项A","选项B"]}`;
 
 export function modelContentForDelivery(
   input: {
@@ -886,6 +980,9 @@ export function modelContentForDelivery(
   content: string,
 ): string {
   const text = content.trim();
+  if (text.includes(DELIVERY_DISPATCH_MARKER)) {
+    return content.replaceAll(DELIVERY_DISPATCH_MARKER, "").trim();
+  }
   if (!text || text.includes(DELIVERY_DESK_MARKER) || text.includes(DELIVERY_AUTO_FIX_MARKER) || !input.workPanelOpen) return content;
   const kind = input.activeWorkPanelTabKind;
   if (kind !== "requirements" && kind !== "architecture") return content;
@@ -894,9 +991,17 @@ export function modelContentForDelivery(
   const desk = peekDelivery(path) ?? ensureDelivery(path);
   if (!desk) return content;
   const existing = desk.existingProject === true;
+  const lane = desk.intake?.kind;
+  const requirements = existing ? EXISTING_REQUIREMENTS_INSTRUCTION : REQUIREMENTS_INSTRUCTION;
   const instruction = kind === "architecture"
     ? (existing ? EXISTING_ARCHITECTURE_INSTRUCTION : ARCHITECTURE_INSTRUCTION)
-    : (existing ? EXISTING_REQUIREMENTS_INSTRUCTION : REQUIREMENTS_INSTRUCTION);
+    : lane === "bug"
+      ? BUG_INSTRUCTION
+      : lane === "unclear"
+        ? UNCLEAR_INSTRUCTION
+        : lane === "both"
+          ? `${BOTH_PREFIX}${requirements}`
+          : requirements;
   const snapshot = JSON.stringify({
     activeModuleId: desk.activeModuleId,
     modules: desk.modules.map((module) => ({

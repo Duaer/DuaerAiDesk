@@ -1,5 +1,5 @@
 import i18n from "i18next";
-import { deliveryCardIssues } from "./delivery-card-check.ts";
+import { deliveryCardIssues, SHARED_BASELINE_FIELDS } from "./delivery-card-check.ts";
 import { appendDeliveryChatNote } from "./delivery-chat-note.ts";
 import {
   DELIVERY_AUTO_HANDLE_ACTION,
@@ -95,7 +95,10 @@ export async function runDeliveryAutoHandle(): Promise<boolean> {
   bumpDeliveryReviewEpoch();
   try {
     const scope = module.id === GLOBAL_MODULE_ID ? "global" : "module";
-    const localIssues = deliveryCardIssues(card, scope);
+    const sharedBaseline = new Set<DeliveryCardField>(SHARED_BASELINE_FIELDS);
+    const localIssues = deliveryCardIssues(card, scope).filter((issue) => (
+      scope === "global" || !sharedBaseline.has(issue.field) || Boolean(card[issue.field].trim())
+    ));
     const missingByField = new Map<DeliveryCardField, string[]>();
     for (const issue of localIssues) {
       const prior = missingByField.get(issue.field) ?? [];

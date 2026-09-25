@@ -17,12 +17,43 @@ export type DeliveryCardIssue = {
     | "env"
     | "data"
     | "deps"
-    | "perf";
+    | "perf"
+    | "reproShort";
   missing?: string[];
 };
 
 /** `full` keeps the historical every-field gate. `global` checks shared baselines. `module` checks a baseline only when that module wrote one. Style and layout are not a requirements gate. */
-export type DeliveryCheckScope = "full" | "global" | "module";
+export type DeliveryCheckScope = "full" | "global" | "module" | "bug";
+
+/** Required on the global card. A feature module leaves these empty unless it has its own rule. */
+export const SHARED_BASELINE_FIELDS = [
+  "deviceMatrix",
+  "criticalPaths",
+  "exceptionCases",
+  "apiContract",
+  "envChecklist",
+  "dataPrecheck",
+  "externalDeps",
+  "perfBudget",
+] as const satisfies readonly DeliveryCardField[];
+
+const SHARED_BASELINE_OPT_OUT: Partial<Record<DeliveryCardField, RegExp>> = {
+  deviceMatrix: /Chrome 最近两版/,
+  criticalPaths: /^打开(?:页面|首页)完成/,
+  exceptionCases: /空态[；;].*失败.*权限不足.*超时.*重试/,
+  apiContract: /^(?:本模块)?无\s*HTTP\s*API$|无对外接口|不涉及接口|^no\s*http\s*api$/i,
+  envChecklist: /无客户联调环境/,
+  dataPrecheck: /(?:本模块)?无导入/,
+  externalDeps: /(?:本模块)?无外部依赖/,
+  perfBudget: /(?:本模块)?无页面性能要求/,
+};
+
+/** Canned auto-fix text. It belongs on global, not on a feature module that left the field empty. */
+export function isSharedBaselineOptOut(field: DeliveryCardField, text: string): boolean {
+  const value = text.trim();
+  if (!value || !(SHARED_BASELINE_FIELDS as readonly string[]).includes(field)) return false;
+  return SHARED_BASELINE_OPT_OUT[field]?.test(value) === true;
+}
 
 const NAMED_TARGETS = [
   /chrome/i,
@@ -186,6 +217,17 @@ export function deliveryCardIssues(
   const issues: DeliveryCardIssue[] = [];
   const goal = card.goal.trim();
   const acceptance = card.acceptance.trim();
+  if (scope === "bug") {
+    if (goal.length < 8) issues.push({ field: "goal", code: "goalShort" });
+    if (acceptance.length < 12) issues.push({ field: "acceptance", code: "acceptanceShort" });
+    else if (acceptanceLooksVague(acceptance) && !acceptanceLooksCheckable(acceptance)) {
+      issues.push({ field: "acceptance", code: "acceptanceVague" });
+    }
+    if (card.assumptions.trim().length < 8) {
+      issues.push({ field: "assumptions", code: "reproShort" });
+    }
+    return issues;
+  }
   if (goal.length < 8) issues.push({ field: "goal", code: "goalShort" });
   if (acceptance.length < 12) issues.push({ field: "acceptance", code: "acceptanceShort" });
   else if (acceptanceLooksVague(acceptance) && !acceptanceLooksCheckable(acceptance)) {

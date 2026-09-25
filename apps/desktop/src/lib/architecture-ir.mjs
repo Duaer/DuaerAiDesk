@@ -191,20 +191,120 @@ export function extractArchitectureIr(text) {
   return null;
 }
 
+const TYPE_HINTS = [
+  [/front|web|ui|react|vue|page|客户端|前端/i, "frontend"],
+  [/api|gateway|service|server|后端|接口/i, "backend"],
+  [/db|sql|redis|mongo|数据|库/i, "database"],
+  [/auth|oauth|secure|安全|鉴权/i, "security"],
+  [/queue|mq|kafka|bus|消息/i, "messagebus"],
+  [/cdn|s3|oss|cloud|云/i, "cloud"],
+  [/external|third|支付|短信|外部/i, "external"],
+];
+
+const TYPE_RANK = {
+  external: 0,
+  frontend: 1,
+  security: 2,
+  backend: 3,
+  messagebus: 4,
+  database: 5,
+  cloud: 6,
+};
+
+const SERVICE_TYPES = new Set(["backend", "database", "cloud", "messagebus"]);
+
+function clipText(value, max) {
+  const text = String(value || "").trim();
+  return text.length <= max ? text : text.slice(0, max);
+}
+
+function guessComponentType(name, responsibility) {
+  const hay = `${name} ${responsibility}`;
+  for (const [re, type] of TYPE_HINTS) {
+    if (re.test(hay)) return type;
+  }
+  return "backend";
+}
+
+/** Fallback Archify IR when chat only returned named boxes. */
+export function architectureIrFromComponents(summary, components) {
+  const nodes = (Array.isArray(components) ? components : [])
+    .filter((component) => component && String(component.name || "").trim())
+    .slice(0, 12)
+    .map((component, index) => ({
+      id: String(component.id || `c${index + 1}`),
+      type: guessComponentType(component.name, component.responsibility),
+      label: clipText(component.name, 12),
+      sublabel: clipText(component.responsibility, 12),
+      order: index,
+    }))
+    .sort((left, right) => (TYPE_RANK[left.type] ?? 3) - (TYPE_RANK[right.type] ?? 3) || left.order - right.order)
+    .map((node) => {
+      const next = {
+        id: node.id,
+        type: node.type,
+        label: node.label,
+      };
+      if (node.sublabel) next.sublabel = node.sublabel;
+      return next;
+    });
+  if (!nodes.length) return null;
+  const connections = nodes.slice(0, -1).map((node, index) => {
+    const next = nodes[index + 1];
+    const label = clipText(next.sublabel || next.label, 8);
+    const edge = { id: `e${index + 1}`, from: node.id, to: next.id };
+    if (index === 0) edge.variant = "emphasis";
+    if (label) edge.label = label;
+    return edge;
+  });
+  const serviceIds = nodes.filter((node) => SERVICE_TYPES.has(node.type)).map((node) => node.id);
+  const boundaries = serviceIds.length >= 2
+    ? [{ kind: "region", label: "服务", wraps: serviceIds }]
+    : [];
+  const items = nodes.slice(0, 4).map((node) => node.label).filter(Boolean);
+  return {
+    schema_version: 1,
+    diagram_type: "architecture",
+    meta: {
+      title: clipText(summary, 40) || "Architecture",
+      quality_profile: "standard",
+    },
+    components: nodes,
+    connections,
+    boundaries,
+    cards: items.length ? [{ dot: "cyan", title: "概览", items }] : [],
+  };
+}
+
 /** Drop hand-placed geometry so Archify can route a diagram that failed layout checks. */
 export function relaxArchitectureIr(ir) {
   if (!ir || typeof ir !== "object" || !Array.isArray(ir.components)) return null;
   const clip = (value, max) => {
     const text = String(value || "").trim();
     if (text.length <= max) return text;
-    return `${text.slice(0, max - 1)}…`;
+    return text.slice(0, max);
   };
   const metaIn = ir.meta && typeof ir.meta === "object" ? ir.meta : {};
+  const boundaries = (Array.isArray(ir.boundaries) ? ir.boundaries : [])
+    .filter((boundary) => boundary && BOUNDARY_KINDS.has(boundary.kind) && Array.isArray(boundary.wraps))
+    .map((boundary) => ({
+      kind: boundary.kind,
+      label: clip(boundary.label, 8),
+      wraps: boundary.wraps,
+    }))
+    .filter((boundary) => boundary.label && boundary.wraps.length);
+  const cards = (Array.isArray(ir.cards) ? ir.cards : [])
+    .filter((card) => card && card.title)
+    .map((card) => ({
+      dot: CARD_DOTS.has(card.dot) ? card.dot : "cyan",
+      title: clip(card.title, 12),
+      items: (Array.isArray(card.items) ? card.items : []).slice(0, 4).map((item) => clip(item, 12)).filter(Boolean),
+    }));
   return {
     schema_version: 1,
     diagram_type: "architecture",
     meta: {
-      title: String(metaIn.title || ir.title || "Architecture"),
+      title: clip(metaIn.title || ir.title || "Architecture", 40),
       quality_profile: "standard",
     },
     components: ir.components.map((component) => {
@@ -215,14 +315,16 @@ export function relaxArchitectureIr(ir) {
       };
       const sublabel = clip(component.sublabel, 12);
       if (sublabel) row.sublabel = sublabel;
-      if (component.row != null) row.row = component.row;
-      if (component.col != null) row.col = component.col;
       return row;
     }),
     connections: (Array.isArray(ir.connections) ? ir.connections : []).map((edge) => {
       const row = { id: edge.id, from: edge.from, to: edge.to };
-      if (edge.variant) row.variant = edge.variant;
+      const label = clip(edge.label, 8);
+      if (label) row.label = label;
+      if (edge.variant && CONNECTION_VARIANTS.has(edge.variant)) row.variant = edge.variant;
       return row;
     }),
+    boundaries,
+    cards,
   };
 }

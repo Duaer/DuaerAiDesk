@@ -118,8 +118,10 @@ destination, chat as the home surface, tools and permissions inline.
   scope, acceptance, assumptions), module tabs, and a confirm lock that requires
   the same local checks as the Duaer-spec live desk: a concrete goal, a
   checkable acceptance, and the eight baseline fields (or an explicit
-  opt-out). The Requirements panel leads with the project background and an
-  iteration timeline. A kickoff background is the first point for a new project.
+  opt-out). The Requirements panel leads with a compact header: the project
+  background is one line, a timeline point that only repeats that background
+  shows as a time beside it, and later points stay one line each. The confirmed
+  count sits on the module-tab row. A kickoff background is the first point for a new project.
   An older project that only stored a background string shows that text as its
   first point. A later background edit, revision, or opened change appends a
   point. The first module is the global card. The shared baseline must pass
@@ -144,6 +146,13 @@ destination, chat as the home surface, tools and permissions inline.
   model is reviewed through that provider's judgments endpoint
   (`POST /v1/judgments`):
   the call decides whether the card can lock and does not rewrite the card.
+  A separate intake judgment runs once, when the user states a new ask and the
+  desk is not already in a follow-up. It returns bug, requirement, both, or
+  unclear. DuaerAiDesk then runs that lane. A bug records repro, expected, and
+  actual, then splits fix tasks with no architecture. Both records the bug
+  first; those task ids block the new requirement. Unclear asks one question,
+  then falls through to a requirement if it is still unclear. A failed intake
+  call stays on the requirement lane.
   Other models still use a one-shot chat completion. Task can call
   the same employee wherever a pass or fail judgment is needed. With no
   judgment model set, the review follows the conversation model and Task does
@@ -174,11 +183,12 @@ destination, chat as the home surface, tools and permissions inline.
   and DuaerAiDesk starts one architecture-design chat turn (live-desk style). The Architecture
   panel mirrors the live-desk layout: title, hint, summary, a dark diagram mount with
   component nodes at their authored size (the figure shrinks only when it is wider than the panel), then action buttons (confirm / regenerate / redesign). Chat `<<<JSON>>>`
-  fills `summary` + `components`. When the diagram can be locked, the chat
+  fills an Archify diagram: four to twelve components, one labeled main path, a region, and a side card. A reply that only names boxes is laid out the same way. When the diagram can be locked, the chat
   offers two choices: confirm the architecture, or keep revising. Confirm
   locks the board. When style and layout are still empty, one chat turn asks
-  the UI designer for them and writes them onto the global card. Implementation
-  dispatch and the task split start only after both are concrete. The
+  the UI designer for them and writes them onto the global card. The chat then
+  offers two choices: start the task split, or revise the visual. Implementation
+  dispatch starts when the user picks the split. The
   architecture panel shows the diagram and does not carry process buttons.
   Archify HTML diagrams, revise dual-diagram, and bug-desk skip-architecture
   remain follow-ups. Dispatch stays closed
@@ -210,10 +220,11 @@ destination, chat as the home surface, tools and permissions inline.
   only the code that meets that task's acceptance. Choosing more than one employee spreads independent tasks across
   those employees. The app releases one ready task per employee. The next wave
   is sent only after the chat is idle and every task in the current wave is
-  stored as done. Finished task ids are not dispatched again, and the model
+  stored as done, including when another work-panel tab is open. Finished task ids are not dispatched again, and the model
   does not choose the next wave. A wave that does not succeed is left for the
   user; it is not retried on its own. Starting execution stays
-  on the Dispatch tab so progress stays visible. Digital employees are configured
+  on the Dispatch tab so progress stays visible, and that start button stays
+  locked until a change reopens the desk. Digital employees are configured
   in Settings, on the page named for them; each one stores its own model there,
   and an empty model follows the current chat. Dispatch offers a host choice of none or GitHub Pages.
   Cloudflare, Alibaba Cloud, and AWS appear there only after both keys are saved under Settings → Deploy.

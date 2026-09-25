@@ -1,16 +1,26 @@
+import i18n from "i18next";
 import { globalVisualReady } from "./delivery-card-check.ts";
-import { isDeliveryGateNote } from "./delivery-chat.ts";
-import { beginDispatchSplit } from "./delivery-dispatch-chat.ts";
 import {
+  DELIVERY_REVISE_VISUAL_ACTION,
+  DELIVERY_START_DISPATCH_ACTION,
+  isDeliveryGateNote,
+  parseDeliveryGateChoices,
+} from "./delivery-chat.ts";
+import { appendDeliveryChatNote } from "./delivery-chat-note.ts";
+import { beginDispatchSplit, clearDispatchSplitMark } from "./delivery-dispatch-chat.ts";
+import {
+  clearGlobalVisual,
   GLOBAL_MODULE_ID,
   peekDelivery,
   writeGlobalVisual,
   type DeliveryDesk,
 } from "./delivery-desk.ts";
+import { deliveryProjectPath } from "./use-delivery-desk.ts";
 import { useAppStore } from "../stores/app-store";
 
 const JSON_MARKER = "<<<JSON>>>";
 const designSent = new Set<string>();
+const offeredVisual = new Set<string>();
 
 export function clearVisualDesignMark(projectPath: string): void {
   designSent.delete(projectPath.trim());
@@ -44,6 +54,29 @@ export function extractVisualDesign(reply: string): { style: string; layout: str
   return { style, layout };
 }
 
+/** Parent prose that means the designer turn is finished and the next step should appear. */
+export function visualHandoffClaim(reply: string): boolean {
+  return /已整理进全局卡|全局设计与版式|视觉契约|design_type"\s*:\s*"visual"/.test(String(reply || ""));
+}
+
+/** The designer summary often stays prose. Split it into style and layout. */
+export function extractVisualProse(reply: string): { style: string; layout: string } | null {
+  const raw = String(reply || "");
+  const marker = raw.lastIndexOf("视觉契约");
+  if (marker < 0) return null;
+  const after = raw.slice(marker).split(/我已把|<<<JSON>>>/)[0] ?? "";
+  const body = after.replace(/^视觉契约[:：]\s*/, "").replace(/[。.\s]+$/, "").trim();
+  if (body.length < 16) return null;
+  const layoutAt = body.search(/单栏|双栏|三栏|吸顶|导航|侧栏|页眉|全宽|栅格/);
+  if (layoutAt >= 8) {
+    const style = body.slice(0, layoutAt).replace(/[，,、\s]+$/, "").trim();
+    const layout = body.slice(layoutAt).replace(/^[，,、\s]+/, "").trim();
+    if (globalVisualReady(style, layout)) return { style, layout };
+  }
+  if (globalVisualReady(body, body)) return { style: body, layout: body };
+  return null;
+}
+
 function visualDesignPrompt(desk: DeliveryDesk): string {
   const architecture = {
     summary: desk.architecture.summary,
@@ -68,24 +101,80 @@ export async function beginVisualDesign(projectPath: string): Promise<void> {
   const desk = path ? peekDelivery(path) : null;
   if (!path || !desk || desk.architecture.status !== "confirmed") return;
   const global = desk.modules.find((module) => module.id === GLOBAL_MODULE_ID);
-  if (!global || globalVisualReady(global.card.style, global.card.layout)) {
-    await beginDispatchSplit(path);
-    return;
-  }
+  if (!global || globalVisualReady(global.card.style, global.card.layout)) return;
   if (designSent.has(path)) return;
   designSent.add(path);
   await useAppStore.getState().sendPrompt(visualDesignPrompt(desk));
 }
 
-/** Store a concrete visual design, then release the implementation split. */
+/** Store a concrete visual design. The next step is a chat choice, not an automatic split. */
 export function maybeApplyVisualDesignFromReply(projectPath: string, reply: string): boolean {
   const path = projectPath.trim();
   if (!path || isDeliveryGateNote(reply)) return false;
   const desk = peekDelivery(path);
   if (!desk || desk.architecture.status !== "confirmed") return false;
-  const design = extractVisualDesign(reply);
-  if (!design) return false;
-  writeGlobalVisual(path, design.style, design.layout);
-  void beginDispatchSplit(path);
-  return true;
+  const design = extractVisualDesign(reply) ?? extractVisualProse(reply);
+  if (design) writeGlobalVisual(path, design.style, design.layout);
+  if (!useAppStore.getState().isRunning && (design || visualHandoffClaim(reply))) {
+    offerVisualDecision(path, reply);
+  }
+  return Boolean(design);
+}
+
+function visualDecisionKey(path: string, style: string, layout: string): string {
+  return `${path}\0${style.trim()}\0${layout.trim()}`;
+}
+
+/** After style and layout are on the global card, offer split or another design pass. */
+export function offerVisualDecision(projectPath: string, reply = ""): void {
+  const path = projectPath.trim();
+  const state = useAppStore.getState();
+  if (!path || state.isRunning) return;
+  const desk = peekDelivery(path);
+  if (!desk || desk.architecture.status !== "confirmed") return;
+  if (desk.dispatchPlan?.tasks.length) return;
+  const global = desk.modules.find((module) => module.id === GLOBAL_MODULE_ID);
+  const ready = Boolean(global && globalVisualReady(global.card.style, global.card.layout));
+  const claimed = visualHandoffClaim(reply)
+    || state.messages.slice(-6).some((message) => visualHandoffClaim(message.content || ""));
+  if (!ready && !claimed) return;
+  const key = ready && global
+    ? visualDecisionKey(path, global.card.style, global.card.layout)
+    : `${path}\0handoff`;
+  if (offeredVisual.has(key)) return;
+  const last = state.messages.at(-1);
+  if (last && parseDeliveryGateChoices(last.content || "").includes(DELIVERY_START_DISPATCH_ACTION)) {
+    offeredVisual.add(key);
+    return;
+  }
+  offeredVisual.add(key);
+  appendDeliveryChatNote(i18n.t("panel.architecture.visualDecideNote"), {
+    choices: [DELIVERY_START_DISPATCH_ACTION, DELIVERY_REVISE_VISUAL_ACTION],
+  });
+}
+
+/** Start the task split from the chat chip. */
+export async function startDispatchFromChat(): Promise<void> {
+  const path = deliveryProjectPath(useAppStore.getState());
+  if (!path) return;
+  clearDispatchSplitMark(path);
+  await beginDispatchSplit(path);
+}
+
+/** Clear the visual contract and ask the designer again. */
+export async function reviseVisualFromChat(): Promise<void> {
+  const state = useAppStore.getState();
+  const path = deliveryProjectPath(state);
+  if (!path) return;
+  const desk = peekDelivery(path);
+  const global = desk?.modules.find((module) => module.id === GLOBAL_MODULE_ID);
+  if (global) offeredVisual.delete(visualDecisionKey(path, global.card.style, global.card.layout));
+  if (state.isRunning) {
+    appendDeliveryChatNote(i18n.t("panel.requirements.chatAutoFixBusy"));
+    return;
+  }
+  clearVisualDesignMark(path);
+  clearGlobalVisual(path);
+  clearDispatchSplitMark(path);
+  await beginVisualDesign(path);
 }

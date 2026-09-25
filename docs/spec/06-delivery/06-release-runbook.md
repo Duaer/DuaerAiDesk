@@ -88,8 +88,8 @@ when macOS `iconutil` is available, without overwriting the canonical source.
   independently of Chromium locales.
 - App icons `build/icon.icns` and `build/icon.ico` (derived from canonical
   `build/icon_1024.png` by `scripts/make-icon.py`).
-- macOS menu bar template `build/tray-icon-mac.png`, derived from the dark PI
-  mark with a transparent background; Windows/Linux use the product PNG tray
+- macOS menu bar template `build/tray-icon-mac.png`, derived from the DI
+  monogram with a transparent background; Windows/Linux use the product PNG tray
   resource.
 
 ## 4. Release steps

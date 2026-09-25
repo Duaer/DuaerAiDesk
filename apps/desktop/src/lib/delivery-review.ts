@@ -1,4 +1,9 @@
-import { deliveryCardIssues, type DeliveryCardIssue, type DeliveryCheckScope } from "./delivery-card-check.ts";
+import {
+  deliveryCardIssues,
+  SHARED_BASELINE_FIELDS,
+  type DeliveryCardIssue,
+  type DeliveryCheckScope,
+} from "./delivery-card-check.ts";
 import { DELIVERY_AUTO_FIX_MARKER } from "./delivery-chat.ts";
 import type { DeliveryCard, DeliveryCardField } from "./delivery-desk.ts";
 
@@ -42,27 +47,27 @@ const ACCEPT_PROMPT = `你是「Duaer」需求验收官。用户即将锁定某�
 2. acceptance 是否可客观检查：必须写清「打开/看到/点击/返回/命令通过/接口返回」等可核对结果；禁止仅「更好用 / 更好看 / nicer / looks better」这类空话
 3. outOfScope 是否划清边界（可简短）
 4. assumptions 是否合理、不偷换目标
-5. deviceMatrix / criticalPaths / exceptionCases 是否已填且具体（禁止空；deviceMatrix 至少两个具体浏览器或国产终端，并写截图/云测证据和降级或 Polyfill，禁止只写「主流浏览器」；exceptionCases 必须覆盖空态、失败、权限不足、超时、重试；有接口时还要错误码或 HTTP status）
-6. apiContract 是否已填：OpenAPI/类型等路径，或明确「本模块无 HTTP API」（禁止空）
-7. envChecklist 是否已填：DNS、TLS、CORS、鉴权、第三方可达全部通过，或明确「无客户联调环境」；存在未通过项则 passed=false
-8. dataPrecheck 是否已填：字段映射、导入预检失败清单、可导出，或明确「本模块无导入」
-9. externalDeps 是否已填：阻塞项、SLA、备用 Mock、并行路径，或明确「本模块无外部依赖」
-10. perfBudget 是否已填：LCP、INP、包体、长列表虚拟滚动、弱网、大数据压测，或明确「本模块无页面性能要求」；禁止只写「挺快的」
+5. deviceMatrix / criticalPaths / exceptionCases 空着就跳过（这是功能模块，八项基线只在全局要求里必填）。非空时才检查：deviceMatrix 至少两个具体浏览器或国产终端，并写截图/云测证据和降级或 Polyfill，禁止只写「主流浏览器」；exceptionCases 必须覆盖空态、失败、权限不足、超时、重试；有接口时还要错误码或 HTTP status
+6. apiContract 空着就跳过。非空时要有 OpenAPI/类型等路径，或明确「本模块无 HTTP API」
+7. envChecklist 空着就跳过。非空时 DNS、TLS、CORS、鉴权、第三方可达全部通过，或明确「无客户联调环境」；存在未通过项则 passed=false
+8. dataPrecheck 空着就跳过。非空时要有字段映射、导入预检失败清单、可导出，或明确「本模块无导入」
+9. externalDeps 空着就跳过。非空时要有阻塞项、SLA、备用 Mock、并行路径，或明确「本模块无外部依赖」
+10. perfBudget 空着就跳过。非空时要有 LCP、INP、包体、长列表虚拟滚动、弱网、大数据压测，或明确「本模块无页面性能要求」；禁止只写「挺快的」
 11. 按该验收标准做完后，用户是否有理由满意（成品可核对，而非过程叙事）
 
 规则：
-- 共用基线（deviceMatrix 到 perfBudget）以及 style、layout 如果是空的，不要因此判失败。非空时仍须可核对，禁止只写「桌面为主」或「更好看」
-- 若小改即可通过：修订确认卡字段（尤其把 acceptance 改成可检查句子，并补全基线与契约），passed=true
+- 共用基线（deviceMatrix 到 perfBudget）以及 style、layout 如果是空的，不要因此判失败，也不要补默认值。非空时仍须可核对，禁止只写「桌面为主」或「更好看」
+- 若小改即可通过：只修订已经有问题的 goal / acceptance 等字段，passed=true。不要把全局基线写进这张卡
 - 若缺关键信息：passed=false，issues 列出缺什么（中文，短句）
 - 不要写代码。不要假设仓库路径。不要催派工。
 - 只输出一个 JSON，不要 markdown 围栏：
 {"passed":false,"summary":"一句话结论","issues":["问题1"],"goal":"...","outOfScope":"...","acceptance":"...","assumptions":"...","deviceMatrix":"...","criticalPaths":"...","exceptionCases":"...","apiContract":"...","envChecklist":"...","dataPrecheck":"...","externalDeps":"...","perfBudget":"..."}`;
 
-const FIX_ACCEPT_PROMPT = `你是「Duaer」需求修正助手。自动验收未通过，请根据 issues 修订确认卡。优先把 acceptance 改成可客观检查的句子（打开何处、看到什么、哪条命令通过），并补全 deviceMatrix / criticalPaths / exceptionCases / apiContract / envChecklist / dataPrecheck / externalDeps / perfBudget；不要编造用户没提过的大功能。
+const FIX_ACCEPT_PROMPT = `你是「Duaer」需求修正助手。自动验收未通过，请根据 issues 修订确认卡。优先把 acceptance 改成可客观检查的句子（打开何处、看到什么、哪条命令通过）。八项基线只在全局要求里必填；功能模块上这些字段是空的就保持空白，不要补默认值。不要编造用户没提过的大功能。
 
 规则：
 1. 针对每条 issue 修改 goal / outOfScope / acceptance / assumptions / deviceMatrix / criticalPaths / exceptionCases / apiContract / envChecklist / dataPrecheck / externalDeps / perfBudget
-2. 保持用户原意；缺信息时写合理、可检查的默认（如 Chrome 最近两版、手机 Safari，云测截图放 compat/，旧壳降级提示升级；主路径对齐 goal；异常态须同时写上空态、失败、权限不足、超时、重试，有接口则补错误码；无接口则写「本模块无 HTTP API」；无客户联调则 envChecklist 写「无客户联调环境」，否则 DNS、TLS、CORS、鉴权、第三方可达全部写通过；无导入则 dataPrecheck 写「本模块无导入」，否则写字段映射、导入预检失败清单、可导出；无外部依赖则 externalDeps 写「本模块无外部依赖」，否则写阻塞项、SLA、备用 Mock、并行路径；无页面则 perfBudget 写「本模块无页面性能要求」，否则写 LCP、INP、包体、长列表虚拟滚动、弱网、大数据压测，禁止只写「挺快的」），并写进 assumptions
+2. 保持用户原意。这些默认只写给全局要求；功能模块上空着的基线不要填。全局缺信息时写合理、可检查的默认（如 Chrome 最近两版、手机 Safari，云测截图放 compat/，旧壳降级提示升级；主路径对齐 goal；异常态须同时写上空态、失败、权限不足、超时、重试，有接口则补错误码；无接口则写「本模块无 HTTP API」；无客户联调则 envChecklist 写「无客户联调环境」，否则 DNS、TLS、CORS、鉴权、第三方可达全部写通过；无导入则 dataPrecheck 写「本模块无导入」，否则写字段映射、导入预检失败清单、可导出；无外部依赖则 externalDeps 写「本模块无外部依赖」，否则写阻塞项、SLA、备用 Mock、并行路径；无页面则 perfBudget 写「本模块无页面性能要求」，否则写 LCP、INP、包体、长列表虚拟滚动、弱网、大数据压测，禁止只写「挺快的」），并写进 assumptions
 3. 不要写代码。不要假设仓库路径。
 4. 只输出一个 JSON，不要 markdown 围栏：
 {"summary":"一句话说明改了什么","goal":"...","outOfScope":"...","acceptance":"...","assumptions":"...","deviceMatrix":"...","criticalPaths":"...","exceptionCases":"...","apiContract":"...","envChecklist":"...","dataPrecheck":"...","externalDeps":"...","perfBudget":"..."}`;
@@ -97,11 +102,24 @@ export function clipDeliveryReviewCard(value: unknown): DeliveryCard {
   return card;
 }
 
+const SHARED_BASELINE = new Set<DeliveryCardField>(SHARED_BASELINE_FIELDS);
+
+/** A feature module does not inherit a global baseline it left blank. */
+function moduleLeavesBaselineEmpty(
+  scope: DeliveryCheckScope,
+  field: DeliveryCardField,
+  current: string,
+): boolean {
+  return scope === "module" && SHARED_BASELINE.has(field) && !current.trim();
+}
+
 /** Fill the same explicit defaults the live-desk fix prompt uses. A short goal is left for the model. */
 export function localDeliveryFix(card: DeliveryCard, scope: DeliveryCheckScope = "full"): DeliveryCard {
   const next: DeliveryCard = { ...card };
   const issues = deliveryCardIssues(card, scope);
-  const fields = new Set(issues.map((issue) => issue.field));
+  const fields = new Set(issues.map((issue) => issue.field).filter((field) => (
+    !moduleLeavesBaselineEmpty(scope, field, card[field] ?? "")
+  )));
   const codes = new Set(issues.map((issue) => issue.code));
   if (fields.has("acceptance")) {
     const basis = card.goal.trim() || card.acceptance.trim() || "该模块结果";
@@ -146,6 +164,7 @@ export function fillEmptyBaseline(card: DeliveryCard, scope: DeliveryCheckScope 
   let changed = false;
   for (const issue of issues) {
     const field = issue.field;
+    if (moduleLeavesBaselineEmpty(scope, field, next[field] ?? "")) continue;
     if ((next[field] ?? "").trim()) continue;
     if (field === "criticalPaths") {
       const goal = card.goal.trim();
@@ -246,10 +265,14 @@ export function deliveryAutoFixPrompt(input: {
   const notes = keys.length
     ? []
     : (input.notes ?? []).map((note) => note.trim()).filter(Boolean).slice(0, 8);
+  const moduleBaseline = input.moduleId === "global"
+    ? ""
+    : "deviceMatrix、criticalPaths、exceptionCases、apiContract、envChecklist、dataPrecheck、externalDeps、perfBudget 只在全局要求里必填。这个模块空着的不要补。";
   return [
     DELIVERY_AUTO_FIX_MARKER,
     `只改「${title}」的这些字段：${keys.join("、") || "（无）"}。保留已有内容，只补缺项。`,
     "先一句话说明改了什么，再单独一行 <<<JSON>>>，只输出这些字段。",
+    ...(moduleBaseline ? [moduleBaseline] : []),
     ...fieldLines,
     ...contextLines,
     ...notes,

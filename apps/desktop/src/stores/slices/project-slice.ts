@@ -10,6 +10,7 @@ import {
   setDeliveryExistingProject,
   workspaceLooksExisting,
 } from "../../lib/delivery-desk.ts";
+import { classifyProjectKickoff, kickoffKeyFor } from "../../lib/delivery-intake.ts";
 import { toolWorkPanelTab } from "../../lib/work-panel-tabs";
 import {
   rememberProject,
@@ -96,8 +97,22 @@ async function startProjectKickoff(
   }
   if (!get().activeSessionId || get().messages.length > 0) return;
   get().openWorkPanelTab(toolWorkPanelTab("requirements"));
+  const state = get();
+  const session = state.sessions.find((item) => item.id === state.activeSessionId);
+  const judgment = state.settings?.judgmentModel;
+  const intake = await classifyProjectKickoff(key, backgroundText, {
+    sessionId: state.activeSessionId,
+    providerId: judgment?.providerId
+      || session?.providerId
+      || state.draftConfiguration?.providerId
+      || state.settings?.defaultProviderId,
+    modelId: judgment?.modelId
+      || session?.modelId
+      || state.draftConfiguration?.modelId
+      || state.settings?.defaultModelId,
+  });
   const background = i18n.t("project.kickoffBackground", { description: backgroundText });
-  const kickoffKey = hasProduct ? "project.kickoffExisting" : "project.kickoff";
+  const kickoffKey = kickoffKeyFor(intake.kind, hasProduct);
   await get().sendPrompt(i18n.t(kickoffKey, { name, background }));
 }
 

@@ -36,7 +36,8 @@ import { useAppStore } from "../stores/app-store";
 
 const IDLE: DeliveryReviewState = { status: "idle", fingerprint: "", summary: "", issues: [] };
 
-function reviewScope(moduleId: string): DeliveryCheckScope {
+function reviewScope(path: string, moduleId: string): DeliveryCheckScope {
+  if (peekDelivery(path)?.intake?.kind === "bug") return "bug";
   return moduleId === GLOBAL_MODULE_ID ? "global" : "module";
 }
 
@@ -213,7 +214,7 @@ export function useDeliveryReview(path: string | null, module: DeliveryModule | 
     if (!path || !moduleId) return abandonChecking(seq, expectedFp);
     if (seq !== seqRef.current) return "skipped";
     const card = liveCard(path, moduleId);
-    if (!card || deliveryCardFingerprint(card) !== expectedFp || deliveryCardIssues(card, reviewScope(moduleId)).length > 0) {
+    if (!card || deliveryCardFingerprint(card) !== expectedFp || deliveryCardIssues(card, reviewScope(path, moduleId)).length > 0) {
       return abandonChecking(seq, expectedFp);
     }
     const startKey = settleKey(path, moduleId, expectedFp);
@@ -237,7 +238,7 @@ export function useDeliveryReview(path: string | null, module: DeliveryModule | 
         return abandonChecking(seq, expectedFp);
       }
       const rewritten = result.card;
-      const passed = result.passed && deliveryCardIssues(rewritten, reviewScope(moduleId)).length === 0;
+      const passed = result.passed && deliveryCardIssues(rewritten, reviewScope(path, moduleId)).length === 0;
       if (!passed) {
         const failed: DeliveryReviewState = {
           status: "failed",
@@ -315,7 +316,7 @@ export function useDeliveryReview(path: string | null, module: DeliveryModule | 
     }
     const card = liveCard(path, moduleId);
     if (!card) return;
-    const localIssues = deliveryCardIssues(card, reviewScope(moduleId));
+    const localIssues = deliveryCardIssues(card, reviewScope(path, moduleId));
     if (localIssues.length > 0) {
       seqRef.current += 1;
       pendingRef.current = false;

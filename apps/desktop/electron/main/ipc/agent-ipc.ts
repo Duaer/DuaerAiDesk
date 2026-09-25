@@ -14,7 +14,13 @@ import type { ComposerCommandService } from "./composer-ipc";
 import type { IpcRegistrar } from "./types";
 import { withPromptEnhancementTimeout } from "../prompt-enhancement-timeout";
 import { clipDeliveryReviewCard, deliveryReviewPrompt, parseDeliveryReview } from "../../../src/lib/delivery-review.ts";
-import { isJudgmentModelId, requestJudgmentReview } from "../../../src/lib/judgment-review.ts";
+import {
+  intakeFromText,
+  intakePrompt,
+  isJudgmentModelId,
+  requestIntakeJudgment,
+  requestJudgmentReview,
+} from "../../../src/lib/judgment-review.ts";
 import {
   readDeliveryArchitectureHtml,
   renderDeliveryArchitecture,
@@ -225,11 +231,25 @@ export function registerAgentIpc({
 
   handle(IPC.invoke.deliveryReview, async (req: DeliveryReviewRequest) => {
     if (!host) throw new Error("backend unavailable");
-    const mode = req?.mode === "fix" ? "fix" : req?.mode === "validate" ? "validate" : "";
+    const mode = req?.mode === "fix"
+      ? "fix"
+      : req?.mode === "validate"
+        ? "validate"
+        : req?.mode === "intake"
+          ? "intake"
+          : "";
     if (!mode) {
       throw Object.assign(new Error("mode must be validate or fix"), {
         errorCode: ErrorCodes.INVALID_ARGUMENT,
       });
+    }
+    if (mode === "intake") {
+      const ask = typeof req?.ask === "string" ? req.ask.trim() : "";
+      if (!ask) {
+        throw Object.assign(new Error("ask required"), {
+          errorCode: ErrorCodes.INVALID_ARGUMENT,
+        });
+      }
     }
     const card = clipDeliveryReviewCard(req?.card);
     const issues = Array.isArray(req?.issues)
@@ -261,7 +281,47 @@ export function registerAgentIpc({
     // jev models reject chat completions and require the judgments endpoint.
     const modelId = typeof launch.modelId === "string" ? launch.modelId : "";
     let reviewed;
-    if (mode === "validate" && isJudgmentModelId(modelId)) {
+    if (mode === "intake" && isJudgmentModelId(modelId)) {
+      const intake = await withPromptEnhancementTimeout((signal) =>
+        requestIntakeJudgment({
+          baseUrl: typeof runtimeProvider.baseUrl === "string" ? runtimeProvider.baseUrl : "",
+          apiKey: typeof runtimeProvider.apiKey === "string" ? runtimeProvider.apiKey : "",
+          modelId,
+          ask: typeof req.ask === "string" ? req.ask : "",
+          signal,
+        }),
+      );
+      reviewed = {
+        passed: false,
+        summary: intake?.reason || "",
+        issues: [],
+        card,
+        intakeKind: intake?.kind ?? "requirement",
+        intakeReason: intake?.reason ?? "",
+      };
+    } else if (mode === "intake") {
+      const prompt = intakePrompt(typeof req.ask === "string" ? req.ask : "");
+      const result = await withPromptEnhancementTimeout((signal) =>
+        completeOneShot(
+          runtimeProvider,
+          {
+            systemPrompt: prompt.systemPrompt,
+            messages: [{ role: "user", content: prompt.user, timestamp: Date.now() }],
+          },
+          "off",
+          { signal, sessionId: launchSessionId },
+        ),
+      );
+      const intake = intakeFromText(result.text) ?? { kind: "requirement" as const, reason: "" };
+      reviewed = {
+        passed: false,
+        summary: intake.reason,
+        issues: [],
+        card,
+        intakeKind: intake.kind,
+        intakeReason: intake.reason,
+      };
+    } else if (mode === "validate" && isJudgmentModelId(modelId)) {
       reviewed = await withPromptEnhancementTimeout((signal) =>
         requestJudgmentReview({
           baseUrl: typeof runtimeProvider.baseUrl === "string" ? runtimeProvider.baseUrl : "",

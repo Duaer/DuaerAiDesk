@@ -114,16 +114,23 @@ export type DeliveryReviewRequest = {
   sessionId?: string | null;
   providerId?: string;
   modelId?: string;
-  mode: "validate" | "fix";
+  mode: "validate" | "fix" | "intake";
   card: DeliveryReviewCard;
   issues?: string[];
+  /** User ask classified before a requirements interview. Intake mode only. */
+  ask?: string;
 };
+
+export type DeliveryIntakeKind = "bug" | "requirement" | "both" | "unclear";
 
 export type DeliveryReviewResponse = {
   passed: boolean;
   summary: string;
   issues: string[];
   card: DeliveryReviewCard;
+  /** Set when mode is intake. Absent on lock and fix reviews. */
+  intakeKind?: DeliveryIntakeKind;
+  intakeReason?: string;
 };
 
 /** Archify IR render — same pipeline as Duaer live desk / tt-a1i Archify. */

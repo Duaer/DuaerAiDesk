@@ -3,6 +3,7 @@ import test from "node:test";
 
 const { enrichChatOptions } = await import("../src/lib/choice-options.ts");
 const {
+  applyDeliveryAcknowledgement,
   applyDeliveryChat,
   applyDeliveryProse,
   setDeliveryAutoFixFields,
@@ -19,6 +20,7 @@ const {
   confirmDeliveryModule,
   ensureDelivery,
   peekDelivery,
+  replaceDeliveryCard,
   resetDeliveryDeskForTests,
   setDeliveryBackground,
   setDeliveryExistingProject,
@@ -204,6 +206,27 @@ test("spoken requirement lands on the card before model json", () => {
   resetDeliveryDeskForTests();
 });
 
+test("a 明白了 restatement lands on the open card without json", () => {
+  resetDeliveryDeskForTests();
+  const path = "/tmp/duaer-chat-ack";
+  ensureDelivery(path);
+  const open = () => peekDelivery(path).modules.find((module) => module.id === "global");
+  fillDeliveryFromMessage(
+    path,
+    "assistant",
+    "明白了，是做「个人主页展示」类的在线简历（不是投简历用的那种，而是像主页一样展示你的）。\n\n那下一个问题：主页上想放些什么内容？",
+  );
+  assert.match(open().card.goal, /个人主页展示/);
+  assert.equal(open().card.goal.includes("下一个问题"), false);
+  applyDeliveryAcknowledgement(
+    path,
+    "手机电脑都要兼顾，明白。\n\n再确认一个关键的：这些内容以后需要你自己随时改吗？",
+  );
+  assert.match(open().card.deviceMatrix, /手机电脑都要兼顾/);
+  assert.match(open().card.goal, /个人主页展示/);
+  resetDeliveryDeskForTests();
+});
+
 test("chat inventory splits modules and drops the blank seed", () => {
   resetDeliveryDeskForTests();
   const path = "/tmp/duaer-chat-split";
@@ -360,7 +383,10 @@ test("requirements tab only fills from newly arrived chat messages", async () =>
   assert.match(source, /requestAnimationFrame/);
   assert.match(source, /fillDeliveryFromMessage/);
   assert.match(source, /fillEmptyBaseline/);
-  assert.equal(/for \(const message of messages\)/.test(source), false);
+  const loop = source.match(/for \(const message of messages\) \{[\s\S]*?\n        \}/);
+  assert.ok(loop);
+  assert.match(loop[0], /applyDeliveryAcknowledgement/);
+  assert.equal(loop[0].includes("fillDeliveryFromMessage"), false);
 });
 
 test("an unfinished JSON tail writes the open card as fields grow", () => {
@@ -423,6 +449,94 @@ test("an existing project inventories current functions into the same cards", ()
   resetDeliveryDeskForTests();
 });
 
+test("a feature module keeps a global baseline opt-out off the card", () => {
+  resetDeliveryDeskForTests();
+  const path = "/tmp/duaer-module-baseline";
+  ensureDelivery(path);
+  const shared = {
+    outOfScope: "",
+    assumptions: "",
+    criticalPaths: "",
+    exceptionCases: "",
+    envChecklist: "",
+    dataPrecheck: "",
+    externalDeps: "",
+    perfBudget: "",
+    dependsOn: [],
+  };
+  applyDeliveryChat(path, {
+    reply: "简历页单独写。",
+    options: [],
+    activeModuleId: "m1",
+    goal: "",
+    acceptance: "",
+    deviceMatrix: "",
+    apiContract: "",
+    ...shared,
+    modules: [{
+      id: "m1",
+      title: "简历",
+      goal: "交付一个可打开的个人主页",
+      acceptance: "打开 index.html 能看到姓名",
+      deviceMatrix: "Chrome 最近两版、手机 Safari；云测截图放 compat/；旧壳降级提示升级",
+      apiContract: "本模块无 HTTP API",
+      ...shared,
+    }],
+  });
+  const feature = () => peekDelivery(path).modules.find((module) => module.id === "m1");
+  assert.equal(feature().card.deviceMatrix, "");
+  assert.equal(feature().card.apiContract, "");
+  assert.match(feature().card.goal, /个人主页/);
+  applyDeliveryChat(path, {
+    reply: "这个模块只在微信里打开。",
+    options: [],
+    activeModuleId: "m1",
+    goal: "",
+    acceptance: "",
+    deviceMatrix: "只支持微信内置浏览器，截图放 compat/",
+    apiContract: "",
+    ...shared,
+    modules: [{
+      id: "m1",
+      title: "简历",
+      goal: "交付一个可打开的个人主页",
+      acceptance: "打开 index.html 能看到姓名",
+      deviceMatrix: "只支持微信内置浏览器，截图放 compat/",
+      apiContract: "",
+      ...shared,
+    }],
+  });
+  assert.match(feature().card.deviceMatrix, /微信内置浏览器/);
+  replaceDeliveryCard(path, "m1", {
+    ...feature().card,
+    apiContract: "本模块无 HTTP API",
+    envChecklist: "无客户联调环境",
+  });
+  assert.equal(feature().card.apiContract, "");
+  assert.equal(feature().card.envChecklist, "");
+  assert.match(feature().card.deviceMatrix, /微信内置浏览器/);
+  setDeliveryAutoFixFields([]);
+  applyDeliveryChat(path, {
+    reply: "补上基线。",
+    options: [],
+    goal: "不要覆盖目标",
+    outOfScope: "",
+    acceptance: "",
+    assumptions: "",
+    deviceMatrix: "Chrome 最近两版、手机 Safari；云测截图放 compat/；旧壳降级提示升级",
+    criticalPaths: "打开首页完成该模块目标",
+    exceptionCases: "空态；失败可重试；权限不足；超时；重试",
+    apiContract: "本模块无 HTTP API",
+    envChecklist: "无客户联调环境",
+    dataPrecheck: "本模块无导入",
+    externalDeps: "本模块无外部依赖",
+    perfBudget: "本模块无页面性能要求",
+  });
+  assert.equal(feature().card.apiContract, "");
+  assert.match(feature().card.goal, /个人主页/);
+  resetDeliveryDeskForTests();
+});
+
 test("an auto-fix reply rewrites only the fields that were sent", () => {
   resetDeliveryDeskForTests();
   const path = "/tmp/duaer-chat-autofix-scope";
@@ -471,6 +585,22 @@ test("an auto-fix reply rewrites only the fields that were sent", () => {
   assert.equal(card.exceptionCases, "空态；失败；权限不足；超时；重试");
   assert.equal(card.goal, "记下每天的决定");
   assert.match(card.deviceMatrix, /Chrome 最近两版/);
+  resetDeliveryDeskForTests();
+});
+
+test("a queued dispatch wave is not rewritten as a requirements card", () => {
+  resetDeliveryDeskForTests();
+  const path = "/tmp/duaer-dispatch-wave";
+  ensureDelivery(path);
+  const prompt = "<<<DISPATCH>>>\n用 Task 执行 T1";
+  applyDeliveryUtterance(path, prompt);
+  assert.equal(peekDelivery(path).modules[0].card.goal, "");
+  const wrapped = modelContentForDelivery(
+    { workPanelOpen: true, activeWorkPanelTabKind: "requirements", projectPath: path },
+    prompt,
+  );
+  assert.equal(wrapped, "用 Task 执行 T1");
+  assert.equal(visibleDeliveryText(prompt, "user"), "用 Task 执行 T1");
   resetDeliveryDeskForTests();
 });
 

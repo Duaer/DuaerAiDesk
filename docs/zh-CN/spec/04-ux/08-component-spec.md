@@ -1634,11 +1634,11 @@ pi-ai 结果信封携带 `details` 中的结构化有效负载并重复它
 
 ```text
 [flow] Subagent completed   1 subagent · 1/1 finished · 40s        [›]
-  ┌────────────────┐    ┌───────────────────────────────────────────┐
-  │ (◎) Main agent │────│ [bot] code-reviewer      Completed · 32s  │
-  │ Coordinating 1 │    │ check the store diff                      │
-  │ delegated task │    │ 3 steps                             [›]   │
-  └────────────────┘    └───────────────────────────────────────────┘
+  ┌─────────────────┐    ┌───────────────────────────────────────────┐
+  │ (◎) DuaerAiDesk │────│ [bot] code-reviewer      Completed · 32s  │
+  │ Coordinating 1  │    │ check the store diff                      │
+  │ delegated task  │    │ 3 steps                             [›]   │
+  └─────────────────┘    └───────────────────────────────────────────┘
 ```
 
 展开节点后，先是该调用携带的块，然后是子智能体自己的行：

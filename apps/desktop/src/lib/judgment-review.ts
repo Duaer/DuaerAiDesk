@@ -1,5 +1,8 @@
-import type { DeliveryCard } from "./delivery-desk.ts";
+import type { DeliveryIntakeKind } from "@duaer-ai-desk/shared";
+import type { DeliveryCard, DeliveryIntake } from "./delivery-desk.ts";
 import type { DeliveryReviewResult } from "./delivery-review.ts";
+
+export type { DeliveryIntake };
 
 /** Jev-family ids are served by a judgments endpoint, not chat completions. */
 export function isJudgmentModelId(modelId: string): boolean {
@@ -47,6 +50,80 @@ export function judgmentReviewRequest(modelId: string, card: DeliveryCard): {
       },
     },
   };
+}
+
+const INTAKE_KINDS = new Set<DeliveryIntakeKind>(["bug", "requirement", "both", "unclear"]);
+
+/** Separate from the lock review. One choice, one sentence, no card rewrite. */
+export function intakeJudgmentRequest(modelId: string, ask: string): {
+  model: string;
+  state: { ask: string };
+  questions: Record<string, unknown>;
+} {
+  return {
+    model: modelId.trim(),
+    state: { ask: ask.trim().slice(0, 2000) },
+    questions: {
+      kind: {
+        type: "choice",
+        instructions: "用户这句话要走哪条流程。只看这句话。说不清就选 unclear，不要猜。",
+        criteria: {
+          bug: "现有行为坏了，没有新功能",
+          requirement: "要的是新行为，不是在修已有故障",
+          both: "既要修已有故障，又要新行为",
+          unclear: "信息不够，必须再问一个问题才能分",
+        },
+      },
+      reason: {
+        type: "noul",
+        instructions: "一句话理由，不要写步骤。",
+      },
+    },
+  };
+}
+
+export function intakePrompt(ask: string): { systemPrompt: string; user: string } {
+  return {
+    systemPrompt: [
+      "你是 Duaer 判断师。只判断用户这句话是 bug、需求，还是需求加 bug。",
+      "不要改写，不要派工，不要给步骤。说不清就 kind 为 unclear。",
+      "只输出一个 JSON，不要 markdown 围栏：",
+      "{\"kind\":\"bug\",\"reason\":\"一句话\"}",
+    ].join("\n"),
+    user: ask.trim().slice(0, 2000),
+  };
+}
+
+export function intakeFromJudgment(body: unknown): DeliveryIntake | null {
+  const record = asRecord(body);
+  const answers = asRecord(record?.answers);
+  const kindRow = asRecord(answers?.kind);
+  const choice = typeof kindRow?.choice === "string" ? kindRow.choice.trim() : "";
+  if (!INTAKE_KINDS.has(choice as DeliveryIntakeKind)) return null;
+  const reasonRow = asRecord(answers?.reason);
+  const reason = typeof reasonRow?.text === "string"
+    ? reasonRow.text
+    : typeof record?.summary === "string"
+      ? record.summary
+      : "";
+  return { kind: choice as DeliveryIntakeKind, reason: reason.trim().slice(0, 200) };
+}
+
+export function intakeFromText(text: string): DeliveryIntake | null {
+  const trimmed = text.trim().replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "");
+  const start = trimmed.indexOf("{");
+  const end = trimmed.lastIndexOf("}");
+  if (start < 0 || end <= start) return null;
+  try {
+    const value = JSON.parse(trimmed.slice(start, end + 1)) as unknown;
+    const record = asRecord(value);
+    const kind = typeof record?.kind === "string" ? record.kind.trim() : "";
+    if (!INTAKE_KINDS.has(kind as DeliveryIntakeKind)) return null;
+    const reason = typeof record?.reason === "string" ? record.reason.trim().slice(0, 200) : "";
+    return { kind: kind as DeliveryIntakeKind, reason };
+  } catch {
+    return null;
+  }
 }
 
 function asRecord(value: unknown): Record<string, unknown> | null {
@@ -135,4 +212,33 @@ export async function requestJudgmentReview(input: {
     throw new Error("Judgment response was not JSON");
   }
   return deliveryReviewFromJudgment(parsed, input.card);
+}
+
+export async function requestIntakeJudgment(input: {
+  baseUrl: string;
+  apiKey: string;
+  modelId: string;
+  ask: string;
+  signal?: AbortSignal;
+  fetchImpl?: typeof fetch;
+}): Promise<DeliveryIntake | null> {
+  const fetchImpl = input.fetchImpl ?? fetch;
+  const response = await fetchImpl(judgmentReviewUrl(input.baseUrl), {
+    method: "POST",
+    headers: {
+      authorization: `Bearer ${input.apiKey}`,
+      "content-type": "application/json",
+    },
+    body: JSON.stringify(intakeJudgmentRequest(input.modelId, input.ask)),
+    ...(input.signal ? { signal: input.signal } : {}),
+  });
+  const text = await response.text();
+  if (!response.ok) {
+    throw new Error(judgmentErrorMessage(response.status, text));
+  }
+  try {
+    return intakeFromJudgment(JSON.parse(text) as unknown);
+  } catch {
+    throw new Error("Judgment response was not JSON");
+  }
 }

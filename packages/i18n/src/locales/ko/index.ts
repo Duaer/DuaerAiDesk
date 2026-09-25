@@ -427,7 +427,7 @@ export const ko = {
     subagentWorkUnnamed: "서브에이전트가 한 작업",
     subagentProcess: "활동",
     subagentUnnamed: "이름 없는 서브에이전트",
-    subagentCoordinator: "메인 에이전트",
+    subagentCoordinator: "DuaerAiDesk",
     subagentCoordinating_one: "위임된 작업 {{count}}개 조정 중",
     subagentCoordinating_other: "위임된 작업 {{count}}개 조정 중",
     subagentTopology: "위임된 작업",

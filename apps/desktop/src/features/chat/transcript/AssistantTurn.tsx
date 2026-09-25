@@ -35,6 +35,7 @@ import {
 } from "../../../lib/turn-process";
 import { stripInlineMarkdown } from "../../../lib/choice-options.ts";
 import {
+  applyDeliveryAcknowledgement,
   applyDeliveryChat,
   applyDeliveryProse,
   deliveryChatHasCard,
@@ -42,13 +43,17 @@ import {
   isDeliveryConfirmArchitectureChoice,
   isDeliveryGateNote,
   isDeliveryReviseArchitectureChoice,
+  isDeliveryReviseVisualChoice,
+  isDeliveryStartBugfixChoice,
+  isDeliveryStartDispatchChoice,
   parseDeliveryChat,
   parseDeliveryGateChoices,
   visibleDeliveryText,
 } from "../../../lib/delivery-chat.ts";
 import { confirmArchitectureFromChat, maybeRenderArchitectureFromReply, reviseArchitectureFromChat } from "../../../lib/delivery-architecture.ts";
+import { maybeApplyVisualDesignFromReply, reviseVisualFromChat, startDispatchFromChat } from "../../../lib/delivery-visual.ts";
 import { runDeliveryAutoHandle } from "../../../lib/delivery-auto-handle.ts";
-import { maybeApplyDispatchSplitFromReply } from "../../../lib/delivery-dispatch-chat.ts";
+import { maybeApplyDispatchSplitFromReply, startBugfixFromChat } from "../../../lib/delivery-dispatch-chat.ts";
 import { deliveryProjectPath } from "../../../lib/use-delivery-desk";
 import { useAppStore } from "../../../stores/app-store";
 import { Markdown } from "../../../components/Markdown";
@@ -263,7 +268,13 @@ export const AssistantTurn = memo(function AssistantTurn({
     const tab = state.workPanelTabs.find((item) => item.id === state.activeWorkPanelTabId);
     return tab?.kind === "requirements" || tab?.kind === "architecture";
   });
+  const choiceSurface = useAppStore((state) => {
+    if (!state.workPanelOpen) return false;
+    const tab = state.workPanelTabs.find((item) => item.id === state.activeWorkPanelTabId);
+    return tab?.kind === "requirements" || tab?.kind === "architecture" || tab?.kind === "dispatch";
+  });
   const transcript = useAppStore((state) => state.messages);
+  const turnRunning = useAppStore((state) => state.isRunning);
   const sendPrompt = useAppStore((state) => state.sendPrompt);
   const turnMessageIds = useMemo(
     () => new Set(turnMessages.map((message) => message.id)),
@@ -271,7 +282,7 @@ export const AssistantTurn = memo(function AssistantTurn({
   );
   const latestId = transcript.at(-1)?.id;
   const showChoices = Boolean(
-    deliveryChatActive &&
+    choiceSurface &&
     choiceItems.length &&
     latestId &&
     turnMessageIds.has(latestId),
@@ -280,6 +291,9 @@ export const AssistantTurn = memo(function AssistantTurn({
     if (isDeliveryAutoHandleChoice(option)) return t("panel.requirements.autoHandle");
     if (isDeliveryConfirmArchitectureChoice(option)) return t("panel.architecture.confirmChoice");
     if (isDeliveryReviseArchitectureChoice(option)) return t("panel.architecture.reviseChoice");
+    if (isDeliveryStartDispatchChoice(option)) return t("panel.architecture.startSplitChoice");
+    if (isDeliveryStartBugfixChoice(option)) return t("panel.requirements.startBugfix");
+    if (isDeliveryReviseVisualChoice(option)) return t("panel.architecture.reviseVisualChoice");
     return stripInlineMarkdown(option);
   };
   const onChoice = (option: string) => {
@@ -295,16 +309,30 @@ export const AssistantTurn = memo(function AssistantTurn({
       void reviseArchitectureFromChat();
       return;
     }
+    if (isDeliveryStartDispatchChoice(option)) {
+      void startDispatchFromChat();
+      return;
+    }
+    if (isDeliveryStartBugfixChoice(option)) {
+      void startBugfixFromChat();
+      return;
+    }
+    if (isDeliveryReviseVisualChoice(option)) {
+      void reviseVisualFromChat();
+      return;
+    }
     void sendPrompt(option);
   };
   useEffect(() => {
     if (!projectPath) return;
     maybeApplyDispatchSplitFromReply(projectPath, content);
+    maybeApplyVisualDesignFromReply(projectPath, content);
     if (!deliveryChatActive) return;
     if (delivery && deliveryChatHasCard(delivery)) {
       applyDeliveryChat(projectPath, delivery);
     } else if (visibleContent.trim()) {
       applyDeliveryProse(projectPath, visibleContent);
+      applyDeliveryAcknowledgement(projectPath, visibleContent);
     }
     if (isDeliveryGateNote(content)) return;
     const tab = useAppStore.getState().workPanelTabs.find(
@@ -313,7 +341,7 @@ export const AssistantTurn = memo(function AssistantTurn({
     if (tab?.kind === "architecture") {
       void maybeRenderArchitectureFromReply(projectPath, content);
     }
-  }, [content, delivery, deliveryChatActive, projectPath, visibleContent]);
+  }, [content, delivery, deliveryChatActive, projectPath, turnRunning, visibleContent]);
   const actionMessage = [...turnMessages]
     .reverse()
     .find((message) => (message.content || "").trim());

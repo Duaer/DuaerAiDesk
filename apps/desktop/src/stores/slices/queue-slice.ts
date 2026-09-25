@@ -9,6 +9,7 @@ import type {
 } from "@duaer-ai-desk/shared";
 import { api } from "../../lib/api";
 import { applyDeliveryUtterance, modelContentForDelivery } from "../../lib/delivery-chat.ts";
+import { ensureDeliveryIntake } from "../../lib/delivery-intake.ts";
 import {
   enqueueQueuedPrompt,
   isPendingQueuedPrompt,
@@ -31,6 +32,31 @@ import {
   type SubmittedComposerDraft,
 } from "../runtime/session-runtime";
 import type { StoreAccess } from "./types";
+
+async function classifyOutbound(get: () => AppState, content: string): Promise<void> {
+  const state = get();
+  const tab = state.workPanelTabs.find((item) => item.id === state.activeWorkPanelTabId);
+  const session = state.sessions.find((item) => item.id === state.activeSessionId);
+  const projectPath = session?.projectPath || state.activeProjectPath;
+  const judgment = state.settings?.judgmentModel;
+  await ensureDeliveryIntake({
+    text: content,
+    tabKind: tab?.kind,
+    workPanelOpen: state.workPanelOpen,
+    projectPath,
+    model: {
+      sessionId: state.activeSessionId,
+      providerId: judgment?.providerId
+        || session?.providerId
+        || state.draftConfiguration?.providerId
+        || state.settings?.defaultProviderId,
+      modelId: judgment?.modelId
+        || session?.modelId
+        || state.draftConfiguration?.modelId
+        || state.settings?.defaultModelId,
+    },
+  });
+}
 
 function outboundPrompt(get: () => AppState, content: string): string {
   const state = get();
@@ -376,6 +402,7 @@ export function createQueueSlice({
         }
         if (!sessionId) throw new Error(i18n.t("errors.noActiveSession"));
         if (get().pendingPlans[sessionId]?.status === "pending") return false;
+        await classifyOutbound(get, content);
         if (get().runningSessions[sessionId]) {
           // Native Pi children have no Desktop prompt queue. Reject the send
           // here so the caller restores the draft instead of round-tripping a

@@ -95,3 +95,22 @@ test("review posts the card to judgments and returns the lock decision", async (
   assert.equal(body.questions.gap.type, "choice");
   assert.equal(result.passed, true);
 });
+
+const { intakeFromJudgment, intakeFromText } = await import("../src/lib/judgment-review.ts");
+
+test("intake judgment reads kind and leaves the card alone", () => {
+  const intake = intakeFromJudgment({
+    answers: {
+      kind: { type: "choice", choice: "bug" },
+      reason: { type: "noul", text: "登录已经坏了" },
+    },
+  });
+  assert.equal(intake?.kind, "bug");
+  assert.equal(intake?.reason, "登录已经坏了");
+  assert.equal(intakeFromJudgment({ answers: { kind: { choice: "maybe" } } }), null);
+});
+
+test("intake text falls back only when the kind is one of the four lanes", () => {
+  assert.equal(intakeFromText('{"kind":"both","reason":"又修又加"}')?.kind, "both");
+  assert.equal(intakeFromText('{"kind":"feature"}'), null);
+});

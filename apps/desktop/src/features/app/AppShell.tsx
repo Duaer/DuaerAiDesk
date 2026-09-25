@@ -21,6 +21,7 @@ import { api } from "../../lib/api";
 import { PortalVisibilityProvider } from "../../lib/portal-visibility";
 import { CollapsedTitlebarActions, RoutePending } from "./chrome";
 import { useAppShellRuntime } from "./useAppShellRuntime";
+import { useDispatchWave } from "../../lib/use-dispatch-wave";
 import { DELIVERY_CHAT_MAX_WIDTH } from "../../lib/work-panel-resize";
 
 const SettingsPage = lazy(() =>
@@ -45,6 +46,7 @@ const PluginsPage = lazy(() =>
 );
 
 export function AppShell() {
+  useDispatchWave();
   const {
     t,
     ready,

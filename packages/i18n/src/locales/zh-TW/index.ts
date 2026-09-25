@@ -419,7 +419,7 @@ export const zhTW = {
     subagentWorkUnnamed: "數字員工的工作過程",
     subagentProcess: "工作過程",
     subagentUnnamed: "未命名數字員工",
-    subagentCoordinator: "主 Agent",
+    subagentCoordinator: "DuaerAiDesk",
     subagentCoordinating_one: "正在協調 {{count}} 個委派任務",
     subagentCoordinating_other: "正在協調 {{count}} 個委派任務",
     subagentTopology: "委派任務",

@@ -2283,11 +2283,11 @@ never summarizes from its own arguments:
 
 ```text
 [flow] Subagent completed   1 subagent · 1/1 finished · 40s        [›]
-  ┌────────────────┐    ┌───────────────────────────────────────────┐
-  │ (◎) Main agent │────│ [bot] code-reviewer  claude-sonnet-4-5 · Completed · 32s │
-  │ Coordinating 1 │    │ check the store diff                      │
-  │ delegated task │    │ 3 steps                                   │
-  └────────────────┘    └───────────────────────────────────────────┘
+  ┌─────────────────┐    ┌───────────────────────────────────────────┐
+  │ (◎) DuaerAiDesk │────│ [bot] code-reviewer  claude-sonnet-4-5 · Completed · 32s │
+  │ Coordinating 1  │    │ check the store diff                      │
+  │ delegated task  │    │ 3 steps                                   │
+  └─────────────────┘    └───────────────────────────────────────────┘
 ```
 
 Clicking a topology node toggles an inset grouped side sheet in the right-side

@@ -3,7 +3,12 @@ declare module "*.mjs" {
   export default mod;
   export function extractArchitectureIr(text: string): Record<string, unknown> | null;
   export function relaxArchitectureIr(ir: Record<string, unknown>): Record<string, unknown> | null;
+  export function architectureIrFromComponents(
+    summary: string,
+    components: Array<{ id?: string; name?: string; responsibility?: string }>,
+  ): Record<string, unknown> | null;
   export function dispatchSplitPrompt(note: string, snapshot: string): string;
+  export function bugfixSplitPrompt(note: string, snapshot: string): string;
   export function annotateParallelTasks<T extends { id: string; dependsOn?: string[] }>(
     tasks: T[],
   ): Array<T & { wave: number; parallel: boolean }>;

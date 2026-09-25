@@ -21,6 +21,20 @@ function clip(value, max) {
 /**
  * User bubble shows only `note`. The model still receives the split rules after the desk marker.
  */
+const BUGFIX_INSTRUCTION = `你是 DuaerAiDesk 的拆任务助手。这是修缺陷，没有新架构，不要叫 UI 设计师，不要 deploy。
+规则：
+- 一条 implement 修复任务，title 写要改的那一处，acceptance 写期望结果怎样算通过。
+- 一条 verify-l3，验收是同一条期望结果。dependsOn 写修复任务 id。
+- 不要编新功能，不要派工，不要改仓库。
+输出：先写给用户看的纯文本，然后单独一行 <<<JSON>>>，再输出 JSON（不要 markdown 围栏）：
+{"dispatch_type":"tasks","workers":1,"rationale":"一句话依据","tasks":[{"id":"T001","title":"修登录失败","role":"implement","workerId":"w1","moduleId":"global","acceptance":"用原账号打开后能进入首页","dependsOn":[]}]}`;
+
+export function bugfixSplitPrompt(note, snapshot) {
+  const visible = String(note || "").trim() || "开始拆修复任务。";
+  const body = String(snapshot || "").trim();
+  return `${visible}\n\n${DESK_MARKER}\n${BUGFIX_INSTRUCTION}\n故障：${body}`;
+}
+
 export function dispatchSplitPrompt(note, snapshot) {
   const visible = String(note || "").trim() || "架构已确认，开始拆任务。";
   const body = String(snapshot || "").trim();

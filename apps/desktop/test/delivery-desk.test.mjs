@@ -12,6 +12,7 @@ const {
   deriveStage,
   emptyDeliveryDesk,
   ensureDelivery,
+  dispatchExecutionLocked,
   markDeliveryBuilding,
   moduleCanConfirm,
   noteDeliveryIteration,
@@ -192,10 +193,12 @@ test("dispatch stays closed until the baseline is signed", () => {
   assert.equal(baselineIsValid(signed.baseline, signed.modules), true);
   markDeliveryBuilding(path);
   assert.equal(peekDelivery(path).stage, "building");
+  assert.equal(dispatchExecutionLocked(peekDelivery(path)), true);
 
   assert.equal(openDeliveryChange(path, "验收改成可核对的首页记录"), true);
   const changed = peekDelivery(path);
   assert.equal(changed.baseline.signedAt, null);
+  assert.equal(dispatchExecutionLocked(changed), false);
   assert.equal(changed.modules[0].status, "draft");
   assert.equal(changed.architecture.status, "draft");
   assert.equal(changed.modules[0].card.goal, PASSING_CARD.goal);

@@ -1,6 +1,6 @@
 import i18n from "i18next";
 import { api } from "./api.ts";
-import { extractArchitectureIr, relaxArchitectureIr } from "./architecture-ir.mjs";
+import { architectureIrFromComponents, extractArchitectureIr, relaxArchitectureIr } from "./architecture-ir.mjs";
 import {
   DELIVERY_CONFIRM_ARCHITECTURE_ACTION,
   DELIVERY_REVISE_ARCHITECTURE_ACTION,
@@ -16,7 +16,6 @@ import {
   peekDelivery,
   setDeliveryArchitectureDiagram,
   withArchitectureDesignReset,
-  type DeliveryComponent,
   type DeliveryDesk,
 } from "./delivery-desk.ts";
 import { deliveryProjectPath } from "./use-delivery-desk.ts";
@@ -44,60 +43,6 @@ export function rememberArchitectureHtml(diagramKey: string, html: string): void
   const key = diagramKey.trim();
   if (!key || !html.trim()) return;
   htmlByKey.set(key, html);
-}
-
-const TYPE_HINTS: Array<{ re: RegExp; type: string }> = [
-  { re: /front|web|ui|react|vue|page|客户端|前端/i, type: "frontend" },
-  { re: /api|gateway|service|server|后端|接口/i, type: "backend" },
-  { re: /db|sql|redis|mongo|数据|库/i, type: "database" },
-  { re: /auth|oauth|secure|安全|鉴权/i, type: "security" },
-  { re: /queue|mq|kafka|bus|消息/i, type: "messagebus" },
-  { re: /cdn|s3|oss|cloud|云/i, type: "cloud" },
-  { re: /external|third|支付|短信|外部/i, type: "external" },
-];
-
-function guessComponentType(name: string, responsibility: string): string {
-  const hay = `${name} ${responsibility}`;
-  for (const hint of TYPE_HINTS) {
-    if (hint.re.test(hay)) return hint.type;
-  }
-  return "backend";
-}
-
-/** Fallback Archify IR when chat only returned summary/components boxes. */
-export function architectureIrFromComponents(
-  summary: string,
-  components: DeliveryComponent[],
-): Record<string, unknown> | null {
-  const nodes = components
-    .filter((component) => component.name.trim())
-    .slice(0, 12)
-    .map((component, index) => ({
-      id: component.id || `c${index + 1}`,
-      type: guessComponentType(component.name, component.responsibility),
-      label: component.name.trim().slice(0, 40),
-      sublabel: component.responsibility.trim().slice(0, 80),
-      row: Math.floor(index / 3) + 1,
-      col: (index % 3) + 1,
-    }));
-  if (!nodes.length) return null;
-  const connections = nodes.slice(0, -1).map((node, index) => ({
-    id: `e${index + 1}`,
-    from: node.id,
-    to: nodes[index + 1]!.id,
-  }));
-  return {
-    schema_version: 1,
-    diagram_type: "architecture",
-    meta: {
-      title: summary.trim().slice(0, 80) || "Architecture",
-      quality_profile: "standard",
-    },
-    components: nodes,
-    connections,
-    boundaries: [],
-    cards: [],
-  };
 }
 
 function componentsFromIr(ir: Record<string, unknown>): Array<{ name: string; responsibility: string }> {
@@ -278,7 +223,7 @@ export async function beginArchitectureDesign(
   const path = projectPath.trim();
   if (!path) return;
   const desk = peekDelivery(path);
-  if (!desk || !architectureDesignReady(desk)) return;
+  if (!desk || desk.intake?.kind === "bug" || !architectureDesignReady(desk)) return;
   if (desk.architecture.status === "confirmed" && !options.force) {
     useAppStore.getState().openWorkPanelTab(toolWorkPanelTab("architecture"));
     return;

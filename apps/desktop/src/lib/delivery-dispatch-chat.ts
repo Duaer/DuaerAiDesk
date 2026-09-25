@@ -1,9 +1,12 @@
 import i18n from "i18next";
 import { useAppStore } from "../stores/app-store";
 import { api } from "./api.ts";
-import { isDeliveryGateNote } from "./delivery-chat.ts";
+import { DELIVERY_START_BUGFIX_ACTION, isDeliveryGateNote, parseDeliveryGateChoices } from "./delivery-chat.ts";
+import { deliveryCardIssues } from "./delivery-card-check.ts";
+import { appendDeliveryChatNote } from "./delivery-chat-note.ts";
 import { assignDeliveryWorkers, deliveryDispatchPrompt, withPublishTask } from "./delivery-dispatch.ts";
 import {
+  bugfixSplitPrompt,
   dispatchSplitPrompt,
   extractDispatchPlan,
   progressFromToolMessages,
@@ -16,13 +19,20 @@ import {
   normalizeDeliveryDeployTarget,
   noteDispatchRelease,
   noteDispatchTaskDone,
+  GLOBAL_MODULE_ID,
   peekDelivery,
+  type DeliveryCard,
   setDeliveryDispatchGraph,
   setDeliveryDispatchPlan,
 } from "./delivery-desk.ts";
 import { toolWorkPanelTab } from "./work-panel-tabs.ts";
 
 const splitSent = new Set<string>();
+const offeredBugfix = new Set<string>();
+
+function bugFactsReady(card: DeliveryCard): boolean {
+  return deliveryCardIssues(card, "bug").length === 0;
+}
 const waveSends = new Set<string>();
 const graphProgressFp = new Map<string, string>();
 const graphProgressPending = new Set<string>();
@@ -50,7 +60,7 @@ export function clearDispatchSplitMark(projectPath: string): void {
 export async function beginDispatchSplit(projectPath: string): Promise<void> {
   const path = projectPath.trim();
   const desk = path ? peekDelivery(path) : null;
-  if (!path || !desk || desk.architecture.status !== "confirmed") return;
+  if (!path || !desk || desk.architecture.status !== "confirmed" || desk.intake?.kind === "bug") return;
   useAppStore.getState().openWorkPanelTab(toolWorkPanelTab("dispatch"));
   if (desk.dispatchPlan?.tasks.length || splitSent.has(path)) return;
   splitSent.add(path);
@@ -74,12 +84,64 @@ export async function beginDispatchSplit(projectPath: string): Promise<void> {
   );
 }
 
+/** Bug lane: open 派工 and ask for fix tasks. No architecture. */
+export async function beginBugfixSplit(projectPath: string): Promise<void> {
+  const path = projectPath.trim();
+  const desk = path ? peekDelivery(path) : null;
+  if (!path || !desk || desk.intake?.kind !== "bug") return;
+  useAppStore.getState().openWorkPanelTab(toolWorkPanelTab("dispatch"));
+  if (desk.dispatchPlan?.tasks.length || splitSent.has(path)) return;
+  splitSent.add(path);
+  const global = desk.modules.find((module) => module.id === GLOBAL_MODULE_ID);
+  const snapshot = JSON.stringify({
+    goal: global?.card.goal ?? "",
+    acceptance: global?.card.acceptance ?? "",
+    assumptions: global?.card.assumptions ?? "",
+  });
+  await useAppStore.getState().sendPrompt(
+    bugfixSplitPrompt(i18n.t("panel.requirements.bugfixSplitNote"), snapshot),
+  );
+}
+
+export async function startBugfixFromChat(): Promise<void> {
+  const path = useAppStore.getState().sessions
+    .find((session) => session.id === useAppStore.getState().activeSessionId)
+    ?.projectPath
+    || useAppStore.getState().activeProjectPath
+    || "";
+  const key = path.trim();
+  if (!key) return;
+  splitSent.delete(key);
+  await beginBugfixSplit(key);
+}
+
+export function offerBugfixDecision(projectPath: string): void {
+  const path = projectPath.trim();
+  const state = useAppStore.getState();
+  if (!path || state.isRunning) return;
+  const desk = peekDelivery(path);
+  if (!desk || desk.intake?.kind !== "bug" || desk.dispatchPlan?.tasks.length) return;
+  const global = desk.modules.find((module) => module.id === GLOBAL_MODULE_ID);
+  if (!global || !bugFactsReady(global.card)) return;
+  const key = `${path}\0${global.card.goal}\0${global.card.acceptance}\0${global.card.assumptions}`;
+  if (offeredBugfix.has(key)) return;
+  const last = state.messages.at(-1);
+  if (last && parseDeliveryGateChoices(last.content || "").includes(DELIVERY_START_BUGFIX_ACTION)) {
+    offeredBugfix.add(key);
+    return;
+  }
+  offeredBugfix.add(key);
+  appendDeliveryChatNote(i18n.t("panel.requirements.bugfixDecideNote"), {
+    choices: [DELIVERY_START_BUGFIX_ACTION],
+  });
+}
+
 /** Store the task list from the split reply. Thinking stays in the transcript. */
 export function maybeApplyDispatchSplitFromReply(projectPath: string, reply: string): boolean {
   const path = projectPath.trim();
   if (!path || isDeliveryGateNote(reply)) return false;
   const desk = peekDelivery(path);
-  if (!desk || desk.architecture.status !== "confirmed") return false;
+  if (!desk || (desk.architecture.status !== "confirmed" && desk.intake?.kind !== "bug")) return false;
   const plan = extractDispatchPlan(reply);
   if (!plan) return false;
   setDeliveryDispatchPlan(path, {

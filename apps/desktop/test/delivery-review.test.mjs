@@ -10,6 +10,7 @@ const read = (path) => readFile(new URL(path, import.meta.url), "utf8");
 
 const { deliveryCardIssues, deliveryCardStillGathering } = await import("../src/lib/delivery-card-check.ts");
 const {
+  deliveryAutoFixPrompt,
   deliveryCardFingerprint,
   fillEmptyBaseline,
   localDeliveryFix,
@@ -72,7 +73,7 @@ test("requirements confirm does not gate style or layout", async () => {
 });
 
 test("a visual JSON reply stores style and layout only when both are concrete", async () => {
-  const { extractVisualDesign } = await import("../src/lib/delivery-visual.ts");
+  const { extractVisualDesign, extractVisualProse } = await import("../src/lib/delivery-visual.ts");
   const ready = extractVisualDesign(`done
 <<<JSON>>>
 {"design_type":"visual","style":"白底、深色字、正文 16px、间距 8px","layout":"单栏居中，顶部导航"}`);
@@ -88,6 +89,15 @@ test("a visual JSON reply stores style and layout only when both are concrete", 
 {"design_type":"visual","style":"好看","layout":"居中"}`),
     null,
   );
+  const prose = extractVisualProse(
+    "UI 设计师已给出视觉契约：整体走「专业清晰、移动优先」路线，浅灰底配靛蓝主色、卡片化排版，单栏纵向流加吸顶锚点导航，五个板块按顺序全宽排列，移动端自动叠单列。我已把这两段写进确认卡。",
+  );
+  assert.match(prose?.style ?? "", /靛蓝/);
+  assert.match(prose?.layout ?? "", /单栏/);
+  assert.equal(prose?.style.includes("我已把"), false);
+  const { visualHandoffClaim } = await import("../src/lib/delivery-visual.ts");
+  assert.equal(visualHandoffClaim("设计师已交付全局设计与版式方案，我已整理进全局卡。"), true);
+  assert.equal(visualHandoffClaim("请先确认目标"), false);
 });
 
 test("a static page opt-out passes without the compat-lab checklist", () => {
@@ -167,6 +177,32 @@ test("empty baseline is filled once goal and acceptance already pass", () => {
   assert.equal(early.apiContract, "");
   const custom = fillEmptyBaseline({ ...card, deviceMatrix: "只写了 Chrome" });
   assert.equal(custom.deviceMatrix, "只写了 Chrome");
+  const moduleCard = fillEmptyBaseline(card, "module");
+  assert.equal(moduleCard.deviceMatrix, "");
+  assert.equal(moduleCard.apiContract, "");
+  assert.equal(moduleCard.perfBudget, "");
+  const moduleFix = localDeliveryFix({
+    ...card,
+    acceptance: "更好用",
+  }, "module");
+  assert.equal(moduleFix.deviceMatrix, "");
+  assert.match(moduleFix.acceptance, /打开页面能看到/);
+});
+
+test("auto-fix on a feature module does not ask for global baselines", () => {
+  const prompt = deliveryAutoFixPrompt({
+    moduleId: "m1",
+    moduleTitle: "简历",
+    fields: [{ field: "acceptance", current: "更好看", missing: "" }],
+  });
+  assert.match(prompt, /只在全局要求里必填/);
+  assert.match(prompt, /这个模块空着的不要补/);
+  const globalPrompt = deliveryAutoFixPrompt({
+    moduleId: "global",
+    moduleTitle: "全局要求",
+    fields: [{ field: "deviceMatrix", current: "", missing: "浏览器" }],
+  });
+  assert.doesNotMatch(globalPrompt, /这个模块空着的不要补/);
 });
 
 test("auto-fix fills baseline defaults and a checkable acceptance", () => {
@@ -251,7 +287,7 @@ test("delivery review uses the one-shot desktop model", async () => {
   assert.match(main, /deliveryReviewPrompt\(mode, card, issues\)/);
   assert.match(main, /thinkingLevel: "off"/);
   assert.match(tab, /useDeliveryReview\(path, module\)/);
-  assert.match(tab, /!moduleCanConfirm\(module\) \|\| !reviewed/);
+  assert.match(tab, /!moduleCanConfirm\(module, shown\.intake\?\.kind\) \|\| !reviewed/);
   assert.equal(/requirements-auto/.test(tab), false);
   assert.equal(/panel\.requirements\.autoHandle/.test(tab), false);
   assert.match(hook, /appendDeliveryChatNote/);

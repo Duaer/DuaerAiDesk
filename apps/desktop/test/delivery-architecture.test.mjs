@@ -35,6 +35,8 @@ test("architecture uses Archify mount and live-archify IPC", async () => {
   assert.match(arch, /beginVisualDesign\(path\)/);
   const visual = await read("../src/lib/delivery-visual.ts");
   assert.match(visual, /beginDispatchSplit\(path\)/);
+  assert.match(visual, /offerVisualDecision/);
+  assert.match(tab, /offerVisualDecision/);
   assert.match(visual, /design_type !== "visual"/);
   assert.match(visual, /agent 填 ui-designer/);
   assert.doesNotMatch(tab, /panel\.architecture\.renderDiagram/);
@@ -75,12 +77,32 @@ test("relaxed architecture IR drops hand-placed geometry", async () => {
   const relaxed = relaxArchitectureIr({
     components: [{ id: "bar", label: "sticky 顶部通栏提示条今天还没写", size: [171, 64], pos: [1, 2] }],
     connections: [{ id: "e7", from: "bar", to: "web", fromSide: "bottom", labelDx: 12, label: "托管访问与双击打开" }],
+    boundaries: [{ kind: "region", label: "服务区这一层说明太长", wraps: ["bar", "web"] }],
+    cards: [{ dot: "cyan", title: "概览", items: ["页面进 API", ""] }],
   });
   assert.equal(relaxed.components[0].size, undefined);
   assert.equal(relaxed.components[0].pos, undefined);
   assert.equal(relaxed.connections[0].fromSide, undefined);
-  assert.equal(relaxed.connections[0].label, undefined);
+  assert.equal(relaxed.connections[0].labelDx, undefined);
+  assert.equal(relaxed.connections[0].label, "托管访问与双击打");
   assert.ok(relaxed.components[0].label.length <= 10);
+  assert.equal(relaxed.boundaries[0].label, "服务区这一层说明");
+  assert.deepEqual(relaxed.cards[0].items, ["页面进 API"]);
+});
+
+test("named boxes fall back to a main path with a region and a side card", async () => {
+  const { architectureIrFromComponents } = await import("../src/lib/architecture-ir.mjs");
+  const ir = architectureIrFromComponents("日记系统", [
+    { id: "db", name: "日记库", responsibility: "本地保存" },
+    { id: "web", name: "前端页面", responsibility: "写下并保存" },
+    { id: "api", name: "保存接口", responsibility: "写入日记" },
+  ]);
+  assert.equal(ir.components[0].id, "web");
+  assert.equal(ir.connections[0].variant, "emphasis");
+  assert.equal(ir.connections[0].label.length <= 8, true);
+  assert.deepEqual(ir.boundaries[0].wraps, ["api", "db"]);
+  assert.equal(ir.cards[0].title, "概览");
+  assert.equal(ir.components[0].row, undefined);
 });
 
 test("architecture svg keeps authored size instead of stretching to the panel", async () => {

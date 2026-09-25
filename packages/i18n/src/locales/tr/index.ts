@@ -427,7 +427,7 @@ export const tr = {
     subagentWorkUnnamed: "Alt ajanın yaptıkları",
     subagentProcess: "Etkinlik",
     subagentUnnamed: "Adsız alt ajan",
-    subagentCoordinator: "Ana ajan",
+    subagentCoordinator: "DuaerAiDesk",
     subagentCoordinating_one: "{{count}} devredilmiş görev koordine ediliyor",
     subagentCoordinating_other: "{{count}} devredilmiş görev koordine ediliyor",
     subagentTopology: "Devredilen görevler",

@@ -418,7 +418,7 @@ export const de = {
     "subagentWorkUnnamed": "Was der Subagent getan hat",
     "subagentProcess": "Aktivität",
     "subagentUnnamed": "Unbenannter Subagent",
-    "subagentCoordinator": "Hauptagent",
+    "subagentCoordinator": "DuaerAiDesk",
     "subagentCoordinating_one": "Koordinieren von {{count}} delegierten Aufgaben",
     "subagentCoordinating_other": "Koordinieren von {{count}} delegierten Aufgaben",
     "subagentTopology": "Delegierte Aufgaben",

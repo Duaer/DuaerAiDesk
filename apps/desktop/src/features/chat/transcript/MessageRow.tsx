@@ -11,10 +11,11 @@ import { useOpenChatFileRef } from "../../../hooks/use-preview-target";
 import { splitChatText } from "../../../lib/chat-links";
 import { stripInlineMarkdown } from "../../../lib/choice-options.ts";
 import { confirmArchitectureFromChat, reviseArchitectureFromChat } from "../../../lib/delivery-architecture.ts";
-import { applyDeliveryChat, deliveryChatHasCard, isDeliveryAutoHandleChoice, isDeliveryConfirmArchitectureChoice, isDeliveryGateNote, isDeliveryReviseArchitectureChoice, parseDeliveryChat, parseDeliveryGateChoices, visibleDeliveryText } from "../../../lib/delivery-chat.ts";
+import { applyDeliveryChat, deliveryChatHasCard, isDeliveryAutoHandleChoice, isDeliveryConfirmArchitectureChoice, isDeliveryGateNote, isDeliveryReviseArchitectureChoice, isDeliveryReviseVisualChoice, isDeliveryStartBugfixChoice, isDeliveryStartDispatchChoice, parseDeliveryChat, parseDeliveryGateChoices, visibleDeliveryText } from "../../../lib/delivery-chat.ts";
 import { maybeRenderArchitectureFromReply } from "../../../lib/delivery-architecture.ts";
 import { maybeApplyDispatchSplitFromReply } from "../../../lib/delivery-dispatch-chat.ts";
-import { maybeApplyVisualDesignFromReply } from "../../../lib/delivery-visual.ts";
+import { startBugfixFromChat } from "../../../lib/delivery-dispatch-chat.ts";
+import { maybeApplyVisualDesignFromReply, reviseVisualFromChat, startDispatchFromChat } from "../../../lib/delivery-visual.ts";
 import { runDeliveryAutoHandle } from "../../../lib/delivery-auto-handle.ts";
 import { deliveryProjectPath } from "../../../lib/use-delivery-desk";
 import { useAppStore } from "../../../stores/app-store";
@@ -86,8 +87,14 @@ export const MessageRow = memo(function MessageRow({
     const tab = state.workPanelTabs.find((item) => item.id === state.activeWorkPanelTabId);
     return tab?.kind === "requirements" || tab?.kind === "architecture";
   });
+  const turnRunning = useAppStore((state) => state.isRunning);
+  const choiceSurface = useAppStore((state) => {
+    if (!state.workPanelOpen) return false;
+    const tab = state.workPanelTabs.find((item) => item.id === state.activeWorkPanelTabId);
+    return tab?.kind === "requirements" || tab?.kind === "architecture" || tab?.kind === "dispatch";
+  });
   const sendPrompt = useAppStore((state) => state.sendPrompt);
-  const showChoices = deliveryChatActive && !isUser && deliveryChoices.length > 0 && messages.at(-1)?.id === message.id;
+  const showChoices = choiceSurface && !isUser && deliveryChoices.length > 0 && messages.at(-1)?.id === message.id;
   const onChoice = (option: string) => {
     if (isDeliveryAutoHandleChoice(option)) {
       void runDeliveryAutoHandle();
@@ -101,12 +108,27 @@ export const MessageRow = memo(function MessageRow({
       void reviseArchitectureFromChat();
       return;
     }
+    if (isDeliveryStartDispatchChoice(option)) {
+      void startDispatchFromChat();
+      return;
+    }
+    if (isDeliveryStartBugfixChoice(option)) {
+      void startBugfixFromChat();
+      return;
+    }
+    if (isDeliveryReviseVisualChoice(option)) {
+      void reviseVisualFromChat();
+      return;
+    }
     void sendPrompt(option);
   };
   const choiceLabel = (option: string) => {
     if (isDeliveryAutoHandleChoice(option)) return t("panel.requirements.autoHandle");
     if (isDeliveryConfirmArchitectureChoice(option)) return t("panel.architecture.confirmChoice");
     if (isDeliveryReviseArchitectureChoice(option)) return t("panel.architecture.reviseChoice");
+    if (isDeliveryStartDispatchChoice(option)) return t("panel.architecture.startSplitChoice");
+    if (isDeliveryStartBugfixChoice(option)) return t("panel.requirements.startBugfix");
+    if (isDeliveryReviseVisualChoice(option)) return t("panel.architecture.reviseVisualChoice");
     return stripInlineMarkdown(option);
   };
   useEffect(() => {
@@ -127,7 +149,7 @@ export const MessageRow = memo(function MessageRow({
     if (tab?.kind === "architecture") {
       void maybeRenderArchitectureFromReply(projectPath, message.content || "");
     }
-  }, [deliveryChatActive, isUser, message.content, message.id, projectPath]);
+  }, [deliveryChatActive, isUser, message.content, message.id, projectPath, turnRunning]);
   const revisionCount = message.revisionCount ?? 0;
   const activeRevision = message.activeRevision ?? revisionCount;
   const showRevisionPager = editableUserMessage && revisionCount > 1;
