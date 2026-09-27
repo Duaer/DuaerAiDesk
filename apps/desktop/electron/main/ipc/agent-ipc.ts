@@ -488,9 +488,11 @@ export function registerAgentIpc({
       });
     }
     if (!host) throw new Error("host unavailable");
+    // Capture after the null check so nested closures keep a non-null HostProcess.
+    const hostProcess = host;
     const releaseSessionOperation = await acquireSessionOperation(req.sessionId);
     try {
-    const sessionMessage = await resolveSessionMessageInput(host, req);
+    const sessionMessage = await resolveSessionMessageInput(hostProcess, req);
     // Install the renderer's prompt-time snapshot before any asynchronous
     // setup. This closes the gap where a fast completion could beat the
     // effect that reports the active chat session. Missing or mismatched
@@ -502,8 +504,8 @@ export function registerAgentIpc({
         ? requestedViewingSessionId
         : null,
     );
-    const settings = await host.call<any>("settings.get");
-    const sessionResult = await host.call<{ session?: any }>("session.get", {
+    const settings = await hostProcess.call<any>("settings.get");
+    const sessionResult = await hostProcess.call<{ session?: any }>("session.get", {
       id: req.sessionId,
       messageLimit: 1,
     });
@@ -546,8 +548,8 @@ export function registerAgentIpc({
       }
 
       try {
-        await persistenceOutbox.flush(() => host);
-        const truncated = await host.call<{
+        await persistenceOutbox.flush(() => hostProcess);
+        const truncated = await hostProcess.call<{
           revision?: {
             rootUserId?: string;
             revisionCount?: number;
@@ -584,7 +586,7 @@ export function registerAgentIpc({
           .call("agent.disposeSession", { sessionId: req.sessionId })
           .catch(() => undefined);
       }
-      const refreshed = await host.call<{ session?: any }>("session.get", {
+      const refreshed = await hostProcess.call<{ session?: any }>("session.get", {
         id: req.sessionId,
         messageLimit: 1,
       });
@@ -603,7 +605,7 @@ export function registerAgentIpc({
     // window no longer shows. Close it and start again, instead of telling
     // the user to stop a task they cannot see.
     const turnWasTracked = activeTurns.has(req.sessionId);
-    const beginTurn = () => host.call<{ turnId?: string }>("session.beginTurn", {
+    const beginTurn = () => hostProcess.call<{ turnId?: string }>("session.beginTurn", {
       sessionId: req.sessionId,
       providerId: launch.providerId,
       modelId: launch.modelId,
@@ -619,7 +621,7 @@ export function registerAgentIpc({
         sessionId: req.sessionId,
         turnId: orphanTurnId,
       });
-      await host.call("session.endTurn", {
+      await hostProcess.call("session.endTurn", {
         turnId: orphanTurnId,
         status: "aborted",
         errorCode: "TURN_ABORTED",
@@ -742,7 +744,7 @@ export function registerAgentIpc({
         : {}),
     };
     try {
-      await host.call("session.appendMessage", {
+      await hostProcess.call("session.appendMessage", {
         sessionId: req.sessionId,
         message: userMessage,
         turnId: durableTurnId,
