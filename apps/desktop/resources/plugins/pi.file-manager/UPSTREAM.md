@@ -34,10 +34,10 @@ stores LF, and this repository's `.gitattributes` keeps it that way.
 
 | File | Bytes | sha256 |
 | --- | --- | --- |
-| `main.js` | 63234 | `43cface10124728f16e72530e699678177f97353b57190532e89c03186e6960d` |
-| `README.md` | 20039 | `8c524f6d13eac557e286fa0ec9b9cf5138bed0bd66d4a7914f3484443e627a01` |
+| `main.js` | 63235 | `78c69f0c94cd05fc1e249d8c59dc0a27c4825151f8407b0ef6d458af0d72c38c` |
+| `README.md` | 20042 | `536e3f47faea0082425915620ae68cbaf262fb8f7b54fafffea0c4ece3273e72` |
 | `views/index.html` | 345 | `771fd3d8afdea7fca75ed1f1918c1ce93ad1c87babdb321cfb85e910465cd2c1` |
-| `views/assets/index.js` | 1345417 | `d0a1dc369764bed2ab12ce0e65fe983fe0b4f9919f2f8ff4546b736208d66dac` |
+| `views/assets/index.js` | 1345420 | `dc036957c3f6cd348ccc3ed6f6e30da1234a363fd1395bf528b7d1c7b5e09878` |
 | `manifest.json` | 14171 | `751a5c86d6e4901cf7fc7f5d9e1de99c90c6dc0798b316500d20781d779e4188` |
 
 `views-src/` from the upstream repository is deliberately not vendored: this

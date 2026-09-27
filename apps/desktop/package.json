@@ -6,7 +6,7 @@
   "description": "DuaerAiDesk Electron application",
   "homepage": "https://github.com/Duaer/DuaerAiDesk",
   "author": {
-    "name": "vastsa",
+    "name": "Duaer",
     "email": "hhxk666@gmail.com"
   },
   "main": "./out/main/index.js",
@@ -84,7 +84,7 @@
     "publish": [
       {
         "provider": "github",
-        "owner": "vastsa",
+        "owner": "Duaer",
         "repo": "DuaerAiDesk"
       }
     ],

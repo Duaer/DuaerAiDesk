@@ -409,7 +409,7 @@ test("GitHub releases trigger the CNB mirror pipeline with a JSON payload", () =
   );
   assert.match(
     mirrorToCnbWorkflowSource,
-    /if: github\.repository == 'vastsa\/DuaerAiDesk'/,
+    /if: github\.repository == 'Duaer\/DuaerAiDesk'/,
   );
   assert.match(
     mirrorToCnbWorkflowSource,
