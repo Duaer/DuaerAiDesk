@@ -3791,7 +3791,7 @@
   margin: 0;
   color: var(--ds-text-secondary);
   font-size: var(--text-xs);
-  line-height: 1.4;
+  line-height: var(--leading-normal);
 }
 
 .settings-deploy-row {
@@ -3808,7 +3808,7 @@
 .settings-deploy-name {
   font-size: var(--text-sm);
   font-weight: var(--font-weight-semibold);
-  line-height: 1.2;
+  line-height: var(--leading-tighter);
 }
 
 .settings-deploy-state {
