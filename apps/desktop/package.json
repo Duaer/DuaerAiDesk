@@ -1,6 +1,6 @@
 {
   "name": "@duaer-ai-desk/desktop",
-  "version": "0.15.6",
+  "version": "0.15.7",
   "desktopName": "duaer-ai-desk.desktop",
   "private": true,
   "description": "DuaerAiDesk Electron application",

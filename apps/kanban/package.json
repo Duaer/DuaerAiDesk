@@ -1,6 +1,6 @@
 {
   "name": "@duaer-ai-desk/kanban",
-  "version": "0.1.0",
+  "version": "0.15.7",
   "private": true,
   "type": "module",
   "description": "本地任务看板：三列看板 + 拖拽排序 + 本地 SQLite 持久化",
