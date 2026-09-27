@@ -86,6 +86,9 @@ export class Repository {
     return this.transaction(() => {
       const moving = this.getRow(id);
       if (!moving) return null;
+      if (!isStatus(moving.status)) {
+        throw new Error(`数据库中出现了非法 status：${moving.status}`);
+      }
 
       const sourceStatus = moving.status;
       const targetIds = this.columnIds(status).filter((taskId) => taskId !== id);
@@ -118,6 +121,9 @@ export class Repository {
     return this.transaction(() => {
       const row = this.getRow(id);
       if (!row) return null;
+      if (!isStatus(row.status)) {
+        throw new Error(`数据库中出现了非法 status：${row.status}`);
+      }
 
       this.db.prepare("DELETE FROM tasks WHERE id = ?").run(id);
       this.parkColumn(row.status);
