@@ -57,7 +57,7 @@ test("settings subagent empty-state copy uses a non-conflicting key", () => {
   const chinese = flattenCatalog(zhCN);
 
   assert.equal(english["settings.subagentsEmpty"], "No subagents of your own yet");
-  assert.equal(chinese["settings.subagentsEmpty"], "还没有你自己的子智能体");
+  assert.equal(chinese["settings.subagentsEmpty"], "还没有你自己的数字员工");
   assert.equal(typeof english["settings.subagents"], "string");
   assert.equal(typeof english["extensions.subagents.empty"], "string");
 });
@@ -66,7 +66,7 @@ test("creation-phase delegation copy is catalog-backed", () => {
   assert.equal(english["chat.subagentCreating"], "Starting subagent…");
   assert.equal(
     flattenCatalog(zhCN)["chat.subagentCreating"],
-    "正在创建子智能体…",
+    "正在创建数字员工…",
   );
   for (const [id, catalog] of Object.entries(catalogs)) {
     assert.equal(
@@ -119,7 +119,7 @@ test("settings rail labels stay concise and parallel across locales", () => {
       "模型",
       "技能",
       "MCP",
-      "子智能体",
+      "数字员工",
       "导入",
       "项目",
       "信息",
