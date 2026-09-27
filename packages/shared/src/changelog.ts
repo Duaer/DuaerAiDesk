@@ -29,6 +29,14 @@ export type ChangelogEntry = {
 
 const enEntries: ChangelogEntry[] = [
   {
+    version: "0.15.7",
+    date: "2026-09-27",
+    highlights: [
+      "Fix GPT-6 Astra, Sol, and Luna tool calls by using the Responses API and omitting reasoning when thinking is off.",
+    ],
+  },
+
+  {
     version: "0.15.6",
     date: "2026-09-23",
     highlights: [
@@ -841,6 +849,14 @@ const enEntries: ChangelogEntry[] = [
 
 const zhCNEntries: ChangelogEntry[] = [
   {
+    version: "0.15.7",
+    date: "2026-09-27",
+    highlights: [
+      "修复 GPT-6 Astra、Sol、Luna 的工具调用：改走 Responses API，并在关闭思考时不再发送 reasoning。",
+    ],
+  },
+
+  {
     version: "0.15.6",
     date: "2026-09-23",
     highlights: [
@@ -1652,6 +1668,14 @@ const zhCNEntries: ChangelogEntry[] = [
 ];
 
 const zhTWEntries: ChangelogEntry[] = [
+  {
+    version: "0.15.7",
+    date: "2026-09-27",
+    highlights: [
+      "修復 GPT-6 Astra、Sol、Luna 的工具呼叫：改走 Responses API，並在關閉思考時不再傳送 reasoning。",
+    ],
+  },
+
   {
     version: "0.15.6",
     date: "2026-09-23",

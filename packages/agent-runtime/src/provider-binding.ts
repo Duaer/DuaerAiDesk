@@ -37,6 +37,10 @@ import {
   type ThinkingLevel,
 } from "@duaer-ai-desk/shared";
 import { genericModelConfig } from "./model-capabilities.js";
+import {
+  gpt6ToolingRequiresResponsesApi,
+  withGpt6ToolingThinkingOffOmitted,
+} from "./openai-model-quirks.js";
 import type { ModelConfig } from "./thinking-level.js";
 
 export type RuntimeProviderConfig = {
@@ -159,7 +163,18 @@ export function providerRequestKey(provider: RuntimeProviderConfig): string {
  * wrong adapter (the gateway answers 500, see #105).
  */
 export function apiBindingForProviderModel(provider: RuntimeProviderConfig): ApiBinding {
-  return apiBindingForStyle(resolveApiStyle(provider.modelConfig?.api) ?? provider.apiStyle);
+  const catalogStyle = resolveApiStyle(provider.modelConfig?.api);
+  if (catalogStyle) return apiBindingForStyle(catalogStyle);
+  // gpt-6-astra/sol/luna + tools need Responses (or effort none on Completions).
+  if (
+    gpt6ToolingRequiresResponsesApi({
+      modelId: provider.modelId,
+      vendorKey: provider.vendorKey,
+    })
+  ) {
+    return apiBindingForStyle("responses");
+  }
+  return apiBindingForStyle(provider.apiStyle);
 }
 
 /**
@@ -199,9 +214,12 @@ export function buildProviderModel(
 ): Model<Api> {
   const binding = apiBindingForProviderModel(provider);
   const catalog = provider.modelConfig;
-  const catalogModel = catalog
-    ? (({ source: _source, ...model }) => model)(catalog)
-    : genericModelConfig(provider.modelId, provider.baseUrl ?? binding.defaultBaseUrl);
+  const catalogModel = withGpt6ToolingThinkingOffOmitted(
+    provider.modelId,
+    catalog
+      ? (({ source: _source, ...model }) => model)(catalog)
+      : genericModelConfig(provider.modelId, provider.baseUrl ?? binding.defaultBaseUrl),
+  );
   const baseUrl = runtimeBaseUrlForApi(
     binding.api,
     provider.baseUrl ?? catalog?.baseUrl ?? binding.defaultBaseUrl,

@@ -716,6 +716,23 @@ identify the platform validation still needed.
 - **Milestone**: M2
 - **Status**: Unit-covered (binding resolution and endpoint assertion)
 
+#### E2E-005F: gpt-6 astra/sol/luna use Responses and omit reasoning when thinking is off
+
+- **Preconditions**: An OpenAI provider row selects `gpt-6-astra`,
+  `gpt-6-sol`, or `gpt-6-luna` with `thinkingLevel: off` and at least one
+  function tool. A deterministic fixture accepts `/responses` and rejects
+  Chat Completions bodies that combine `tools` with `reasoning_effort`.
+- **Steps**: 1) Dispatch a tool-using turn (or a subagent with the same
+  model and thinking off). 2) Capture the outbound path and JSON body.
+- **Expected**: The request posts to `/responses`. The body has no
+  `reasoning_effort` / `reasoning.effort: "none"`. The turn does not fail
+  with the Chat Completions 400 about tools plus reasoning_effort.
+- **Specs linked**: `03-runtime/11-provider-model-system.md`
+- **Acceptance**: F (runtime provider requests)
+- **Milestone**: M2
+- **Status**: Unit-covered (`openai-model-quirks`, binding resolution,
+  models.dev catalog pin)
+
 #### E2E-005C: OpenAI-compatible system role fallback
 
 - **Preconditions**: A deterministic OpenAI-compatible Chat Completions

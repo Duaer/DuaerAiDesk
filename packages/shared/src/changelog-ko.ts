@@ -2,6 +2,14 @@ import type { ChangelogEntry } from "./changelog.js";
 
 export const koEntries: ChangelogEntry[] = [
   {
+    version: "0.15.7",
+    date: "2026-09-27",
+    highlights: [
+      "GPT-6 Astra, Sol, Luna 도구 호출을 Responses API로 고치고, 사고가 꺼져 있을 때 reasoning을 보내지 않습니다.",
+    ],
+  },
+
+  {
     version: "0.15.6",
     date: "2026-09-23",
     highlights: [

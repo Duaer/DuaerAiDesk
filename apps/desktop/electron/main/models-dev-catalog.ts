@@ -13,7 +13,11 @@ import type {
   ModelReasoningOption,
   ThinkingLevel,
 } from "@duaer-ai-desk/shared";
-import type { ModelConfig } from "@duaer-ai-desk/agent-runtime";
+import {
+  gpt6ToolingRequiresResponsesApi,
+  withGpt6ToolingThinkingOffOmitted,
+  type ModelConfig,
+} from "@duaer-ai-desk/agent-runtime";
 
 export const MODELS_DEV_API_URL = "https://models.dev/api.json";
 export const MODELS_DEV_TIMEOUT_MS = 10_000;
@@ -398,6 +402,30 @@ const RESPONSES_ONLY_MODEL_IDS: ReadonlySet<string> = new Set([
   "muse-spark-1.3-contributor",
 ]);
 
+function resolvePublishedModelApi(
+  providerKey: string,
+  modelId: string,
+  rawApi: string | undefined,
+): string | undefined {
+  if (rawApi) return rawApi;
+  // Scoped to opencode-go on purpose: the same model ids exist under other
+  // providers (e.g. meta, llmgateway) where the completions path is correct
+  // and must not be rerouted (see #105).
+  if (providerKey === "opencode-go" && RESPONSES_ONLY_MODEL_IDS.has(modelId.toLowerCase())) {
+    return "openai-responses";
+  }
+  // gpt-6-astra/sol/luna need Responses when tools and reasoning coexist.
+  if (
+    gpt6ToolingRequiresResponsesApi({
+      modelId,
+      vendorKey: providerKey,
+    })
+  ) {
+    return "openai-responses";
+  }
+  return undefined;
+}
+
 function modelFromRaw(
   providerKey: string,
   provider: JsonRecord,
@@ -413,14 +441,11 @@ function modelFromRaw(
   const limit = parseLimit(raw.limit);
   const experimental = publishedExperimental(raw.experimental);
   const providerMetadata = publishedMetadata(raw.provider);
-  // Scoped to opencode-go on purpose: the same model ids exist under other
-  // providers (e.g. meta, llmgateway) where the completions path is correct
-  // and must not be rerouted (see #105).
-  const modelApi =
-    nonEmptyString(raw.api) ??
-    (providerKey === "opencode-go" && RESPONSES_ONLY_MODEL_IDS.has(modelId.toLowerCase())
-      ? "openai-responses"
-      : undefined);
+  const modelApi = resolvePublishedModelApi(
+    providerKey,
+    modelId,
+    nonEmptyString(raw.api),
+  );
   const displayName = nonEmptyString(raw.name) ?? modelId;
   const inputPublished = modalityResult.inputPublished;
   const outputPublished = modalityResult.outputPublished;
@@ -662,10 +687,15 @@ export function modelInfoFromModelsDev(
 ): ModelInfo {
   const contextWindow = positiveInteger(model.limit.context);
   const maxTokens = positiveInteger(model.limit.output);
-  const thinkingLevelMap = thinkingLevelMapFromModelsDev(
-    model.reasoningOptions,
-    model.thinkingLevels,
-  );
+  const thinkingLevelMap = withGpt6ToolingThinkingOffOmitted(
+    model.modelId,
+    {
+      thinkingLevelMap: thinkingLevelMapFromModelsDev(
+        model.reasoningOptions,
+        model.thinkingLevels,
+      ),
+    },
+  ).thinkingLevelMap;
   return {
     modelId: model.modelId,
     displayName: model.displayName,
@@ -741,7 +771,9 @@ export function modelConfigFromModelsDev(
   if (model.family !== undefined) config.family = model.family;
   if (model.attachment !== undefined) config.attachment = model.attachment;
   if (model.reasoningOptions !== undefined) config.reasoningOptions = model.reasoningOptions;
-  const thinkingLevelMap = thinkingLevelMapFromModelsDev(model.reasoningOptions, thinkingLevels);
+  const thinkingLevelMap = withGpt6ToolingThinkingOffOmitted(model.modelId, {
+    thinkingLevelMap: thinkingLevelMapFromModelsDev(model.reasoningOptions, thinkingLevels),
+  }).thinkingLevelMap;
   if (thinkingLevelMap) config.thinkingLevelMap = thinkingLevelMap;
   if (model.toolCall !== undefined) config.toolCall = model.toolCall;
   if (model.structuredOutput !== undefined) config.structuredOutput = model.structuredOutput;

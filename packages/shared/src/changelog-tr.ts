@@ -2,6 +2,14 @@ import type { ChangelogEntry } from "./changelog.js";
 
 export const trEntries: ChangelogEntry[] = [
   {
+    "version": "0.15.7",
+    "date": "2026-09-27",
+    "highlights": [
+      "GPT-6 Astra, Sol ve Luna araç çağrılarını Responses API ile düzeltir; düşünme kapalıyken reasoning göndermez.",
+    ],
+  },
+
+  {
     "version": "0.15.6",
     "date": "2026-09-23",
     "highlights": [

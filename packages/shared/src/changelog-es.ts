@@ -2,6 +2,14 @@ import type { ChangelogEntry } from "./changelog.js";
 
 export const esEntries: ChangelogEntry[] = [
   {
+    "version": "0.15.7",
+    "date": "2026-09-27",
+    "highlights": [
+      "Corrige las llamadas a herramientas de GPT-6 Astra, Sol y Luna usando la API Responses y omitiendo reasoning cuando el thinking está desactivado.",
+    ],
+  },
+
+  {
     "version": "0.15.6",
     "date": "2026-09-23",
     "highlights": [
