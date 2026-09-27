@@ -1,5 +1,3 @@
-import type { EnglishCatalog } from "../en/index.js";
-
 export const ko = {
   app: {
     shellName: "DuaerAiDesk",
@@ -1523,6 +1521,9 @@ sklm: {
     createFolderRequired: "폴더를 하나 이상 추가하세요.",
     kickoff: "프로젝트 \"{{name}}\"이(가) 선택되었습니다. {{background}}쉬운 말로 요구사항을 정리해 주세요: 목표와 검증 가능한 수락.",
     kickoffExisting: "프로젝트 \"{{name}}\"이(가) 선택되었습니다. {{background}}나중에 고치기 쉽도록 지금 있는 기능부터 정리해 주세요.",
+    kickoffBug: "프로젝트 \"{{name}}\"이(가) 선택되었습니다. {{background}}재현 방법, 기대 결과, 실제 현상을 먼저 적어 주세요. 새 기능이 아니라 수정입니다.",
+    kickoffBoth: "프로젝트 \"{{name}}\"이(가) 선택되었습니다. {{background}}먼저 버그를 적고, 그다음 새 동작을 정리해 주세요.",
+    kickoffUnclear: "프로젝트 \"{{name}}\"이(가) 선택되었습니다. {{background}}수정인지 새 요구인지 아직 모릅니다. 구분되는 질문 하나만 해 주세요.",
     kickoffBackground: "배경: {{description}}. ",
     active: "활성",
     switchProject: "프로젝트 전환",
@@ -1840,6 +1841,7 @@ sklm: {
         perf: "성능 예산이 불완전합니다: {{missing}}",
         style: "사이트 스타일에 색, 글꼴, 간격 또는 현재 스타일 유지가 필요합니다.",
         layout: "레이아웃에 단, 탐색, 본문 또는 현재 레이아웃 유지가 필요합니다.",
+        reproShort: "What actually happens is too short. Write the repro and the observed result.",
       },
       gap: {
         browsers: "이름 있는 브라우저나 기기 둘",
@@ -1902,6 +1904,12 @@ sklm: {
       hintDesigning: "Designing architecture in chat; the Archify diagram appears here when ready.",
       hintPreview: "Archify diagram is below. Confirm when ready, or regenerate.",
       hintConfirmed: "Architecture confirmed. Digital employees will follow this structure.",
+      confirmChoice: "Confirm architecture",
+      reviseChoice: "Keep revising",
+      decideNote: "The architecture diagram is ready. Confirm it to split tasks from this diagram.",
+      visualDecideNote: "Style and layout are on the confirm card. The task split can start.",
+      startSplitChoice: "Start the task split",
+      reviseVisualChoice: "Revise the visual",
       regenerate: "Redesign in chat",
       regenerating: "Regenerating…",
       renderDiagram: "Render diagram",
@@ -2649,6 +2657,6 @@ importConfirm: "가져온 확장은 에이전트 프로세스 안에서 에이�
       dismiss: "닫기",
     },
   },
-} satisfies EnglishCatalog;
+} as const;
 
 export default ko;

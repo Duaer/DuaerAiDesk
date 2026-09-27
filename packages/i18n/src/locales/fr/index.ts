@@ -1,5 +1,3 @@
-import type { EnglishCatalog } from "../en/index.js";
-
 export const fr = {
   "app": {
     "shellName": "DuaerAiDesk",
@@ -1507,6 +1505,9 @@ sklm: {
     "createFolderRequired": "Ajoutez au moins un dossier.",
     "kickoff": "Le projet « {{name}} » est sélectionné. {{background}}Commencez à clarifier les besoins en langage simple : objectif et acceptation vérifiable.",
     "kickoffExisting": "Le projet « {{name}} » est sélectionné. {{background}}Organisez d'abord les fonctions actuelles, pour que les changements suivants aient une base.",
+    "kickoffBug": "Le projet « {{name}} » est sélectionné. {{background}}Notez comment le reproduire, le résultat attendu et ce qui se passe. C'est une correction, pas une nouvelle fonction.",
+    "kickoffBoth": "Le projet « {{name}} » est sélectionné. {{background}}Notez d'abord le bug, puis le nouveau comportement.",
+    "kickoffUnclear": "Le projet « {{name}} » est sélectionné. {{background}}Duaer ne sait pas encore s'il s'agit d'une correction ou d'un nouveau besoin. Posez exactement une question distinctive.",
     "kickoffBackground": "Contexte : {{description}}. ",
     "active": "Actif",
     "switchProject": "Changer de projet",
@@ -1823,7 +1824,8 @@ sklm: {
         "deps": "Dépendances externes incomplètes : {{missing}}",
         "perf": "Budget de performance incomplet : {{missing}}",
         "style": "Le style doit citer couleurs, typo ou espacements, ou le maintien du style actuel.",
-        "layout": "La mise en page doit citer colonnes, navigation ou zone principale, ou le maintien de la mise en page actuelle."
+        "layout": "La mise en page doit citer colonnes, navigation ou zone principale, ou le maintien de la mise en page actuelle.",
+        "reproShort": "What actually happens is too short. Write the repro and the observed result.",
       },
       "gap": {
         "browsers": "deux navigateurs ou appareils nommés",
@@ -1886,6 +1888,12 @@ sklm: {
       "hintDesigning": "Designing architecture in chat; the Archify diagram appears here when ready.",
       "hintPreview": "Archify diagram is below. Confirm when ready, or regenerate.",
       "hintConfirmed": "Architecture confirmed. Digital employees will follow this structure.",
+      "confirmChoice": "Confirm architecture",
+      "reviseChoice": "Keep revising",
+      "decideNote": "The architecture diagram is ready. Confirm it to split tasks from this diagram.",
+      "visualDecideNote": "Style and layout are on the confirm card. The task split can start.",
+      "startSplitChoice": "Start the task split",
+      "reviseVisualChoice": "Revise the visual",
       "regenerate": "Redesign in chat",
       "regenerating": "Regenerating…",
       "renderDiagram": "Render diagram",
@@ -2609,6 +2617,6 @@ sklm: {
       "dismiss": "Ignorer"
     }
   }
-} satisfies EnglishCatalog;
+} as const;
 
 export default fr;

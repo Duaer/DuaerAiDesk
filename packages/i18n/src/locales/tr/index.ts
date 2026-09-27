@@ -1,5 +1,3 @@
-import type { EnglishCatalog } from "../en/index.js";
-
 export const tr = {
   app: {
     shellName: "DuaerAiDesk",
@@ -1513,6 +1511,9 @@ sklm: {
     createFolderRequired: "En az bir klasör ekleyin.",
     kickoff: "\"{{name}}\" projesi seçildi. {{background}}Gereksinimleri sade dille netleştirmeye başlayın: hedef ve denetlenebilir kabul.",
     kickoffExisting: "\"{{name}}\" projesi seçildi. {{background}}Sonraki değişiklikler için önce mevcut işlevleri çıkarın.",
+    kickoffBug: "\"{{name}}\" projesi seçildi. {{background}}Nasıl yeniden üretileceğini, beklenen sonucu ve olanı yazın. Bu bir düzeltme, yeni özellik değil.",
+    kickoffBoth: "\"{{name}}\" projesi seçildi. {{background}}Önce hatayı, sonra yeni davranışı yazın.",
+    kickoffUnclear: "\"{{name}}\" projesi seçildi. {{background}}Duaer bunun düzeltme mi yoksa yeni gereksinim mi olduğunu henüz bilmiyor. Ayırt eden tek bir soru sorun.",
     kickoffBackground: "Arka plan: {{description}}. ",
     active: "Etkin",
     switchProject: "Projeyi değiştir",
@@ -1830,6 +1831,7 @@ sklm: {
         perf: "Performans bütçesi eksik: {{missing}}",
         style: "Site stili renk, yazı tipi, aralık veya mevcut stili koruma notu ister.",
         layout: "Yerleşim sütun, gezinti, ana alan veya mevcut yerleşimi koruma notu ister.",
+        reproShort: "What actually happens is too short. Write the repro and the observed result.",
       },
       gap: {
         browsers: "iki adlı tarayıcı veya cihaz",
@@ -1892,6 +1894,12 @@ sklm: {
       hintDesigning: "Designing architecture in chat; the Archify diagram appears here when ready.",
       hintPreview: "Archify diagram is below. Confirm when ready, or regenerate.",
       hintConfirmed: "Architecture confirmed. Digital employees will follow this structure.",
+      confirmChoice: "Confirm architecture",
+      reviseChoice: "Keep revising",
+      decideNote: "The architecture diagram is ready. Confirm it to split tasks from this diagram.",
+      visualDecideNote: "Style and layout are on the confirm card. The task split can start.",
+      startSplitChoice: "Start the task split",
+      reviseVisualChoice: "Revise the visual",
       regenerate: "Redesign in chat",
       regenerating: "Regenerating…",
       renderDiagram: "Render diagram",
@@ -2639,6 +2647,6 @@ importConfirm: "İçe aktarılan uzantılar ajan sürecinde, ajanın kendi araç
       dismiss: "Kapat",
     },
   },
-} satisfies EnglishCatalog;
+} as const;
 
 export default tr;

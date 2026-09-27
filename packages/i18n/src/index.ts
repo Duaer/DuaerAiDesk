@@ -24,6 +24,26 @@ import { fr } from "./locales/fr/index.js";
 import { de } from "./locales/de/index.js";
 import { ko } from "./locales/ko/index.js";
 
+/** Fill missing locale leaves from English so incomplete catalogs still type-check. */
+function fillFromEnglish(overlay: unknown): EnglishCatalog {
+  const walk = (base: unknown, over: unknown): unknown => {
+    if (base === null || typeof base !== "object" || Array.isArray(base)) {
+      return over === undefined ? base : over;
+    }
+    const baseRecord = base as Record<string, unknown>;
+    const overRecord =
+      over && typeof over === "object" && !Array.isArray(over)
+        ? (over as Record<string, unknown>)
+        : {};
+    const next: Record<string, unknown> = {};
+    for (const key of Object.keys(baseRecord)) {
+      next[key] = walk(baseRecord[key], overRecord[key]);
+    }
+    return next;
+  };
+  return walk(en, overlay) as EnglishCatalog;
+}
+
 export const defaultLocale = "en";
 
 /**
@@ -47,12 +67,12 @@ export type AppLanguageSetting = "auto" | AppLocale;
 export const catalogs: Record<AppLocale, EnglishCatalog> = {
   en,
   "zh-CN": zhCN,
-  "zh-TW": zhTW,
-  tr,
-  de,
-  es,
-  fr,
-  ko,
+  "zh-TW": fillFromEnglish(zhTW),
+  tr: fillFromEnglish(tr),
+  de: fillFromEnglish(de),
+  es: fillFromEnglish(es),
+  fr: fillFromEnglish(fr),
+  ko: fillFromEnglish(ko),
 };
 
 export function isAppLocale(value: string | null | undefined): value is AppLocale {

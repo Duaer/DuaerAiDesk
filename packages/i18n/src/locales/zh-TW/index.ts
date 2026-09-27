@@ -1,5 +1,3 @@
-import type { EnglishCatalog } from "../en/index.js";
-
 export const zhTW = {
   app: {
     shellName: "DuaerAiDesk",
@@ -1493,6 +1491,9 @@ sklm: {
     createFolderRequired: "請至少新增一個資料夾。",
     kickoff: "專案「{{name}}」已選好。{{background}}請用白話開始梳理需求：目標與可檢查驗收。",
     kickoffExisting: "專案「{{name}}」已選好。{{background}}請先把現在的功能整理出來，方便後面迭代。",
+    kickoffBug: "專案「{{name}}」已選好。{{background}}請先記下怎麼復現、期望結果和實際現象。這是修缺陷，先不要設計新功能。",
+    kickoffBoth: "專案「{{name}}」已選好。{{background}}請先記下故障，再整理要新增的行為。",
+    kickoffUnclear: "專案「{{name}}」已選好。{{background}}還分不清是修缺陷還是新需求。請只問一個能區分的問題。",
     kickoffBackground: "背景：{{description}}。",
     active: "當前",
     switchProject: "切換專案",
@@ -1809,6 +1810,7 @@ sklm: {
         perf: "「效能預算」未寫清：{{missing}}",
         style: "「網站風格」要寫清顏色、字型或間距，或寫沿用現有樣式。",
         layout: "「佈局」要寫清欄、導航或主區域，或寫沿用現有佈局。",
+        reproShort: "「實際現象」過短。寫清怎麼復現、實際看到什麼。",
       },
       gap: {
         browsers: "至少兩個具體瀏覽器或國產終端",
@@ -1870,6 +1872,12 @@ sklm: {
       hintDesigning: "正在對話設計架構；Archify 架構圖就緒後顯示在這裡。",
       hintPreview: "下方是 Archify 架構圖。滿意則確認架構，再派工；需要可重新生成。",
       hintConfirmed: "架構已確認。數位員工將按此結構開發。",
+      confirmChoice: "確認架構",
+      reviseChoice: "還要改",
+      decideNote: "架構圖好了。確認後就按這張圖拆任務。",
+      visualDecideNote: "風格和佈局已寫入確認卡。接下來可以拆任務。",
+      startSplitChoice: "開始拆任務",
+      reviseVisualChoice: "還要改風格",
       regenerate: "在對話裡重新設計",
       regenerating: "正在重新生成…",
       renderDiagram: "渲染架構圖",
@@ -2597,6 +2605,6 @@ sklm: {
       dismiss: "關閉",
     },
   },
-} satisfies EnglishCatalog;
+} as const;
 
 export default zhTW;
