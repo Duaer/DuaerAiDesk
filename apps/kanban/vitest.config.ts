@@ -7,6 +7,7 @@ export default defineConfig({
     globals: true,
     environment: "node",
     include: ["server/test/**/*.test.ts", "web/test/**/*.test.{ts,tsx}"],
+    passWithNoTests: true,
     testTimeout: 20000,
     hookTimeout: 20000,
   },
