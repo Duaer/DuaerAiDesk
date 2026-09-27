@@ -101,7 +101,7 @@ test("release builds are gated on the CI checks and least-privilege permissions"
     /run: pnpm build:js/,
     /run: pnpm --filter @duaer-ai-desk\/desktop typecheck/,
     /run: pnpm lint/,
-    /run: pnpm -r --if-present test/,
+    /run: pnpm -r --if-present --filter '!@duaer-ai-desk\/desktop' test/,
     /run: cargo test -p host-core --locked/,
   ]) {
     assert.match(verifyJob, step);
